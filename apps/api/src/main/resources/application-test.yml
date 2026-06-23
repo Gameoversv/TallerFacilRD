@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16:///tallerfacil_test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  flyway:
+    enabled: true
+  jpa:
+    show-sql: true
+
+app:
+  jwt:
+    secret: test-secret-key-256-bits-for-testing-purposes-only
+    expiration-hours: 1

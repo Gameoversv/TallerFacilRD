@@ -1,0 +1,52 @@
+# =============================================================
+# TallerFacilRD — .gitignore
+# =============================================================
+
+# Environment files — NEVER commit
+.env
+.env.local
+.env.*.local
+
+# Java / Maven
+apps/api/target/
+apps/api/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+!apps/api/src/**/*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Node / Next.js
+apps/web/node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/.turbo/
+apps/mobile/node_modules/
+apps/mobile/.expo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker volumes (if mounted locally)
+.docker/
+
+# Test reports
+apps/api/target/surefire-reports/
+coverage/
+
+# Temp files
+tmp_*.md
+tmp*.md
