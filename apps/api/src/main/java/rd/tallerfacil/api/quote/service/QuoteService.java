@@ -1,0 +1,93 @@
+package rd.tallerfacil.api.quote.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import rd.tallerfacil.api.quote.domain.Quote;
+import rd.tallerfacil.api.quote.domain.QuoteItem;
+import rd.tallerfacil.api.quote.domain.QuoteStatus;
+import rd.tallerfacil.api.quote.dto.CreateQuoteRequest;
+import rd.tallerfacil.api.quote.dto.QuoteResponse;
+import rd.tallerfacil.api.quote.dto.UpdateQuoteStatusRequest;
+import rd.tallerfacil.api.quote.repository.QuoteRepository;
+import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
+import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class QuoteService {
+
+    private final QuoteRepository quoteRepository;
+    private final WorkOrderRepository workOrderRepository;
+
+    @Transactional(readOnly = true)
+    public List<QuoteResponse> findByWorkOrder(UUID workOrderId) {
+        return quoteRepository.findByWorkOrderId(workOrderId)
+                .stream().map(QuoteResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public QuoteResponse findById(UUID id) {
+        return quoteRepository.findByIdWithItems(id)
+                .map(QuoteResponse::from)
+                .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada: " + id));
+    }
+
+    @Transactional
+    public QuoteResponse create(CreateQuoteRequest req) {
+        var workOrder = workOrderRepository.findById(req.workOrderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada: " + req.workOrderId()));
+
+        var quote = new Quote();
+        quote.setWorkOrder(workOrder);
+        quote.setApplyItbis(req.applyItbis());
+        quote.setNotes(req.notes());
+
+        BigDecimal subtotal = BigDecimal.ZERO;
+
+        for (var itemReq : req.items()) {
+            var item = new QuoteItem();
+            item.setQuote(quote);
+            item.setItemType(itemReq.itemType());
+            item.setDescription(itemReq.description());
+            item.setQuantity(itemReq.quantity());
+            item.setUnitPrice(itemReq.unitPrice());
+
+            BigDecimal itemSubtotal = itemReq.unitPrice()
+                    .multiply(BigDecimal.valueOf(itemReq.quantity()))
+                    .setScale(2, RoundingMode.HALF_UP);
+            item.setSubtotal(itemSubtotal);
+            subtotal = subtotal.add(itemSubtotal);
+
+            quote.getItems().add(item);
+        }
+
+        BigDecimal itbisAmount = req.applyItbis()
+                ? subtotal.multiply(quote.getItbisRate()).setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        quote.setSubtotal(subtotal);
+        quote.setItbisAmount(itbisAmount);
+        quote.setTotal(subtotal.add(itbisAmount));
+
+        return QuoteResponse.from(quoteRepository.save(quote));
+    }
+
+    @Transactional
+    public QuoteResponse updateStatus(UUID id, UpdateQuoteStatusRequest req) {
+        var quote = quoteRepository.findByIdWithItems(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada: " + id));
+
+        if (quote.getStatus() != QuoteStatus.PENDIENTE) {
+            throw new IllegalStateException("Solo cotizaciones PENDIENTE pueden cambiar de estado");
+        }
+
+        quote.setStatus(req.status());
+        return QuoteResponse.from(quoteRepository.save(quote));
+    }
+}

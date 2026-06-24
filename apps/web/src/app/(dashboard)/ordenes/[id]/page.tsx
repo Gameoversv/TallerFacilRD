@@ -12,6 +12,7 @@ import {
 import type { WorkOrderStatus, WorkOrderPriority, WorkOrderItemType } from "@/types/work-order";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import QuoteSection from "@/components/quotes/QuoteSection";
 import {
   Table,
   TableBody,
@@ -401,6 +402,10 @@ export default function OrdenDetailPage({
         {itemError && (
           <p className="text-xs text-red-600">{itemError}</p>
         )}
+      </div>
+
+      <div className="rounded-lg border bg-white p-5">
+        <QuoteSection workOrderId={id} canEdit={canEdit} />
       </div>
     </div>
   );
