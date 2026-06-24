@@ -8,16 +8,16 @@ import type {
   UpdateProductRequest,
 } from "@/types/product";
 
-export function useInventory(category?: ProductCategory | null, lowStock = false, page = 0) {
+export function useInventory(category?: ProductCategory | null, lowStock = false, page = 0, size = 20) {
   return useQuery<ProductsPage>({
-    queryKey: ["inventory", category, lowStock, page],
+    queryKey: ["inventory", category, lowStock, page, size],
     queryFn: async () => {
       const res = await api.get("/api/inventory", {
         params: {
           category: category ?? undefined,
           low_stock: lowStock || undefined,
           page,
-          size: 20,
+          size,
         },
       });
       return res.data;
