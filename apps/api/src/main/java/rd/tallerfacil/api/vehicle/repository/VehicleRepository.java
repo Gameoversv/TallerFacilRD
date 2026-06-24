@@ -21,6 +21,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
 
     boolean existsByLicensePlateAndActiveTrue(String licensePlate);
 
+    long countByActiveTrue();
+
     @Query(value = """
             SELECT v FROM Vehicle v JOIN FETCH v.customer c
             WHERE v.active = true
