@@ -28,7 +28,9 @@ export default function DashboardLayout({
       router.replace("/login");
       return;
     }
-    setUser(getUser());
+    const u = getUser();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUser(u);
   }, [router]);
 
   function handleLogout() {
