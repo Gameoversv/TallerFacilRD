@@ -16,6 +16,8 @@ import rd.tallerfacil.api.auth.domain.RoleName;
 import rd.tallerfacil.api.auth.repository.UserRepository;
 import rd.tallerfacil.api.customer.dto.CreateCustomerRequest;
 import rd.tallerfacil.api.customer.repository.CustomerRepository;
+import rd.tallerfacil.api.reception.repository.ReceptionRepository;
+import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,11 +31,15 @@ class CustomerIntegrationTest {
     @Autowired ObjectMapper objectMapper;
     @Autowired UserRepository userRepository;
     @Autowired CustomerRepository customerRepository;
+    @Autowired VehicleRepository vehicleRepository;
+    @Autowired ReceptionRepository receptionRepository;
 
     private String token;
 
     @BeforeEach
     void setup() throws Exception {
+        receptionRepository.deleteAll();
+        vehicleRepository.deleteAll();
         customerRepository.deleteAll();
         userRepository.deleteAll();
 

@@ -16,6 +16,7 @@ import rd.tallerfacil.api.auth.dto.RegisterRequest;
 import rd.tallerfacil.api.auth.repository.UserRepository;
 import rd.tallerfacil.api.customer.dto.CreateCustomerRequest;
 import rd.tallerfacil.api.customer.repository.CustomerRepository;
+import rd.tallerfacil.api.reception.repository.ReceptionRepository;
 import rd.tallerfacil.api.vehicle.dto.CreateVehicleRequest;
 import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
 
@@ -35,12 +36,14 @@ class VehicleIntegrationTest {
     @Autowired UserRepository userRepository;
     @Autowired CustomerRepository customerRepository;
     @Autowired VehicleRepository vehicleRepository;
+    @Autowired ReceptionRepository receptionRepository;
 
     private String token;
     private String customerId;
 
     @BeforeEach
     void setup() throws Exception {
+        receptionRepository.deleteAll();
         vehicleRepository.deleteAll();
         customerRepository.deleteAll();
         userRepository.deleteAll();
