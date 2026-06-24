@@ -37,6 +37,7 @@ export default function InventarioPage() {
   const [page, setPage] = useState(0);
   const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { data, isLoading } = useInventory(category, lowStock, page);
   const createMutation = useCreateProduct();
@@ -47,14 +48,29 @@ export default function InventarioPage() {
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
+  function extractError(err: unknown): string {
+    const e = err as { response?: { data?: { error?: string } }; message?: string };
+    return e?.response?.data?.error ?? e?.message ?? "Error inesperado";
+  }
+
   async function handleCreate(values: ProductFormValues) {
-    await createMutation.mutateAsync(values);
-    setShowCreate(false);
+    setFormError(null);
+    try {
+      await createMutation.mutateAsync(values);
+      setShowCreate(false);
+    } catch (err) {
+      setFormError(extractError(err));
+    }
   }
 
   async function handleUpdate(values: ProductFormValues) {
-    await updateMutation.mutateAsync(values);
-    setEditing(null);
+    setFormError(null);
+    try {
+      await updateMutation.mutateAsync(values);
+      setEditing(null);
+    } catch (err) {
+      setFormError(extractError(err));
+    }
   }
 
   return (
@@ -183,17 +199,17 @@ export default function InventarioPage() {
       )}
 
       {/* Create dialog */}
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+      <Dialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) setFormError(null); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Nuevo producto</DialogTitle>
           </DialogHeader>
-          <ProductForm onSubmit={handleCreate} />
+          <ProductForm onSubmit={handleCreate} error={formError} />
         </DialogContent>
       </Dialog>
 
       {/* Edit dialog */}
-      <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
+      <Dialog open={!!editing} onOpenChange={(open) => { if (!open) { setEditing(null); setFormError(null); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar producto</DialogTitle>
@@ -203,6 +219,7 @@ export default function InventarioPage() {
               defaultValues={productToFormValues(editing)}
               onSubmit={handleUpdate}
               submitLabel="Actualizar"
+              error={formError}
             />
           )}
         </DialogContent>

@@ -26,9 +26,10 @@ interface Props {
   defaultValues?: Partial<ProductFormValues>;
   onSubmit: (data: ProductFormValues) => Promise<void>;
   submitLabel?: string;
+  error?: string | null;
 }
 
-export function ProductForm({ defaultValues, onSubmit, submitLabel = "Guardar" }: Props) {
+export function ProductForm({ defaultValues, onSubmit, submitLabel = "Guardar", error }: Props) {
   const {
     register,
     handleSubmit,
@@ -92,6 +93,12 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel = "Guardar" }
           {errors.minStock && <p className="text-xs text-red-500">{errors.minStock.message}</p>}
         </div>
       </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          {error}
+        </p>
+      )}
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? "Guardando..." : submitLabel}
