@@ -14,6 +14,7 @@ const navItems = [
   { href: "/ordenes", label: "Órdenes de trabajo", icon: "🔧" },
   { href: "/inventario", label: "Inventario", icon: "📦" },
   { href: "/compras", label: "Compras", icon: "🛒" },
+  { href: "/facturas", label: "Facturas", icon: "🧾" },
 ];
 
 export default function DashboardLayout({
