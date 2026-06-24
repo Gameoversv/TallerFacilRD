@@ -10,6 +10,21 @@ export interface CreateReceptionRequest {
   notes?: string;
 }
 
+export interface ReceptionsPage {
+  data: Reception[];
+  meta: { total: number; page: number; limit: number };
+}
+
+export function useReceptions(page = 0) {
+  return useQuery<ReceptionsPage>({
+    queryKey: ["receptions", "list", page],
+    queryFn: async () => {
+      const res = await api.get(`/api/receptions?page=${page}`);
+      return res.data;
+    },
+  });
+}
+
 export function useReception(id: string) {
   return useQuery<{ data: Reception }>({
     queryKey: ["receptions", id],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated, getUser, clearToken } from "@/lib/auth";
 import Link from "next/link";
@@ -10,7 +10,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "📊" },
   { href: "/clientes", label: "Clientes", icon: "👥" },
   { href: "/vehiculos", label: "Vehículos", icon: "🚗" },
-  { href: "/recepcion", label: "Recepción", icon: "📋" },
+  { href: "/recepciones", label: "Recepción", icon: "📋" },
   { href: "/ordenes", label: "Órdenes de trabajo", icon: "🔧" },
 ];
 
@@ -21,14 +21,15 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
       router.replace("/login");
+      return;
     }
+    setUser(getUser());
   }, [router]);
-
-  const user = getUser();
 
   function handleLogout() {
     clearToken();
