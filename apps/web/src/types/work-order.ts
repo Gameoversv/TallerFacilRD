@@ -1,4 +1,5 @@
 export type WorkOrderStatus = "PENDIENTE" | "EN_PROGRESO" | "COMPLETADA" | "CANCELADA";
+export type WorkOrderPriority = "BAJA" | "MEDIA" | "ALTA" | "CRITICA";
 export type WorkOrderItemType = "LABOR" | "PARTS";
 
 export interface WorkOrderItem {
@@ -17,6 +18,7 @@ export interface WorkOrder {
   customer_id: string;
   customer_name: string;
   status: WorkOrderStatus;
+  priority: WorkOrderPriority;
   diagnosis: string | null;
   assigned_to: string | null;
   estimated_cost: number | null;
@@ -44,4 +46,9 @@ export interface AddWorkOrderItemRequest {
   type: WorkOrderItemType;
   quantity: number;
   unitPrice: number;
+}
+
+export interface UpdateDiagnosticRequest {
+  diagnosis: string;
+  priority: WorkOrderPriority;
 }

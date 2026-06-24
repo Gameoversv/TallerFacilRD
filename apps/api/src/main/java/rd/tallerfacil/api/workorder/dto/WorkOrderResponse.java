@@ -3,6 +3,7 @@ package rd.tallerfacil.api.workorder.dto;
 import rd.tallerfacil.api.workorder.domain.WorkOrder;
 import rd.tallerfacil.api.workorder.domain.WorkOrderItem;
 import rd.tallerfacil.api.workorder.domain.WorkOrderItemType;
+import rd.tallerfacil.api.workorder.domain.WorkOrderPriority;
 import rd.tallerfacil.api.workorder.domain.WorkOrderStatus;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public record WorkOrderResponse(
         UUID customerId,
         String customerName,
         WorkOrderStatus status,
+        WorkOrderPriority priority,
         String diagnosis,
         String assignedTo,
         BigDecimal estimatedCost,
@@ -53,6 +55,7 @@ public record WorkOrderResponse(
                 customer.getId(),
                 customer.getFirstName() + " " + customer.getLastName(),
                 wo.getStatus(),
+                wo.getPriority(),
                 wo.getDiagnosis(),
                 wo.getAssignedTo(),
                 wo.getEstimatedCost(),
