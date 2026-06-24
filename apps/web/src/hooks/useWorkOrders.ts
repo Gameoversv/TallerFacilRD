@@ -6,6 +6,7 @@ import type {
   WorkOrdersPage,
   CreateWorkOrderRequest,
   AddWorkOrderItemRequest,
+  UpdateDiagnosticRequest,
 } from "@/types/work-order";
 
 export function useWorkOrders(status?: WorkOrderStatus | null, page = 0) {
@@ -58,6 +59,15 @@ export function useUpdateWorkOrderStatus(id: string) {
     mutationFn: (status: WorkOrderStatus) =>
       api.patch(`/api/work-orders/${id}/status`, { status }).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["work-orders"] }),
+  });
+}
+
+export function useUpdateDiagnostic(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateDiagnosticRequest) =>
+      api.patch(`/api/work-orders/${id}/diagnostic`, data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["work-orders", id] }),
   });
 }
 

@@ -13,6 +13,7 @@ import rd.tallerfacil.api.workorder.domain.WorkOrderItem;
 import rd.tallerfacil.api.workorder.domain.WorkOrderStatus;
 import rd.tallerfacil.api.workorder.dto.AddWorkOrderItemRequest;
 import rd.tallerfacil.api.workorder.dto.CreateWorkOrderRequest;
+import rd.tallerfacil.api.workorder.dto.UpdateDiagnosticRequest;
 import rd.tallerfacil.api.workorder.dto.UpdateWorkOrderStatusRequest;
 import rd.tallerfacil.api.workorder.dto.WorkOrderResponse;
 import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
@@ -106,6 +107,16 @@ public class WorkOrderService {
             throw new IllegalArgumentException("Ítem no encontrado: " + itemId);
         }
 
+        return WorkOrderResponse.from(workOrderRepository.save(wo));
+    }
+
+    @Transactional
+    public WorkOrderResponse updateDiagnostic(UUID id, UpdateDiagnosticRequest req) {
+        var wo = workOrderRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada: " + id));
+
+        wo.setDiagnosis(req.diagnosis());
+        wo.setPriority(req.priority());
         return WorkOrderResponse.from(workOrderRepository.save(wo));
     }
 

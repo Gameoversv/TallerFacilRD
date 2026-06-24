@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   useWorkOrder,
   useUpdateWorkOrderStatus,
+  useUpdateDiagnostic,
   useAddWorkOrderItem,
   useRemoveWorkOrderItem,
 } from "@/hooks/useWorkOrders";
-import type { WorkOrderStatus, WorkOrderItemType } from "@/types/work-order";
+import type { WorkOrderStatus, WorkOrderPriority, WorkOrderItemType } from "@/types/work-order";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,6 +54,20 @@ const TRANSITION_VARIANTS: Partial<Record<WorkOrderStatus, "default" | "destruct
   CANCELADA: "destructive",
 };
 
+const PRIORITY_LABELS: Record<WorkOrderPriority, string> = {
+  BAJA: "Baja",
+  MEDIA: "Media",
+  ALTA: "Alta",
+  CRITICA: "Crítica",
+};
+
+const PRIORITY_COLORS: Record<WorkOrderPriority, string> = {
+  BAJA: "bg-gray-100 text-gray-600",
+  MEDIA: "bg-blue-100 text-blue-700",
+  ALTA: "bg-orange-100 text-orange-700",
+  CRITICA: "bg-red-100 text-red-700",
+};
+
 export default function OrdenDetailPage({
   params,
 }: {
@@ -65,6 +80,7 @@ export default function OrdenDetailPage({
   const wo = data?.data;
 
   const updateStatus = useUpdateWorkOrderStatus(id);
+  const updateDiagnostic = useUpdateDiagnostic(id);
   const addItem = useAddWorkOrderItem(id);
   const removeItem = useRemoveWorkOrderItem(id);
 
@@ -74,6 +90,9 @@ export default function OrdenDetailPage({
   const [itemPrice, setItemPrice] = useState("");
   const [itemError, setItemError] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [editingDiag, setEditingDiag] = useState(false);
+  const [diagText, setDiagText] = useState("");
+  const [diagPriority, setDiagPriority] = useState<WorkOrderPriority>("MEDIA");
 
   if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
   if (!wo) return <p className="text-sm text-red-500">Orden no encontrada.</p>;
@@ -157,10 +176,70 @@ export default function OrdenDetailPage({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="rounded-lg border bg-white p-5 space-y-3">
-          <h2 className="font-semibold text-gray-700">Diagnóstico</h2>
-          <p className="text-sm text-gray-600 whitespace-pre-wrap">
-            {wo.diagnosis ?? <span className="italic text-gray-400">Sin diagnóstico</span>}
-          </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-gray-700">Diagnóstico</h2>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[wo.priority ?? "MEDIA"]}`}>
+                {PRIORITY_LABELS[wo.priority ?? "MEDIA"]}
+              </span>
+            </div>
+            {canEdit && !editingDiag && (
+              <button
+                onClick={() => {
+                  setDiagText(wo.diagnosis ?? "");
+                  setDiagPriority(wo.priority ?? "MEDIA");
+                  setEditingDiag(true);
+                }}
+                className="text-xs text-gray-400 hover:text-gray-700 underline underline-offset-2"
+              >
+                Editar
+              </button>
+            )}
+          </div>
+
+          {editingDiag ? (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs text-gray-500">Prioridad</label>
+                <select
+                  value={diagPriority}
+                  onChange={(e) => setDiagPriority(e.target.value as WorkOrderPriority)}
+                  className="w-full h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm"
+                >
+                  <option value="BAJA">Baja</option>
+                  <option value="MEDIA">Media</option>
+                  <option value="ALTA">Alta</option>
+                  <option value="CRITICA">Crítica</option>
+                </select>
+              </div>
+              <textarea
+                rows={4}
+                value={diagText}
+                onChange={(e) => setDiagText(e.target.value)}
+                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm resize-none"
+                placeholder="Descripción técnica del diagnóstico..."
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={updateDiagnostic.isPending}
+                  onClick={async () => {
+                    await updateDiagnostic.mutateAsync({ diagnosis: diagText, priority: diagPriority });
+                    setEditingDiag(false);
+                  }}
+                >
+                  {updateDiagnostic.isPending ? "Guardando..." : "Guardar"}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingDiag(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">
+              {wo.diagnosis ?? <span className="italic text-gray-400">Sin diagnóstico</span>}
+            </p>
+          )}
         </div>
         <div className="rounded-lg border bg-white p-5 space-y-3">
           <h2 className="font-semibold text-gray-700">Detalles</h2>

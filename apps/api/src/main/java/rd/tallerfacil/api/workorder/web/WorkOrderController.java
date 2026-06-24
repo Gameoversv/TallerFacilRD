@@ -8,6 +8,7 @@ import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.workorder.domain.WorkOrderStatus;
 import rd.tallerfacil.api.workorder.dto.AddWorkOrderItemRequest;
 import rd.tallerfacil.api.workorder.dto.CreateWorkOrderRequest;
+import rd.tallerfacil.api.workorder.dto.UpdateDiagnosticRequest;
 import rd.tallerfacil.api.workorder.dto.UpdateWorkOrderStatusRequest;
 import rd.tallerfacil.api.workorder.dto.WorkOrderResponse;
 import rd.tallerfacil.api.workorder.service.WorkOrderService;
@@ -45,6 +46,14 @@ public class WorkOrderController {
     @GetMapping("/by-reception/{receptionId}")
     public ApiResponse<WorkOrderResponse> findByReception(@PathVariable UUID receptionId) {
         return ApiResponse.ok(service.findByReception(receptionId));
+    }
+
+    @PatchMapping("/{id}/diagnostic")
+    public ApiResponse<WorkOrderResponse> updateDiagnostic(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateDiagnosticRequest req
+    ) {
+        return ApiResponse.ok(service.updateDiagnostic(id, req));
     }
 
     @PatchMapping("/{id}/status")

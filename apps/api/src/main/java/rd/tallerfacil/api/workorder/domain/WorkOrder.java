@@ -27,6 +27,10 @@ public class WorkOrder extends BaseEntity {
     @Column(nullable = false, length = 20)
     private WorkOrderStatus status = WorkOrderStatus.PENDIENTE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private WorkOrderPriority priority = WorkOrderPriority.MEDIA;
+
     @Column(columnDefinition = "TEXT")
     private String diagnosis;
 
