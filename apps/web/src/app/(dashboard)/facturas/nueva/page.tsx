@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateInvoice } from "@/hooks/useInvoices";
+import { useWorkOrders } from "@/hooks/useWorkOrders";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { InvoiceItemInput, InvoiceItemType } from "@/types/invoice";
+import type { WorkOrder } from "@/types/work-order";
 
 export default function NuevaFacturaPage() {
   const router = useRouter();
   const createInvoice = useCreateInvoice();
 
-  const [workOrderId, setWorkOrderId] = useState("");
+  const [woSearch, setWoSearch] = useState("");
+  const [selectedWo, setSelectedWo] = useState<WorkOrder | null>(null);
   const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0, 10));
   const [applyItbis, setApplyItbis] = useState(false);
   const [notes, setNotes] = useState("");
@@ -20,6 +23,21 @@ export default function NuevaFacturaPage() {
     { itemType: "MANO_OBRA", description: "", quantity: 1, unitPrice: 0 },
   ]);
   const [error, setError] = useState<string | null>(null);
+
+  // Load all work orders (no status filter so all appear)
+  const { data: woData } = useWorkOrders(null, 0);
+  const allWos = woData?.data ?? [];
+  const filteredWos = woSearch.length >= 1
+    ? allWos.filter((wo) =>
+        wo.vehicle_label.toLowerCase().includes(woSearch.toLowerCase()) ||
+        wo.customer_name.toLowerCase().includes(woSearch.toLowerCase())
+      )
+    : [];
+
+  function selectWo(wo: WorkOrder) {
+    setSelectedWo(wo);
+    setWoSearch("");
+  }
 
   function addItem() {
     setItems((prev) => [...prev, { itemType: "MANO_OBRA", description: "", quantity: 1, unitPrice: 0 }]);
@@ -40,13 +58,13 @@ export default function NuevaFacturaPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!workOrderId.trim()) { setError("Ingresa el ID de la orden de trabajo"); return; }
+    if (!selectedWo) { setError("Selecciona una orden de trabajo"); return; }
     if (items.some((i) => !i.description.trim())) { setError("Todos los ítems deben tener descripción"); return; }
     if (items.some((i) => i.unitPrice <= 0)) { setError("Todos los precios deben ser mayores a 0"); return; }
 
     try {
       const res = await createInvoice.mutateAsync({
-        workOrderId: workOrderId.trim(),
+        workOrderId: selectedWo.id,
         issueDate,
         applyItbis,
         notes: notes.trim() || undefined,
@@ -64,16 +82,52 @@ export default function NuevaFacturaPage() {
       <h1 className="text-2xl font-bold">Nueva factura</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Orden de trabajo */}
         <div className="rounded-lg border bg-white p-5 space-y-4">
-          <h2 className="font-semibold text-gray-700">Datos generales</h2>
-          <div className="space-y-1">
-            <Label>ID Orden de trabajo *</Label>
-            <Input
-              value={workOrderId}
-              onChange={(e) => setWorkOrderId(e.target.value)}
-              placeholder="UUID de la orden..."
-            />
-          </div>
+          <h2 className="font-semibold text-gray-700">Orden de trabajo</h2>
+
+          {selectedWo ? (
+            <div className="flex items-center justify-between rounded-md border bg-gray-50 px-4 py-3">
+              <div>
+                <p className="font-medium text-sm">{selectedWo.vehicle_label}</p>
+                <p className="text-xs text-gray-500">{selectedWo.customer_name} · {selectedWo.status}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedWo(null)}
+                className="text-xs text-gray-400 hover:text-gray-700 underline"
+              >
+                Cambiar
+              </button>
+            </div>
+          ) : (
+            <div className="relative">
+              <Input
+                value={woSearch}
+                onChange={(e) => setWoSearch(e.target.value)}
+                placeholder="Buscar por vehículo o cliente..."
+                autoComplete="off"
+              />
+              {filteredWos.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 border rounded-md bg-white shadow-lg max-h-52 overflow-auto text-sm">
+                  {filteredWos.map((wo) => (
+                    <li
+                      key={wo.id}
+                      onClick={() => selectWo(wo)}
+                      className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <p className="font-medium">{wo.vehicle_label}</p>
+                      <p className="text-xs text-gray-500">{wo.customer_name} · <span className="capitalize">{wo.status.toLowerCase().replace("_", " ")}</span></p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {woSearch.length >= 1 && filteredWos.length === 0 && (
+                <p className="mt-1 text-xs text-gray-400">Sin resultados</p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-1">
             <Label>Fecha de emisión *</Label>
             <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} required />
@@ -84,6 +138,7 @@ export default function NuevaFacturaPage() {
           </div>
         </div>
 
+        {/* Items */}
         <div className="rounded-lg border bg-white p-5 space-y-4">
           <h2 className="font-semibold text-gray-700">Ítems</h2>
 
