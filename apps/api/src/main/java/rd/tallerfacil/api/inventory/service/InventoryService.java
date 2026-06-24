@@ -1,0 +1,95 @@
+package rd.tallerfacil.api.inventory.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import rd.tallerfacil.api.inventory.domain.Product;
+import rd.tallerfacil.api.inventory.domain.ProductCategory;
+import rd.tallerfacil.api.inventory.dto.CreateProductRequest;
+import rd.tallerfacil.api.inventory.dto.ProductResponse;
+import rd.tallerfacil.api.inventory.dto.UpdateProductRequest;
+import rd.tallerfacil.api.inventory.repository.ProductRepository;
+import rd.tallerfacil.api.shared.web.ApiResponse;
+import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class InventoryService {
+
+    private final ProductRepository repository;
+
+    @Transactional(readOnly = true)
+    public ApiResponse<List<ProductResponse>> search(ProductCategory category, boolean lowStock, int page, int size) {
+        Page<Product> result = repository.search(
+                category, lowStock,
+                PageRequest.of(page, size, Sort.by("internalCode").ascending())
+        );
+        List<ProductResponse> data = result.getContent().stream().map(ProductResponse::from).toList();
+        return ApiResponse.paged(data, result.getTotalElements(), page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> findLowStock() {
+        return repository.findLowStock().stream().map(ProductResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse findById(UUID id) {
+        return repository.findByIdAndActiveTrue(id)
+                .map(ProductResponse::from)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+    }
+
+    @Transactional
+    public ProductResponse create(CreateProductRequest req) {
+        if (repository.existsByInternalCodeAndActiveTrue(req.internalCode())) {
+            throw new IllegalArgumentException("Ya existe un producto con el código: " + req.internalCode());
+        }
+
+        var product = new Product();
+        product.setInternalCode(req.internalCode());
+        product.setDescription(req.description());
+        product.setPurchaseCost(req.purchaseCost());
+        product.setSalePrice(req.salePrice());
+        product.setCurrentStock(req.currentStock());
+        product.setMinStock(req.minStock());
+        product.setCategory(req.category());
+
+        return ProductResponse.from(repository.save(product));
+    }
+
+    @Transactional
+    public ProductResponse update(UUID id, UpdateProductRequest req) {
+        var product = repository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+
+        if (req.internalCode() != null && !req.internalCode().equals(product.getInternalCode())
+                && repository.existsByInternalCodeAndActiveTrue(req.internalCode())) {
+            throw new IllegalArgumentException("Ya existe un producto con el código: " + req.internalCode());
+        }
+
+        if (req.internalCode() != null) product.setInternalCode(req.internalCode());
+        if (req.description() != null) product.setDescription(req.description());
+        if (req.purchaseCost() != null) product.setPurchaseCost(req.purchaseCost());
+        if (req.salePrice() != null) product.setSalePrice(req.salePrice());
+        if (req.currentStock() != null) product.setCurrentStock(req.currentStock());
+        if (req.minStock() != null) product.setMinStock(req.minStock());
+        if (req.category() != null) product.setCategory(req.category());
+
+        return ProductResponse.from(repository.save(product));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        var product = repository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
+        product.setActive(false);
+        repository.save(product);
+    }
+}

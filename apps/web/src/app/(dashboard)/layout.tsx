@@ -12,6 +12,7 @@ const navItems = [
   { href: "/vehiculos", label: "Vehículos", icon: "🚗" },
   { href: "/recepciones", label: "Recepción", icon: "📋" },
   { href: "/ordenes", label: "Órdenes de trabajo", icon: "🔧" },
+  { href: "/inventario", label: "Inventario", icon: "📦" },
 ];
 
 export default function DashboardLayout({
