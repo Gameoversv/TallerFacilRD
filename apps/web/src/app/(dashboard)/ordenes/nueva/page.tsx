@@ -40,10 +40,11 @@ export default function NuevaOrdenPage() {
       });
       router.push(`/ordenes/${result.data.id}`);
     } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } }; message?: string };
       const msg =
-        err instanceof Error
-          ? err.message
-          : "Error al crear la orden de trabajo";
+        axiosErr?.response?.data?.error ??
+        axiosErr?.message ??
+        "Error al crear la orden de trabajo";
       setError(msg);
     }
   }

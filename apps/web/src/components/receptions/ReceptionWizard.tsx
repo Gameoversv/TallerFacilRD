@@ -38,6 +38,7 @@ export function ReceptionWizard() {
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState<File[]>([]);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
 
   const createReception = useCreateReception();
@@ -78,38 +79,46 @@ export function ReceptionWizard() {
   };
 
   const onSubmit = async (data: FormValues) => {
-    const result = await createReception.mutateAsync({
-      vehicle_id: data.vehicleId,
-      entry_km: data.entryKm,
-      reported_problem: data.reportedProblem,
-      notes: data.notes,
-      checklist: {
-        exterior: {
-          scratches: data.scratchesExterior,
-          dents: data.dentsExterior,
-          lights: data.lightsExterior,
+    setSubmitError(null);
+    try {
+      const result = await createReception.mutateAsync({
+        vehicle_id: data.vehicleId,
+        entry_km: data.entryKm,
+        reported_problem: data.reportedProblem,
+        notes: data.notes,
+        checklist: {
+          exterior: {
+            scratches: data.scratchesExterior,
+            dents: data.dentsExterior,
+            lights: data.lightsExterior,
+          },
+          interior: {
+            radio: data.radioInterior,
+            screen: data.screenInterior,
+            mats: data.matsInterior,
+          },
+          mechanical: {
+            oil_level: data.oilLevelMech,
+            coolant: data.coolantMech,
+            battery: data.batteryMech,
+          },
         },
-        interior: {
-          radio: data.radioInterior,
-          screen: data.screenInterior,
-          mats: data.matsInterior,
-        },
-        mechanical: {
-          oil_level: data.oilLevelMech,
-          coolant: data.coolantMech,
-          battery: data.batteryMech,
-        },
-      },
-    });
+      });
 
-    const id = result.data.id;
-    setCreatedId(id);
+      const id = result.data.id;
+      setCreatedId(id);
 
-    for (const photo of photos) {
-      await addPhoto.mutateAsync({ id, file: photo });
+      for (const photo of photos) {
+        await addPhoto.mutateAsync({ id, file: photo });
+      }
+
+      router.push(`/recepciones/${id}`);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } }; message?: string };
+      setSubmitError(
+        axiosErr?.response?.data?.error ?? axiosErr?.message ?? "Error al crear la recepción"
+      );
     }
-
-    router.push(`/recepciones/${id}`);
   };
 
   return (
@@ -329,6 +338,13 @@ export function ReceptionWizard() {
           </div>
         )}
 
+        {/* Error message */}
+        {submitError && (
+          <p className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+            {submitError}
+          </p>
+        )}
+
         {/* Navigation */}
         <div className="flex justify-between mt-8">
           <Button
@@ -341,7 +357,30 @@ export function ReceptionWizard() {
           </Button>
 
           {step < STEPS.length - 1 ? (
-            <Button type="button" onClick={() => setStep((s) => s + 1)}>
+            <Button
+              type="button"
+              onClick={async () => {
+                if (step === 0) {
+                  const valid = await new Promise<boolean>((resolve) => {
+                    const customerId = watch("customerId");
+                    const vehicleId = watch("vehicleId");
+                    const entryKm = watch("entryKm");
+                    const reportedProblem = watch("reportedProblem");
+                    if (!customerId || !vehicleId || !entryKm || !reportedProblem) {
+                      resolve(false);
+                    } else {
+                      resolve(true);
+                    }
+                  });
+                  if (!valid) {
+                    setSubmitError("Completa todos los campos obligatorios: cliente, vehículo, km y problema.");
+                    return;
+                  }
+                  setSubmitError(null);
+                }
+                setStep((s) => s + 1);
+              }}
+            >
               Siguiente
             </Button>
           ) : (
