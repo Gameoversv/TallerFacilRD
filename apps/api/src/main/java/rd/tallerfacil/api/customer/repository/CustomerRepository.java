@@ -1,0 +1,27 @@
+package rd.tallerfacil.api.customer.repository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import rd.tallerfacil.api.customer.domain.Customer;
+
+import java.util.UUID;
+
+public interface CustomerRepository extends JpaRepository<Customer, UUID> {
+
+    @Query("""
+            SELECT c FROM Customer c
+            WHERE c.active = true
+            AND (:q IS NULL OR :q = ''
+                OR LOWER(c.firstName) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(c.lastName) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR c.documentId LIKE CONCAT('%', :q, '%'))
+            """)
+    Page<Customer> search(@Param("q") String q, Pageable pageable);
+
+    java.util.Optional<Customer> findByIdAndActiveTrue(java.util.UUID id);
+
+    boolean existsByDocumentIdAndActiveTrue(String documentId);
+}

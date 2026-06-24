@@ -15,6 +15,10 @@ public record ApiResponse<T>(boolean success, T data, String error, Meta meta) {
         return new ApiResponse<>(true, data, null, meta);
     }
 
+    public static <T> ApiResponse<T> paged(T data, long total, int page, int limit) {
+        return new ApiResponse<>(true, data, null, new Meta(total, page, limit));
+    }
+
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(false, null, message, null);
     }
