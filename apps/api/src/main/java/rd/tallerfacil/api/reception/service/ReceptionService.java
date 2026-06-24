@@ -1,6 +1,8 @@
 package rd.tallerfacil.api.reception.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +11,7 @@ import rd.tallerfacil.api.reception.dto.CreateReceptionRequest;
 import rd.tallerfacil.api.reception.dto.ReceptionResponse;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
 import rd.tallerfacil.api.shared.storage.StorageService;
+import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
 
 import java.io.IOException;
@@ -56,6 +59,18 @@ public class ReceptionService {
         return receptionRepository.findByIdWithVehicle(id)
                 .map(ReceptionResponse::from)
                 .orElseThrow(() -> new IllegalArgumentException("Recepción no encontrada: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public ApiResponse<List<ReceptionResponse>> findAll(int page) {
+        var pageable = PageRequest.of(page, 20, Sort.by("createdAt").descending());
+        var result = receptionRepository.findAllActive(pageable);
+        return ApiResponse.paged(
+                result.getContent().stream().map(ReceptionResponse::from).toList(),
+                result.getTotalElements(),
+                page,
+                20
+        );
     }
 
     @Transactional(readOnly = true)

@@ -19,6 +19,7 @@ import rd.tallerfacil.api.customer.repository.CustomerRepository;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
 import rd.tallerfacil.api.vehicle.dto.CreateVehicleRequest;
 import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
+import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
 
 import java.util.Map;
 import java.util.UUID;
@@ -37,12 +38,14 @@ class VehicleIntegrationTest {
     @Autowired CustomerRepository customerRepository;
     @Autowired VehicleRepository vehicleRepository;
     @Autowired ReceptionRepository receptionRepository;
+    @Autowired WorkOrderRepository workOrderRepository;
 
     private String token;
     private String customerId;
 
     @BeforeEach
     void setup() throws Exception {
+        workOrderRepository.deleteAll();
         receptionRepository.deleteAll();
         vehicleRepository.deleteAll();
         customerRepository.deleteAll();

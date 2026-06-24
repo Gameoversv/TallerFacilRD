@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCustomers } from "@/hooks/useCustomers";
 import type { Vehicle } from "@/types/vehicle";
 
 const TRANSMISSIONS = ["MANUAL", "AUTOMATIC", "CVT"] as const;
@@ -45,15 +46,24 @@ export function VehicleForm({
   hideCustomer = false,
 }: Props) {
   const [tab, setTab] = useState<"basico" | "avanzado">("basico");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerLabel, setCustomerLabel] = useState(
+    defaultValues?.customerId ? "Cliente ya seleccionado" : ""
+  );
+  const { data: customersData } = useCustomers(customerSearch, 0);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<VehicleFormValues>({
     resolver: zodResolver(schema),
     defaultValues,
   });
+
+  const customers = customersData?.data ?? [];
+  const showDropdown = customerSearch.length >= 1 && !customerLabel.startsWith("✓");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -148,8 +158,38 @@ export function VehicleForm({
 
           {!hideCustomer && (
             <div className="space-y-1">
-              <Label>ID del cliente *</Label>
-              <Input {...register("customerId")} placeholder="UUID del cliente" />
+              <Label>Cliente *</Label>
+              <input type="hidden" {...register("customerId")} />
+              <Input
+                placeholder="Buscar por nombre o cédula..."
+                value={customerLabel || customerSearch}
+                onChange={(e) => {
+                  setCustomerSearch(e.target.value);
+                  setCustomerLabel("");
+                  setValue("customerId", "");
+                }}
+              />
+              {showDropdown && customers.length > 0 && (
+                <ul className="border rounded-md divide-y text-sm max-h-40 overflow-auto bg-white shadow-sm z-10 relative">
+                  {customers.map((c) => (
+                    <li
+                      key={c.id}
+                      className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setValue("customerId", c.id, { shouldValidate: true });
+                        setCustomerLabel(`✓ ${c.full_name}`);
+                        setCustomerSearch("");
+                      }}
+                    >
+                      <span className="font-medium">{c.full_name}</span>
+                      {c.document_id && (
+                        <span className="text-gray-400 ml-2 text-xs">{c.document_id}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {errors.customerId && (
                 <p className="text-xs text-red-500">{errors.customerId.message}</p>
               )}

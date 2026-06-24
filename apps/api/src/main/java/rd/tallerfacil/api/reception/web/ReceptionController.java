@@ -12,6 +12,7 @@ import rd.tallerfacil.api.reception.service.ReceptionService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +21,12 @@ import java.util.UUID;
 public class ReceptionController {
 
     private final ReceptionService service;
+
+    @GetMapping
+    public ApiResponse<List<ReceptionResponse>> findAll(
+            @RequestParam(defaultValue = "0") int page) {
+        return service.findAll(page);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
