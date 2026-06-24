@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateInvoice } from "@/hooks/useInvoices";
-import { useWorkOrders } from "@/hooks/useWorkOrders";
+import { useWorkOrders, useWorkOrder } from "@/hooks/useWorkOrders";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ export default function NuevaFacturaPage() {
 
   const [woSearch, setWoSearch] = useState("");
   const [selectedWo, setSelectedWo] = useState<WorkOrder | null>(null);
+  const [selectedWoId, setSelectedWoId] = useState<string | null>(null);
   const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0, 10));
   const [applyItbis, setApplyItbis] = useState(false);
   const [notes, setNotes] = useState("");
@@ -23,6 +24,24 @@ export default function NuevaFacturaPage() {
     { itemType: "MANO_OBRA", description: "", quantity: 1, unitPrice: 0 },
   ]);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch WO detail when selected to get items
+  const { data: woDetail } = useWorkOrder(selectedWoId ?? "");
+
+  useEffect(() => {
+    if (!woDetail?.data?.items) return;
+    const woItems = woDetail.data.items;
+    if (woItems.length > 0) {
+      setItems(
+        woItems.map((i) => ({
+          itemType: i.type === "LABOR" ? ("MANO_OBRA" as const) : ("PIEZA" as const),
+          description: i.description,
+          quantity: i.quantity,
+          unitPrice: i.unit_price,
+        }))
+      );
+    }
+  }, [woDetail]);
 
   // Load all work orders (no status filter so all appear)
   const { data: woData } = useWorkOrders(null, 0);
@@ -36,7 +55,10 @@ export default function NuevaFacturaPage() {
 
   function selectWo(wo: WorkOrder) {
     setSelectedWo(wo);
+    setSelectedWoId(wo.id);
     setWoSearch("");
+    // Reset items to empty placeholder — will be replaced when woDetail loads
+    setItems([{ itemType: "MANO_OBRA", description: "", quantity: 1, unitPrice: 0 }]);
   }
 
   function addItem() {
@@ -94,7 +116,7 @@ export default function NuevaFacturaPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedWo(null)}
+                onClick={() => { setSelectedWo(null); setSelectedWoId(null); setItems([{ itemType: "MANO_OBRA", description: "", quantity: 1, unitPrice: 0 }]); }}
                 className="text-xs text-gray-400 hover:text-gray-700 underline"
               >
                 Cambiar
