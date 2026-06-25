@@ -34,6 +34,16 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {
             """)
     Optional<WorkOrder> findByReceptionId(@Param("receptionId") UUID receptionId);
 
+    @Query("""
+            SELECT wo FROM WorkOrder wo
+            JOIN FETCH wo.reception r
+            JOIN FETCH r.vehicle v
+            LEFT JOIN FETCH wo.items
+            WHERE v.id = :vehicleId
+            ORDER BY wo.createdAt DESC
+            """)
+    List<WorkOrder> findByVehicleIdWithItems(@Param("vehicleId") UUID vehicleId);
+
     boolean existsByReceptionId(UUID receptionId);
 
     long countByStatusIn(List<WorkOrderStatus> statuses);
