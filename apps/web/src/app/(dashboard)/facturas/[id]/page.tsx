@@ -4,6 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { useInvoice, useUpdateInvoiceStatus } from "@/hooks/useInvoices";
 import { Button } from "@/components/ui/button";
+import PaymentSection from "@/components/payments/PaymentSection";
 import type { InvoiceStatus } from "@/types/invoice";
 
 const STATUS_LABEL: Record<InvoiceStatus, string> = {
@@ -175,6 +176,18 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
         <p className="text-xs text-gray-400 text-center pt-4 border-t">
           Gracias por su preferencia — TallerFácil RD
         </p>
+      </div>
+
+      {/* Payments section — hidden on print */}
+      <div className="rounded-lg border bg-white p-6 print:hidden">
+        <h2 className="text-base font-semibold mb-4">Pagos</h2>
+        <PaymentSection
+          invoiceId={id}
+          total={inv.total}
+          paidAmount={inv.paid_amount}
+          remainingBalance={inv.remaining_balance}
+          status={inv.status}
+        />
       </div>
     </div>
   );

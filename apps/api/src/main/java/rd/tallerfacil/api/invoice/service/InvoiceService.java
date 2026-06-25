@@ -11,6 +11,7 @@ import rd.tallerfacil.api.invoice.dto.CreateInvoiceRequest;
 import rd.tallerfacil.api.invoice.dto.InvoiceResponse;
 import rd.tallerfacil.api.invoice.dto.UpdateInvoiceStatusRequest;
 import rd.tallerfacil.api.invoice.repository.InvoiceRepository;
+import rd.tallerfacil.api.payment.repository.PaymentRepository;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
@@ -27,18 +28,21 @@ public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final WorkOrderRepository workOrderRepository;
+    private final PaymentRepository paymentRepository;
 
     @Transactional(readOnly = true)
     public ApiResponse<List<InvoiceResponse>> list(int page, int size) {
         var result = invoiceRepository.findAllWithDetails(PageRequest.of(page, size));
-        var data = result.getContent().stream().map(InvoiceResponse::from).toList();
+        var data = result.getContent().stream()
+                .map(inv -> InvoiceResponse.from(inv, paymentRepository.sumAmountByInvoiceId(inv.getId())))
+                .toList();
         return ApiResponse.paged(data, result.getTotalElements(), page, size);
     }
 
     @Transactional(readOnly = true)
     public InvoiceResponse findById(UUID id) {
         return invoiceRepository.findByIdWithDetails(id)
-                .map(InvoiceResponse::from)
+                .map(inv -> InvoiceResponse.from(inv, paymentRepository.sumAmountByInvoiceId(inv.getId())))
                 .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada: " + id));
     }
 
@@ -82,7 +86,7 @@ public class InvoiceService {
 
         var saved = invoiceRepository.save(invoice);
         return invoiceRepository.findByIdWithDetails(saved.getId())
-                .map(InvoiceResponse::from)
+                .map(inv -> InvoiceResponse.from(inv, BigDecimal.ZERO))
                 .orElseThrow();
     }
 
@@ -97,7 +101,9 @@ public class InvoiceService {
 
         invoice.setStatus(req.status());
         invoiceRepository.save(invoice);
-        return invoiceRepository.findByIdWithDetails(id).map(InvoiceResponse::from).orElseThrow();
+        return invoiceRepository.findByIdWithDetails(id)
+                .map(inv -> InvoiceResponse.from(inv, paymentRepository.sumAmountByInvoiceId(id)))
+                .orElseThrow();
     }
 
     private String generateNumber() {

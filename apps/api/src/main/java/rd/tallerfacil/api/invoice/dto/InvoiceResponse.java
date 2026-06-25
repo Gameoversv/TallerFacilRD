@@ -24,6 +24,8 @@ public record InvoiceResponse(
         BigDecimal subtotal,
         BigDecimal itbisAmount,
         BigDecimal total,
+        BigDecimal paidAmount,
+        BigDecimal remainingBalance,
         String notes,
         List<ItemResponse> items,
         Instant createdAt
@@ -43,6 +45,10 @@ public record InvoiceResponse(
     }
 
     public static InvoiceResponse from(Invoice inv) {
+        return from(inv, BigDecimal.ZERO);
+    }
+
+    public static InvoiceResponse from(Invoice inv, BigDecimal paidAmount) {
         var wo = inv.getWorkOrder();
         var reception = wo.getReception();
         var vehicle = reception != null ? reception.getVehicle() : null;
@@ -52,6 +58,8 @@ public record InvoiceResponse(
                 ? (vehicle.getLicensePlate() != null ? vehicle.getLicensePlate() + " — " : "")
                   + vehicle.getBrand() + " " + vehicle.getModel() + " " + vehicle.getYear()
                 : "—";
+
+        BigDecimal remaining = inv.getTotal().subtract(paidAmount).max(BigDecimal.ZERO);
 
         return new InvoiceResponse(
                 inv.getId(),
@@ -66,6 +74,8 @@ public record InvoiceResponse(
                 inv.getSubtotal(),
                 inv.getItbisAmount(),
                 inv.getTotal(),
+                paidAmount,
+                remaining,
                 inv.getNotes(),
                 inv.getItems().stream().map(ItemResponse::from).toList(),
                 inv.getCreatedAt()
