@@ -301,4 +301,28 @@
   .pulse-dot {
     animation: gf-pulse-dot 1.8s ease-in-out infinite;
   }
+
+  /* Force accurate color rendering when printing (e.g. invoices) */
+  .print-exact {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
+
+/* ---- Print: clean white paper, no app chrome, no clipping ---- */
+@media print {
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+  body {
+    color: #000000 !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
+
