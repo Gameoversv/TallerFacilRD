@@ -1,46 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useDashboardSummary, useDashboardActivity, useDashboardAlerts } from "@/hooks/useDashboard";
-
-function KpiCard({
-  label,
-  value,
-  icon,
-  href,
-  accent,
-}: {
-  label: string;
-  value: number | string;
-  icon: string;
-  href?: string;
-  accent?: "green" | "blue" | "yellow" | "red";
-}) {
-  const accentClass = {
-    green: "border-l-green-500",
-    blue: "border-l-blue-500",
-    yellow: "border-l-yellow-500",
-    red: "border-l-red-500",
-  }[accent ?? "blue"] ?? "border-l-gray-300";
-
-  const card = (
-    <div
-      className={`bg-white rounded-lg border border-l-4 ${accentClass} p-5 flex items-center gap-4 hover:shadow-sm transition-shadow`}
-    >
-      <span className="text-3xl">{icon}</span>
-      <div>
-        <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">{label}</p>
-        <p className="text-2xl font-bold text-gray-900 mt-0.5">{value}</p>
-      </div>
-    </div>
-  );
-
-  return href ? <Link href={href}>{card}</Link> : card;
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse bg-gray-100 rounded ${className}`} />;
-}
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  Car,
+  CheckCircle2,
+  ClipboardList,
+  Flag,
+  ShieldCheck,
+  Users,
+  Wrench,
+} from "lucide-react";
+import {
+  useDashboardSummary,
+  useDashboardActivity,
+  useDashboardAlerts,
+} from "@/hooks/useDashboard";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { StatCard } from "@/components/layout/StatCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const { data: summaryData, isLoading: loadingS } = useDashboardSummary();
@@ -53,152 +32,183 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Resumen del taller · actualiza cada 60s
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Panel del taller"
+        title="Dashboard"
+        description="Estado operativo en vivo · se actualiza cada 60 segundos."
+      />
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {loadingS ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-24" />
+            <Skeleton key={i} className="h-[116px] rounded-xl" />
           ))
         ) : (
           <>
-            <KpiCard
-              label="Vehículos en taller"
-              value={s?.vehiculos_en_taller ?? 0}
-              icon="🔧"
-              href="/ordenes?status=EN_PROGRESO"
-              accent="blue"
-            />
-            <KpiCard
-              label="Listos para entrega"
-              value={s?.vehiculos_listos ?? 0}
-              icon="✅"
-              href="/ordenes?status=COMPLETADA"
-              accent="green"
-            />
-            <KpiCard
-              label="Órdenes abiertas"
-              value={s?.ordenes_abiertas ?? 0}
-              icon="📋"
-              href="/ordenes"
-              accent="yellow"
-            />
-            <KpiCard
+            <Link href="/ordenes?status=EN_PROGRESO">
+              <StatCard
+                label="Vehículos en taller"
+                value={String(s?.vehiculos_en_taller ?? 0)}
+                icon={Wrench}
+                accent="primary"
+                hint="En proceso ahora mismo"
+              />
+            </Link>
+            <Link href="/ordenes?status=COMPLETADA">
+              <StatCard
+                label="Listos para entrega"
+                value={String(s?.vehiculos_listos ?? 0)}
+                icon={CheckCircle2}
+                accent="success"
+                hint="Esperando retiro del cliente"
+              />
+            </Link>
+            <Link href="/ordenes">
+              <StatCard
+                label="Órdenes abiertas"
+                value={String(s?.ordenes_abiertas ?? 0)}
+                icon={ClipboardList}
+                accent="warning"
+                hint="Requieren seguimiento"
+              />
+            </Link>
+            <StatCard
               label="Completadas hoy"
-              value={s?.ordenes_completadas_hoy ?? 0}
-              icon="🏁"
-              accent="green"
+              value={String(s?.ordenes_completadas_hoy ?? 0)}
+              icon={Flag}
+              accent="success"
+              hint="Cierres del día"
             />
-            <KpiCard
-              label="Total clientes"
-              value={s?.total_clientes ?? 0}
-              icon="👥"
-              href="/clientes"
-            />
-            <KpiCard
-              label="Total vehículos"
-              value={s?.total_vehiculos ?? 0}
-              icon="🚗"
-              href="/vehiculos"
-            />
+            <Link href="/clientes">
+              <StatCard
+                label="Total clientes"
+                value={String(s?.total_clientes ?? 0)}
+                icon={Users}
+                accent="primary"
+              />
+            </Link>
+            <Link href="/vehiculos">
+              <StatCard
+                label="Total vehículos"
+                value={String(s?.total_vehiculos ?? 0)}
+                icon={Car}
+                accent="primary"
+              />
+            </Link>
           </>
         )}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Activity Feed */}
-        <div className="bg-white rounded-lg border p-5 space-y-4">
-          <h2 className="font-semibold text-gray-800">Actividad reciente</h2>
-          {loadingA ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-10" />
-              ))}
-            </div>
-          ) : activity.length === 0 ? (
-            <p className="text-sm text-gray-400 py-4 text-center">Sin actividad reciente</p>
-          ) : (
-            <ul className="divide-y">
-              {activity.map((ev) => (
-                <li key={ev.entity_id} className="py-3 flex items-start gap-3">
-                  <span className="text-lg mt-0.5">
-                    {ev.type === "RECEPTION" ? "🚗" : "🔧"}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {ev.description}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {ev.type === "RECEPTION" ? "Recepción" : "Orden"} ·{" "}
-                      {new Date(ev.occurred_at).toLocaleString("es-DO", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
-                    </p>
-                  </div>
-                  {ev.type === "RECEPTION" && (
-                    <Link
-                      href={`/recepciones/${ev.entity_id}`}
-                      className="text-xs text-gray-400 hover:text-gray-700 shrink-0"
+        <section className="rounded-xl border border-border bg-card xl:col-span-2">
+          <header className="flex items-center justify-between border-b border-border px-5 py-4">
+            <h2 className="font-display text-sm font-semibold text-white">
+              Actividad reciente
+            </h2>
+            <span className="text-xs text-muted-foreground">Últimos eventos</span>
+          </header>
+          <div className="p-2">
+            {loadingA ? (
+              <div className="space-y-2 p-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12" />
+                ))}
+              </div>
+            ) : activity.length === 0 ? (
+              <p className="py-12 text-center text-sm text-muted-foreground">
+                Sin actividad reciente
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {activity.map((ev) => {
+                  const isReception = ev.type === "RECEPTION";
+                  const Icon = isReception ? Car : Wrench;
+                  return (
+                    <li
+                      key={ev.entity_id}
+                      className="flex items-start gap-3 px-3 py-3 transition-colors hover:bg-muted/40"
                     >
-                      Ver →
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-white">
+                          {ev.description}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {isReception ? "Recepción" : "Orden"} ·{" "}
+                          {new Date(ev.occurred_at).toLocaleString("es-DO", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </div>
+                      {isReception && (
+                        <Link
+                          href={`/recepciones/${ev.entity_id}`}
+                          className="mt-1 inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          Ver <ArrowUpRight className="h-3.5 w-3.5" />
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
 
         {/* Alerts */}
-        <div className="bg-white rounded-lg border p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-800">Alertas</h2>
+        <section className="rounded-xl border border-border bg-card">
+          <header className="flex items-center justify-between border-b border-border px-5 py-4">
+            <h2 className="font-display text-sm font-semibold text-white">
+              Alertas
+            </h2>
             {alerts.length > 0 && (
-              <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+              <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">
                 {alerts.length}
               </span>
             )}
+          </header>
+          <div className="p-3">
+            {alerts.length === 0 ? (
+              <div className="flex flex-col items-center py-12 text-center">
+                <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-success/12 text-success">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <p className="text-sm text-muted-foreground">
+                  Sin alertas activas
+                </p>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {alerts.map((a) => (
+                  <li key={a.entity_id}>
+                    <Link
+                      href={`/ordenes/${a.entity_id}`}
+                      className="flex items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/8 p-3 transition-colors hover:border-destructive/40"
+                    >
+                      <span className="mt-0.5 text-destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-white">
+                          {a.description}
+                        </p>
+                        <p className="mt-0.5 text-xs text-destructive/90">
+                          OT abierta hace {a.days_open} días
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-
-          {alerts.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-2xl">✅</p>
-              <p className="text-sm text-gray-400 mt-2">Sin alertas activas</p>
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {alerts.map((a) => (
-                <li
-                  key={a.entity_id}
-                  className="flex items-start gap-3 bg-red-50 border border-red-100 rounded-lg p-3"
-                >
-                  <span className="text-lg">⚠️</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-red-800 truncate">
-                      {a.description}
-                    </p>
-                    <p className="text-xs text-red-500 mt-0.5">
-                      OT abierta hace {a.days_open} días
-                    </p>
-                  </div>
-                  <Link
-                    href={`/ordenes/${a.entity_id}`}
-                    className="text-xs text-red-600 hover:text-red-800 font-medium shrink-0"
-                  >
-                    Ver →
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        </section>
       </div>
     </div>
   );

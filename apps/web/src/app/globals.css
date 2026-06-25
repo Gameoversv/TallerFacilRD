@@ -1,26 +1,304 @@
 @import "tailwindcss";
 
+/* ============================================================
+   GarageFlow — Design System
+   Direction: Industrial premium / automotive-diagnostic dark.
+   Dark-only theme. Exact brand palette mapped to shadcn tokens.
+   ============================================================ */
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* ---- Brand palette (source of truth) ---- */
+  --gf-bg: #0f1115;
+  --gf-sidebar: #171a21;
+  --gf-card: #1f242d;
+  --gf-primary: #00a3ff;
+  --gf-primary-hover: #0091e6;
+  --gf-success: #22c55e;
+  --gf-warning: #f59e0b;
+  --gf-danger: #ef4444;
+  --gf-text: #ffffff;
+  --gf-text-muted: #94a3b8;
+  --gf-border: #2d3748;
+
+  /* ---- shadcn semantic mapping ---- */
+  --background: var(--gf-bg);
+  --foreground: var(--gf-text);
+
+  --card: var(--gf-card);
+  --card-foreground: var(--gf-text);
+
+  --popover: #232a34;
+  --popover-foreground: var(--gf-text);
+
+  --primary: var(--gf-primary);
+  --primary-foreground: #04121d;
+
+  --secondary: #2a313c;
+  --secondary-foreground: var(--gf-text);
+
+  --muted: #1a1f27;
+  --muted-foreground: var(--gf-text-muted);
+
+  --accent: #232b36;
+  --accent-foreground: var(--gf-text);
+
+  --destructive: var(--gf-danger);
+  --destructive-foreground: #ffffff;
+
+  --success: var(--gf-success);
+  --success-foreground: #04130a;
+  --warning: var(--gf-warning);
+  --warning-foreground: #1a1203;
+  --info: var(--gf-primary);
+
+  --border: var(--gf-border);
+  --input: var(--gf-border);
+  --ring: var(--gf-primary);
+
+  --sidebar: var(--gf-sidebar);
+  --sidebar-foreground: var(--gf-text-muted);
+  --sidebar-accent: #1f2630;
+  --sidebar-border: #232b35;
+
+  --radius: 0.85rem;
 }
 
+/* Map raw vars to Tailwind v4 color/utility tokens */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-inter), sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: calc(var(--radius) - 2px);
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) + 6px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--gf-bg);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    /* Automotive atmosphere: cool radial glow + faint diagnostic grid */
+    background-image:
+      radial-gradient(
+        60rem 60rem at 100% -10%,
+        rgba(0, 163, 255, 0.08),
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 50rem at -10% 110%,
+        rgba(0, 163, 255, 0.05),
+        transparent 55%
+      );
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background-color: rgba(0, 163, 255, 0.28);
+    color: #ffffff;
+  }
+
+  /* Native selects: force dark control + dark option popup
+     (browser default popup is white-on-white in dark UI) */
+  select {
+    color: var(--foreground);
+    background-color: var(--card);
+  }
+  select option,
+  select optgroup {
+    background-color: var(--popover);
+    color: var(--foreground);
+  }
+
+  /* Form controls: legible defaults on the dark theme */
+  input,
+  textarea,
+  select {
+    accent-color: var(--gf-primary);
+  }
+  input,
+  textarea {
+    caret-color: var(--gf-primary);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
+  /* Native date/time picker glyphs are dark by default — lighten them */
+  input::-webkit-calendar-picker-indicator {
+    filter: invert(0.75) brightness(1.4);
+    cursor: pointer;
+  }
+  /* Autofill: kill the white Chrome autofill background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--foreground);
+    -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+    caret-color: var(--foreground);
+  }
+
+  /* Custom scrollbars — thin, dark, diagnostic */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #313a47 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #2c3540;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #3a4654;
+    background-clip: content-box;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Numeric / diagnostic readouts */
+  .nums {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
+  }
+
+  .text-gradient {
+    background: linear-gradient(180deg, #ffffff 0%, #9fb4c6 130%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Frosted surface for elevated panels */
+  .surface-glass {
+    background: linear-gradient(
+      180deg,
+      rgba(31, 36, 45, 0.92),
+      rgba(23, 26, 33, 0.92)
+    );
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+  }
+
+  /* Accent ring/glow for primary focus moments */
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px rgba(0, 163, 255, 0.35),
+      0 8px 30px -10px rgba(0, 163, 255, 0.45);
+  }
+
+  /* Hairline top accent used on KPI cards */
+  .edge-top::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 163, 255, 0.7),
+      transparent
+    );
+  }
+
+  .grid-texture {
+    background-image:
+      linear-gradient(rgba(45, 55, 72, 0.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45, 55, 72, 0.25) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  @keyframes gf-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-rise {
+    animation: gf-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes gf-pulse-dot {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  .pulse-dot {
+    animation: gf-pulse-dot 1.8s ease-in-out infinite;
+  }
 }
