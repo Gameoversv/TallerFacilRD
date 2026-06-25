@@ -1,0 +1,25 @@
+package rd.tallerfacil.api.cash.repository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import rd.tallerfacil.api.cash.domain.CashTransaction;
+import rd.tallerfacil.api.cash.domain.TransactionType;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
+
+public interface CashRepository extends JpaRepository<CashTransaction, UUID> {
+
+    Page<CashTransaction> findByTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
+            LocalDate from, LocalDate to, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM CashTransaction t WHERE t.type = :type AND t.transactionDate BETWEEN :from AND :to")
+    BigDecimal sumByTypeAndDateRange(
+            @Param("type") TransactionType type,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
+}
