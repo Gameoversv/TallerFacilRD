@@ -43,7 +43,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <aside className="w-60 bg-white border-r flex flex-col shrink-0">
+      <aside className="w-60 bg-white border-r flex flex-col shrink-0 print:hidden">
         <div className="px-6 py-5 border-b">
           <span className="font-bold text-lg tracking-tight">
             🔧 TallerFácil RD
