@@ -17,6 +17,7 @@ const navItems = [
   { href: "/facturas", label: "Facturas", icon: "🧾" },
   { href: "/cuentas-cobrar", label: "Cuentas x Cobrar", icon: "💰" },
   { href: "/caja", label: "Caja", icon: "🏦" },
+  { href: "/empleados", label: "Empleados", icon: "👷" },
 ];
 
 export default function DashboardLayout({
