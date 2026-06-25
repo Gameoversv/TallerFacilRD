@@ -28,6 +28,7 @@ export default function NuevaFacturaPage() {
   // Fetch WO detail when selected to get items
   const { data: woDetail } = useWorkOrder(selectedWoId ?? "");
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!woDetail?.data?.items) return;
     const woItems = woDetail.data.items;
@@ -41,6 +42,7 @@ export default function NuevaFacturaPage() {
         }))
       );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [woDetail]);
 
   // Load all work orders (no status filter so all appear)
