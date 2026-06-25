@@ -39,8 +39,8 @@ export default function ClientesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Clientes</h1>
-          <p className="text-sm text-gray-500">{total} registros</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Clientes</h1>
+          <p className="text-sm text-muted-foreground">{total} registros</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>+ Nuevo cliente</Button>
       </div>
@@ -53,9 +53,9 @@ export default function ClientesPage() {
       />
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -69,7 +69,7 @@ export default function ClientesPage() {
             <TableBody>
               {customers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     Sin resultados
                   </TableCell>
                 </TableRow>
@@ -77,7 +77,7 @@ export default function ClientesPage() {
               {customers.map((c) => (
                 <TableRow
                   key={c.id}
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-muted/40"
                   onClick={() => router.push(`/clientes/${c.id}`)}
                 >
                   <TableCell className="font-medium">{c.full_name}</TableCell>
@@ -88,7 +88,7 @@ export default function ClientesPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-red-500 hover:text-red-700"
+                      className="text-destructive hover:text-destructive"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (confirm(`¿Eliminar a ${c.full_name}?`)) {
@@ -111,7 +111,7 @@ export default function ClientesPage() {
           <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
             ← Anterior
           </Button>
-          <span className="text-gray-500">Página {page + 1} de {totalPages}</span>
+          <span className="text-muted-foreground">Página {page + 1} de {totalPages}</span>
           <Button variant="ghost" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
             Siguiente →
           </Button>

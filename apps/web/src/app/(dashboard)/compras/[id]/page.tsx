@@ -13,15 +13,15 @@ export default function CompraDetailPage({ params }: { params: Promise<{ id: str
   const { data, isLoading } = usePurchase(id);
   const purchase = data?.data;
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
-  if (!purchase) return <p className="text-sm text-red-500">Compra no encontrada</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
+  if (!purchase) return <p className="text-sm text-destructive">Compra no encontrada</p>;
 
   return (
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Detalle de compra</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Detalle de compra</h1>
+          <p className="text-sm text-muted-foreground">
             {new Date(purchase.purchase_date).toLocaleDateString("es-DO")} · {purchase.supplier_name}
           </p>
         </div>
@@ -31,12 +31,12 @@ export default function CompraDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       {purchase.notes && (
-        <div className="rounded-lg border bg-white p-4 text-sm text-gray-600">
-          <span className="font-medium text-gray-700">Notas: </span>{purchase.notes}
+        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Notas: </span>{purchase.notes}
         </div>
       )}
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -61,7 +61,7 @@ export default function CompraDetailPage({ params }: { params: Promise<{ id: str
                 </TableCell>
               </TableRow>
             ))}
-            <TableRow className="bg-gray-50 font-bold">
+            <TableRow className="bg-muted/40 font-bold">
               <TableCell colSpan={4} className="text-right">Total</TableCell>
               <TableCell className="text-right">
                 RD$ {purchase.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}

@@ -42,12 +42,12 @@ export function CustomerForm({ defaultValues, onSubmit, submitLabel = "Guardar" 
         <div className="space-y-1">
           <Label>Nombre *</Label>
           <Input {...register("firstName")} placeholder="Juan" />
-          {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
+          {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
         </div>
         <div className="space-y-1">
           <Label>Apellido *</Label>
           <Input {...register("lastName")} placeholder="Pérez" />
-          {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
+          {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -63,7 +63,7 @@ export function CustomerForm({ defaultValues, onSubmit, submitLabel = "Guardar" 
       <div className="space-y-1">
         <Label>Correo</Label>
         <Input {...register("email")} type="email" placeholder="cliente@mail.com" />
-        {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
       </div>
       <div className="space-y-1">
         <Label>Dirección</Label>

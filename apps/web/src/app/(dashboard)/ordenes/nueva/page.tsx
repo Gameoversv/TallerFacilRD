@@ -52,15 +52,15 @@ export default function NuevaOrdenPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Nueva orden de trabajo</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-white">Nueva orden de trabajo</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Selecciona el vehículo y la recepción asociada
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <section className="rounded-lg border bg-white p-5 space-y-4">
-          <h2 className="font-semibold text-gray-700">1. Seleccionar vehículo</h2>
+        <section className="rounded-lg border bg-card p-5 space-y-4">
+          <h2 className="font-semibold text-foreground">1. Seleccionar vehículo</h2>
           <Input
             placeholder="Buscar por placa, marca o propietario..."
             value={vehicleSearch}
@@ -75,7 +75,7 @@ export default function NuevaOrdenPage() {
               {vehicles.map((v) => (
                 <li
                   key={v.id}
-                  className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  className="px-3 py-2 hover:bg-muted/40 cursor-pointer"
                   onClick={() => {
                     setSelectedVehicleId(v.id);
                     setVehicleSearch(`${v.brand} ${v.model} ${v.year} (${v.license_plate ?? "Sin placa"})`);
@@ -85,7 +85,7 @@ export default function NuevaOrdenPage() {
                   <span className="font-medium">
                     {v.brand} {v.model} {v.year}
                   </span>{" "}
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     — {v.license_plate ?? "Sin placa"} · {v.customer_name}
                   </span>
                 </li>
@@ -95,10 +95,10 @@ export default function NuevaOrdenPage() {
         </section>
 
         {selectedVehicleId && (
-          <section className="rounded-lg border bg-white p-5 space-y-4">
-            <h2 className="font-semibold text-gray-700">2. Seleccionar recepción</h2>
+          <section className="rounded-lg border bg-card p-5 space-y-4">
+            <h2 className="font-semibold text-foreground">2. Seleccionar recepción</h2>
             {receptions.length === 0 ? (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 No hay recepciones para este vehículo.
               </p>
             ) : (
@@ -109,12 +109,12 @@ export default function NuevaOrdenPage() {
                     onClick={() => setSelectedReceptionId(r.id)}
                     className={`px-3 py-3 cursor-pointer transition-colors ${
                       selectedReceptionId === r.id
-                        ? "bg-blue-50 border-l-2 border-blue-500"
-                        : "hover:bg-gray-50"
+                        ? "bg-primary/10 border-l-2 border-primary"
+                        : "hover:bg-muted/40"
                     }`}
                   >
                     <p className="font-medium truncate">{r.reported_problem}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">
+                    <p className="text-muted-foreground text-xs mt-0.5">
                       {new Date(r.created_at).toLocaleDateString("es-DO")} ·{" "}
                       {r.entry_km.toLocaleString()} km
                     </p>
@@ -126,15 +126,15 @@ export default function NuevaOrdenPage() {
         )}
 
         {selectedReceptionId && (
-          <section className="rounded-lg border bg-white p-5 space-y-4">
-            <h2 className="font-semibold text-gray-700">3. Detalles de la orden</h2>
+          <section className="rounded-lg border bg-card p-5 space-y-4">
+            <h2 className="font-semibold text-foreground">3. Detalles de la orden</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label className="text-sm font-medium text-foreground block mb-1">
                   Diagnóstico inicial
                 </label>
                 <textarea
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                   rows={3}
                   placeholder="Descripción del problema encontrado..."
                   value={diagnosis}
@@ -143,7 +143,7 @@ export default function NuevaOrdenPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                  <label className="text-sm font-medium text-foreground block mb-1">
                     Técnico asignado
                   </label>
                   <Input
@@ -153,7 +153,7 @@ export default function NuevaOrdenPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                  <label className="text-sm font-medium text-foreground block mb-1">
                     Costo estimado (RD$)
                   </label>
                   <Input
@@ -171,7 +171,7 @@ export default function NuevaOrdenPage() {
         )}
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2">
             {error}
           </p>
         )}

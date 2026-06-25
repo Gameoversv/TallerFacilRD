@@ -21,8 +21,8 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
   const updateMutation = useUpdateVehicle(id);
   const deleteMutation = useDeleteVehicle();
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
-  if (isError || !data?.data) return <p className="text-sm text-red-500">Vehículo no encontrado.</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
+  if (isError || !data?.data) return <p className="text-sm text-destructive">Vehículo no encontrado.</p>;
 
   const v = data.data;
 
@@ -70,12 +70,12 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
         <div>
           <button
             onClick={() => router.push("/vehiculos")}
-            className="text-sm text-gray-400 hover:text-gray-600 mb-1 block"
+            className="text-sm text-muted-foreground hover:text-muted-foreground mb-1 block"
           >
             ← Vehículos
           </button>
-          <h1 className="text-2xl font-bold">
-            {v.brand} {v.model} <span className="text-gray-400 font-normal">{v.year}</span>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+            {v.brand} {v.model} <span className="text-muted-foreground font-normal">{v.year}</span>
           </h1>
         </div>
         <div className="flex gap-2">
@@ -84,7 +84,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
           </Button>
           <Button
             variant="ghost"
-            className="text-red-500 hover:text-red-700"
+            className="text-destructive hover:text-destructive"
             onClick={handleDelete}
           >
             Eliminar
@@ -99,8 +99,8 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
             onClick={() => setActiveTab(t.key)}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               activeTab === t.key
-                ? "border-gray-900 text-gray-900"
-                : "border-transparent text-gray-400 hover:text-gray-600"
+                ? "border-border text-white"
+                : "border-transparent text-muted-foreground hover:text-muted-foreground"
             }`}
           >
             {t.label}
@@ -146,7 +146,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
             <CardContent className="text-sm">
               <button
                 onClick={() => router.push(`/clientes/${v.customer_id}`)}
-                className="font-medium text-blue-600 hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 {v.customer_name}
               </button>
@@ -195,8 +195,8 @@ function Detail({
 }) {
   return (
     <div className={className}>
-      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-      <p className="font-medium text-gray-800">{value ?? "—"}</p>
+      <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+      <p className="font-medium text-foreground">{value ?? "—"}</p>
     </div>
   );
 }
@@ -205,11 +205,11 @@ function VehicleReceptionsTab({ vehicleId }: { vehicleId: string }) {
   const { data, isLoading } = useVehicleReceptions(vehicleId);
   const receptions = data?.data ?? [];
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
   if (receptions.length === 0) {
     return (
       <Card>
-        <CardContent className="text-sm text-gray-400 text-center py-6">Sin recepciones registradas</CardContent>
+        <CardContent className="text-sm text-muted-foreground text-center py-6">Sin recepciones registradas</CardContent>
       </Card>
     );
   }
@@ -227,8 +227,8 @@ function VehicleReceptionsTab({ vehicleId }: { vehicleId: string }) {
                 <Button variant="ghost" size="sm">Ver →</Button>
               </Link>
             </div>
-            <p className="text-gray-600">{r.reported_problem}</p>
-            <p className="text-xs text-gray-400">Km entrada: {r.entry_km.toLocaleString()}</p>
+            <p className="text-muted-foreground">{r.reported_problem}</p>
+            <p className="text-xs text-muted-foreground">Km entrada: {r.entry_km.toLocaleString()}</p>
           </CardContent>
         </Card>
       ))}
@@ -241,11 +241,11 @@ function VehicleOrdersTab({ vehicleId }: { vehicleId: string }) {
   const visits = data?.data?.visits ?? [];
   const orders = visits.filter((v) => v.work_order != null).map((v) => v.work_order!);
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
   if (orders.length === 0) {
     return (
       <Card>
-        <CardContent className="text-sm text-gray-400 text-center py-6">Sin órdenes de trabajo</CardContent>
+        <CardContent className="text-sm text-muted-foreground text-center py-6">Sin órdenes de trabajo</CardContent>
       </Card>
     );
   }
@@ -256,7 +256,7 @@ function VehicleOrdersTab({ vehicleId }: { vehicleId: string }) {
         <Card key={wo.id}>
           <CardContent className="py-4 text-sm space-y-1">
             <div className="flex items-center justify-between">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${WO_STATUS_COLOR[wo.status] ?? "bg-gray-100 text-gray-600"}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${WO_STATUS_COLOR[wo.status] ?? "bg-muted text-muted-foreground"}`}>
                 {WO_STATUS_LABEL[wo.status] ?? wo.status}
               </span>
               <Link href={`/ordenes/${wo.id}`}>
@@ -264,7 +264,7 @@ function VehicleOrdersTab({ vehicleId }: { vehicleId: string }) {
               </Link>
             </div>
             {wo.items.length > 0 && (
-              <p className="text-xs text-gray-500">{wo.items.length} ítem(s): {wo.items.map((i) => i.description).join(", ")}</p>
+              <p className="text-xs text-muted-foreground">{wo.items.length} ítem(s): {wo.items.map((i) => i.description).join(", ")}</p>
             )}
           </CardContent>
         </Card>
@@ -278,26 +278,26 @@ const WO_STATUS_LABEL: Record<string, string> = {
   WAITING_PARTS: "Esperando piezas", COMPLETED: "Completada", CANCELLED: "Cancelada",
 };
 const WO_STATUS_COLOR: Record<string, string> = {
-  PENDING: "bg-gray-100 text-gray-600", IN_PROGRESS: "bg-blue-100 text-blue-700",
-  WAITING_PARTS: "bg-yellow-100 text-yellow-700", COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-600",
+  PENDING: "bg-muted text-muted-foreground", IN_PROGRESS: "bg-primary/15 text-primary",
+  WAITING_PARTS: "bg-warning/15 text-warning", COMPLETED: "bg-success/15 text-success",
+  CANCELLED: "bg-destructive/15 text-destructive",
 };
 const INV_STATUS_COLOR: Record<string, string> = {
-  PENDIENTE: "bg-yellow-100 text-yellow-700",
-  PAGADA: "bg-green-100 text-green-700",
-  ANULADA: "bg-gray-100 text-gray-500",
+  PENDIENTE: "bg-warning/15 text-warning",
+  PAGADA: "bg-success/15 text-success",
+  ANULADA: "bg-muted text-muted-foreground",
 };
 
 function VehicleHistoryTab({ vehicleId }: { vehicleId: string }) {
   const { data, isLoading } = useVehicleHistory(vehicleId);
   const history = data?.data;
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando historial...</p>;
-  if (!history) return <p className="text-sm text-red-500">Error al cargar historial</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando historial...</p>;
+  if (!history) return <p className="text-sm text-destructive">Error al cargar historial</p>;
   if (history.visits.length === 0) {
     return (
       <Card>
-        <CardContent className="text-sm text-gray-400 text-center py-6">
+        <CardContent className="text-sm text-muted-foreground text-center py-6">
           Sin visitas registradas
         </CardContent>
       </Card>
@@ -306,21 +306,21 @@ function VehicleHistoryTab({ vehicleId }: { vehicleId: string }) {
 
   return (
     <div className="relative">
-      <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200" />
+      <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-muted" />
       <div className="space-y-5">
         {history.visits.map((visit, idx) => (
           <div key={visit.reception_id} className="relative pl-14">
-            <div className="absolute left-3.5 top-1.5 w-3 h-3 rounded-full bg-white border-2 border-gray-400 ring-2 ring-white" />
-            <div className="rounded-lg border bg-white p-4 space-y-3 shadow-sm text-sm">
+            <div className="absolute left-3.5 top-1.5 w-3 h-3 rounded-full bg-card border-2 border-border ring-2 ring-white" />
+            <div className="rounded-lg border bg-card p-4 space-y-3 shadow-sm text-sm">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-gray-400 font-medium uppercase">Visita #{history.total_visits - idx}</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase">Visita #{history.total_visits - idx}</p>
                   <p className="font-semibold mt-0.5">
                     {visit.reception_date
                       ? new Date(visit.reception_date).toLocaleDateString("es-DO", { year: "numeric", month: "long", day: "numeric" })
                       : "Fecha no disponible"}
                   </p>
-                  <p className="text-gray-600 mt-0.5">{visit.complaint || "Sin motivo especificado"}</p>
+                  <p className="text-muted-foreground mt-0.5">{visit.complaint || "Sin motivo especificado"}</p>
                 </div>
                 <Link href={`/recepciones/${visit.reception_id}`}>
                   <Button variant="ghost" size="sm">Recepción</Button>
@@ -330,7 +330,7 @@ function VehicleHistoryTab({ vehicleId }: { vehicleId: string }) {
               {visit.work_order && (
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${WO_STATUS_COLOR[visit.work_order.status] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${WO_STATUS_COLOR[visit.work_order.status] ?? "bg-muted text-muted-foreground"}`}>
                       OT: {WO_STATUS_LABEL[visit.work_order.status] ?? visit.work_order.status}
                     </span>
                     <Link href={`/ordenes/${visit.work_order.id}`}>
@@ -339,11 +339,11 @@ function VehicleHistoryTab({ vehicleId }: { vehicleId: string }) {
                   </div>
 
                   {visit.work_order.items.length > 0 && (
-                    <div className="rounded bg-gray-50 p-2 space-y-1">
+                    <div className="rounded bg-muted/40 p-2 space-y-1">
                       {visit.work_order.items.map((item, i) => (
                         <div key={i} className="flex justify-between text-xs">
-                          <span className="text-gray-700">{item.description}</span>
-                          <span className="text-gray-500">{item.quantity}x RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
+                          <span className="text-foreground">{item.description}</span>
+                          <span className="text-muted-foreground">{item.quantity}x RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
                         </div>
                       ))}
                     </div>
@@ -353,7 +353,7 @@ function VehicleHistoryTab({ vehicleId }: { vehicleId: string }) {
                     <div key={inv.id} className="flex items-center justify-between border rounded px-3 py-1.5">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-medium text-xs">{inv.invoice_number}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${INV_STATUS_COLOR[inv.status] ?? "bg-gray-100 text-gray-500"}`}>{inv.status}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${INV_STATUS_COLOR[inv.status] ?? "bg-muted text-muted-foreground"}`}>{inv.status}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs">RD$ {inv.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>

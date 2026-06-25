@@ -16,52 +16,52 @@ export default function RecepcionesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Recepciones</h1>
-          <p className="text-sm text-gray-500 mt-1">{total} en total</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Recepciones</h1>
+          <p className="text-sm text-muted-foreground mt-1">{total} en total</p>
         </div>
         <Link
           href="/recepciones/nueva"
-          className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-[var(--gf-primary-hover)] transition-colors"
         >
           + Nueva recepción
         </Link>
       </div>
 
       {isLoading ? (
-        <div className="text-sm text-gray-400">Cargando...</div>
+        <div className="text-sm text-muted-foreground">Cargando...</div>
       ) : receptions.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-muted-foreground">
           <p className="text-4xl mb-3">📋</p>
           <p className="font-medium">Sin recepciones</p>
           <p className="text-sm mt-1">Registra la primera entrada de un vehículo</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="bg-card rounded-lg border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Cliente</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Vehículo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Problema</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Km entrada</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Fecha</th>
+              <tr className="border-b bg-muted/40">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Cliente</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vehículo</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Problema</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Km entrada</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y">
               {receptions.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={r.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3 font-medium">{r.customer_name}</td>
-                  <td className="px-4 py-3 text-gray-600">{r.vehicle_label}</td>
-                  <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{r.reported_problem}</td>
-                  <td className="px-4 py-3 text-gray-600">{r.entry_km.toLocaleString()} km</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
+                  <td className="px-4 py-3 text-muted-foreground">{r.vehicle_label}</td>
+                  <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">{r.reported_problem}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.entry_km.toLocaleString()} km</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
                     {new Date(r.created_at).toLocaleDateString("es-DO")}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/recepciones/${r.id}`}
-                      className="text-xs font-medium text-gray-700 hover:text-gray-900 underline underline-offset-2"
+                      className="text-xs font-medium text-foreground hover:text-white underline underline-offset-2"
                     >
                       Ver
                     </Link>
@@ -78,17 +78,17 @@ export default function RecepcionesPage() {
           <button
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="px-3 py-1 text-sm rounded border disabled:opacity-40 hover:bg-gray-50"
+            className="px-3 py-1 text-sm rounded border disabled:opacity-40 hover:bg-muted/40"
           >
             Anterior
           </button>
-          <span className="px-3 py-1 text-sm text-gray-500">
+          <span className="px-3 py-1 text-sm text-muted-foreground">
             {page + 1} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="px-3 py-1 text-sm rounded border disabled:opacity-40 hover:bg-gray-50"
+            className="px-3 py-1 text-sm rounded border disabled:opacity-40 hover:bg-muted/40"
           >
             Siguiente
           </button>

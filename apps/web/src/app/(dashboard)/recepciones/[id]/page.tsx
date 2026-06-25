@@ -13,14 +13,14 @@ export default function RecepcionDetailPage({
   const { data, isLoading } = useReception(id);
   const reception = data?.data;
 
-  if (isLoading) return <div className="p-6 text-sm text-gray-400">Cargando...</div>;
-  if (!reception) return <div className="p-6 text-sm text-red-500">Recepción no encontrada.</div>;
+  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Cargando...</div>;
+  if (!reception) return <div className="p-6 text-sm text-destructive">Recepción no encontrada.</div>;
 
   return (
     <div className="p-6 max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Recepción</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-white">Recepción</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           {new Date(reception.created_at).toLocaleString("es-DO")}
         </p>
       </div>
@@ -32,7 +32,7 @@ export default function RecepcionDetailPage({
       </div>
 
       <div className="space-y-1">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Problema reportado
         </h2>
         <p className="text-sm">{reception.reported_problem}</p>
@@ -40,19 +40,19 @@ export default function RecepcionDetailPage({
 
       {reception.notes && (
         <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Notas</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Notas</h2>
           <p className="text-sm">{reception.notes}</p>
         </div>
       )}
 
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Checklist</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Checklist</h2>
         <ChecklistDisplay checklist={reception.checklist} />
       </div>
 
       {reception.photos.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Fotos ({reception.photos.length})
           </h2>
           <div className="grid grid-cols-3 gap-2">
@@ -74,8 +74,8 @@ export default function RecepcionDetailPage({
 
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-50 rounded-lg p-3">
-      <p className="text-xs text-gray-500 uppercase tracking-wider">{label}</p>
+    <div className="bg-muted/40 rounded-lg p-3">
+      <p className="text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
       <p className="font-medium mt-0.5">{value}</p>
     </div>
   );
@@ -100,7 +100,7 @@ function ChecklistDisplay({ checklist }: { checklist: ReceptionChecklist }) {
     <div className="grid grid-cols-3 gap-4">
       {sections.map((section) => (
         <div key={section}>
-          <h3 className="text-xs font-medium text-gray-400 mb-2">{section}</h3>
+          <h3 className="text-xs font-medium text-muted-foreground mb-2">{section}</h3>
           <ul className="space-y-1">
             {items
               .filter((i) => i.section === section)
@@ -108,7 +108,7 @@ function ChecklistDisplay({ checklist }: { checklist: ReceptionChecklist }) {
                 <li key={item.label} className="flex items-center gap-2 text-sm">
                   <span
                     className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
-                      item.value ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"
+                      item.value ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {item.value ? "✓" : "–"}

@@ -30,10 +30,10 @@ const STATUS_LABELS: Record<WorkOrderStatus, string> = {
 };
 
 const STATUS_COLORS: Record<WorkOrderStatus, string> = {
-  PENDIENTE: "bg-yellow-100 text-yellow-800",
-  EN_PROGRESO: "bg-blue-100 text-blue-800",
-  COMPLETADA: "bg-green-100 text-green-800",
-  CANCELADA: "bg-gray-100 text-gray-600",
+  PENDIENTE: "bg-warning/15 text-warning",
+  EN_PROGRESO: "bg-primary/15 text-primary",
+  COMPLETADA: "bg-success/15 text-success",
+  CANCELADA: "bg-muted text-muted-foreground",
 };
 
 const TRANSITIONS: Record<WorkOrderStatus, WorkOrderStatus[]> = {
@@ -63,10 +63,10 @@ const PRIORITY_LABELS: Record<WorkOrderPriority, string> = {
 };
 
 const PRIORITY_COLORS: Record<WorkOrderPriority, string> = {
-  BAJA: "bg-gray-100 text-gray-600",
-  MEDIA: "bg-blue-100 text-blue-700",
-  ALTA: "bg-orange-100 text-orange-700",
-  CRITICA: "bg-red-100 text-red-700",
+  BAJA: "bg-muted text-muted-foreground",
+  MEDIA: "bg-primary/15 text-primary",
+  ALTA: "bg-warning/15 text-warning",
+  CRITICA: "bg-destructive/15 text-destructive",
 };
 
 export default function OrdenDetailPage({
@@ -95,8 +95,8 @@ export default function OrdenDetailPage({
   const [diagText, setDiagText] = useState("");
   const [diagPriority, setDiagPriority] = useState<WorkOrderPriority>("MEDIA");
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
-  if (!wo) return <p className="text-sm text-red-500">Orden no encontrada.</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
+  if (!wo) return <p className="text-sm text-destructive">Orden no encontrada.</p>;
 
   const totalItems = wo.items.reduce((acc, i) => acc + i.total, 0);
   const canEdit = wo.status === "PENDIENTE" || wo.status === "EN_PROGRESO";
@@ -143,12 +143,12 @@ export default function OrdenDetailPage({
         <div>
           <button
             onClick={() => router.push("/ordenes")}
-            className="text-sm text-gray-400 hover:text-gray-600 mb-1 flex items-center gap-1"
+            className="text-sm text-muted-foreground hover:text-muted-foreground mb-1 flex items-center gap-1"
           >
             ← Órdenes de trabajo
           </button>
-          <h1 className="text-2xl font-bold">{wo.vehicle_label}</h1>
-          <p className="text-sm text-gray-500">{wo.customer_name}</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">{wo.vehicle_label}</h1>
+          <p className="text-sm text-muted-foreground">{wo.customer_name}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-3">
@@ -170,16 +170,16 @@ export default function OrdenDetailPage({
             ))}
           </div>
           {statusError && (
-            <p className="text-xs text-red-600 font-medium">{statusError}</p>
+            <p className="text-xs text-destructive font-medium">{statusError}</p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-lg border bg-white p-5 space-y-3">
+        <div className="rounded-lg border bg-card p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-gray-700">Diagnóstico</h2>
+              <h2 className="font-semibold text-foreground">Diagnóstico</h2>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[wo.priority ?? "MEDIA"]}`}>
                 {PRIORITY_LABELS[wo.priority ?? "MEDIA"]}
               </span>
@@ -191,7 +191,7 @@ export default function OrdenDetailPage({
                   setDiagPriority(wo.priority ?? "MEDIA");
                   setEditingDiag(true);
                 }}
-                className="text-xs text-gray-400 hover:text-gray-700 underline underline-offset-2"
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
               >
                 Editar
               </button>
@@ -201,7 +201,7 @@ export default function OrdenDetailPage({
           {editingDiag ? (
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="text-xs text-gray-500">Prioridad</label>
+                <label className="text-xs text-muted-foreground">Prioridad</label>
                 <select
                   value={diagPriority}
                   onChange={(e) => setDiagPriority(e.target.value as WorkOrderPriority)}
@@ -237,20 +237,20 @@ export default function OrdenDetailPage({
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">
-              {wo.diagnosis ?? <span className="italic text-gray-400">Sin diagnóstico</span>}
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {wo.diagnosis ?? <span className="italic text-muted-foreground">Sin diagnóstico</span>}
             </p>
           )}
         </div>
-        <div className="rounded-lg border bg-white p-5 space-y-3">
-          <h2 className="font-semibold text-gray-700">Detalles</h2>
+        <div className="rounded-lg border bg-card p-5 space-y-3">
+          <h2 className="font-semibold text-foreground">Detalles</h2>
           <dl className="text-sm space-y-2">
             <div className="flex justify-between">
-              <dt className="text-gray-500">Técnico</dt>
+              <dt className="text-muted-foreground">Técnico</dt>
               <dd className="font-medium">{wo.assigned_to ?? "—"}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Costo estimado</dt>
+              <dt className="text-muted-foreground">Costo estimado</dt>
               <dd className="font-medium">
                 {wo.estimated_cost != null
                   ? `RD$${wo.estimated_cost.toLocaleString()}`
@@ -259,21 +259,21 @@ export default function OrdenDetailPage({
             </div>
             {wo.actual_cost != null && (
               <div className="flex justify-between">
-                <dt className="text-gray-500">Costo real</dt>
-                <dd className="font-semibold text-green-700">
+                <dt className="text-muted-foreground">Costo real</dt>
+                <dd className="font-semibold text-success">
                   RD${wo.actual_cost.toLocaleString()}
                 </dd>
               </div>
             )}
             {wo.started_at && (
               <div className="flex justify-between">
-                <dt className="text-gray-500">Inicio</dt>
+                <dt className="text-muted-foreground">Inicio</dt>
                 <dd>{new Date(wo.started_at).toLocaleString("es-DO")}</dd>
               </div>
             )}
             {wo.completed_at && (
               <div className="flex justify-between">
-                <dt className="text-gray-500">Completada</dt>
+                <dt className="text-muted-foreground">Completada</dt>
                 <dd>{new Date(wo.completed_at).toLocaleString("es-DO")}</dd>
               </div>
             )}
@@ -281,11 +281,11 @@ export default function OrdenDetailPage({
         </div>
       </div>
 
-      <div className="rounded-lg border bg-white p-5 space-y-4">
+      <div className="rounded-lg border bg-card p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-gray-700">Ítems de trabajo</h2>
-          <span className="text-sm text-gray-500">
-            Total: <span className="font-semibold text-gray-900">RD${totalItems.toLocaleString()}</span>
+          <h2 className="font-semibold text-foreground">Ítems de trabajo</h2>
+          <span className="text-sm text-muted-foreground">
+            Total: <span className="font-semibold text-white">RD${totalItems.toLocaleString()}</span>
           </span>
         </div>
 
@@ -305,7 +305,7 @@ export default function OrdenDetailPage({
               <TableRow>
                 <TableCell
                   colSpan={canEdit ? 6 : 5}
-                  className="text-center text-gray-400 py-6 text-sm"
+                  className="text-center text-muted-foreground py-6 text-sm"
                 >
                   Sin ítems agregados
                 </TableCell>
@@ -319,7 +319,7 @@ export default function OrdenDetailPage({
                     className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       item.type === "LABOR"
                         ? "bg-purple-100 text-purple-700"
-                        : "bg-orange-100 text-orange-700"
+                        : "bg-warning/15 text-warning"
                     }`}
                   >
                     {item.type === "LABOR" ? "Mano de obra" : "Repuesto"}
@@ -332,7 +332,7 @@ export default function OrdenDetailPage({
                   <TableCell>
                     <button
                       onClick={() => removeItem.mutate(item.id)}
-                      className="text-xs text-red-400 hover:text-red-600"
+                      className="text-xs text-destructive hover:text-destructive"
                     >
                       ✕
                     </button>
@@ -349,7 +349,7 @@ export default function OrdenDetailPage({
             className="border-t pt-4 grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 items-end"
           >
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Descripción</label>
+              <label className="text-xs text-muted-foreground block mb-1">Descripción</label>
               <Input
                 placeholder="Ej: Cambio de pastillas"
                 value={itemDesc}
@@ -358,9 +358,9 @@ export default function OrdenDetailPage({
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Tipo</label>
+              <label className="text-xs text-muted-foreground block mb-1">Tipo</label>
               <select
-                className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 value={itemType}
                 onChange={(e) => setItemType(e.target.value as WorkOrderItemType)}
               >
@@ -369,7 +369,7 @@ export default function OrdenDetailPage({
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Cant.</label>
+              <label className="text-xs text-muted-foreground block mb-1">Cant.</label>
               <Input
                 type="number"
                 min="0.01"
@@ -381,7 +381,7 @@ export default function OrdenDetailPage({
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Precio (RD$)</label>
+              <label className="text-xs text-muted-foreground block mb-1">Precio (RD$)</label>
               <Input
                 type="number"
                 min="0"
@@ -400,11 +400,11 @@ export default function OrdenDetailPage({
         )}
 
         {itemError && (
-          <p className="text-xs text-red-600">{itemError}</p>
+          <p className="text-xs text-destructive">{itemError}</p>
         )}
       </div>
 
-      <div className="rounded-lg border bg-white p-5">
+      <div className="rounded-lg border bg-card p-5">
         <QuoteSection workOrderId={id} canEdit={canEdit} />
       </div>
     </div>

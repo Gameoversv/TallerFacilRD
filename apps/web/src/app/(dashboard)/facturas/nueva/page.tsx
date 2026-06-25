@@ -102,23 +102,23 @@ export default function NuevaFacturaPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold">Nueva factura</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight text-white">Nueva factura</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Orden de trabajo */}
-        <div className="rounded-lg border bg-white p-5 space-y-4">
-          <h2 className="font-semibold text-gray-700">Orden de trabajo</h2>
+        <div className="rounded-lg border bg-card p-5 space-y-4">
+          <h2 className="font-semibold text-foreground">Orden de trabajo</h2>
 
           {selectedWo ? (
-            <div className="flex items-center justify-between rounded-md border bg-gray-50 px-4 py-3">
+            <div className="flex items-center justify-between rounded-md border bg-muted/40 px-4 py-3">
               <div>
                 <p className="font-medium text-sm">{selectedWo.vehicle_label}</p>
-                <p className="text-xs text-gray-500">{selectedWo.customer_name} · {selectedWo.status}</p>
+                <p className="text-xs text-muted-foreground">{selectedWo.customer_name} · {selectedWo.status}</p>
               </div>
               <button
                 type="button"
                 onClick={() => { setSelectedWo(null); setSelectedWoId(null); setItems([{ itemType: "MANO_OBRA", description: "", quantity: 1, unitPrice: 0 }]); }}
-                className="text-xs text-gray-400 hover:text-gray-700 underline"
+                className="text-xs text-muted-foreground hover:text-foreground underline"
               >
                 Cambiar
               </button>
@@ -132,21 +132,21 @@ export default function NuevaFacturaPage() {
                 autoComplete="off"
               />
               {filteredWos.length > 0 && (
-                <ul className="absolute z-10 w-full mt-1 border rounded-md bg-white shadow-lg max-h-52 overflow-auto text-sm">
+                <ul className="absolute z-10 w-full mt-1 border rounded-md bg-card shadow-lg max-h-52 overflow-auto text-sm">
                   {filteredWos.map((wo) => (
                     <li
                       key={wo.id}
                       onClick={() => selectWo(wo)}
-                      className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer"
+                      className="px-4 py-2.5 hover:bg-muted/40 cursor-pointer"
                     >
                       <p className="font-medium">{wo.vehicle_label}</p>
-                      <p className="text-xs text-gray-500">{wo.customer_name} · <span className="capitalize">{wo.status.toLowerCase().replace("_", " ")}</span></p>
+                      <p className="text-xs text-muted-foreground">{wo.customer_name} · <span className="capitalize">{wo.status.toLowerCase().replace("_", " ")}</span></p>
                     </li>
                   ))}
                 </ul>
               )}
               {woSearch.length >= 1 && filteredWos.length === 0 && (
-                <p className="mt-1 text-xs text-gray-400">Sin resultados</p>
+                <p className="mt-1 text-xs text-muted-foreground">Sin resultados</p>
               )}
             </div>
           )}
@@ -162,8 +162,8 @@ export default function NuevaFacturaPage() {
         </div>
 
         {/* Items */}
-        <div className="rounded-lg border bg-white p-5 space-y-4">
-          <h2 className="font-semibold text-gray-700">Ítems</h2>
+        <div className="rounded-lg border bg-card p-5 space-y-4">
+          <h2 className="font-semibold text-foreground">Ítems</h2>
 
           {items.map((item, idx) => (
             <div key={idx} className="grid grid-cols-[120px_1fr_70px_130px_32px] gap-2 items-end">
@@ -201,7 +201,7 @@ export default function NuevaFacturaPage() {
               </div>
               <div className={idx === 0 ? "pt-5" : ""}>
                 {items.length > 1 && (
-                  <button type="button" onClick={() => removeItem(idx)} className="text-red-400 hover:text-red-600 text-xl">×</button>
+                  <button type="button" onClick={() => removeItem(idx)} className="text-destructive hover:text-destructive text-xl">×</button>
                 )}
               </div>
             </div>
@@ -210,16 +210,16 @@ export default function NuevaFacturaPage() {
           <Button type="button" variant="ghost" size="sm" onClick={addItem}>+ Agregar ítem</Button>
 
           <div className="space-y-1 text-sm border-t pt-3">
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
               <span>RD$ {subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-gray-600 cursor-pointer">
+              <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
                 <input type="checkbox" checked={applyItbis} onChange={(e) => setApplyItbis(e.target.checked)} className="rounded" />
                 Aplicar ITBIS (18%)
               </label>
-              <span className="text-gray-600">RD$ {itbisAmount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
+              <span className="text-muted-foreground">RD$ {itbisAmount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="flex justify-between font-bold text-base">
               <span>Total</span>
@@ -229,7 +229,7 @@ export default function NuevaFacturaPage() {
         </div>
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+          <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded px-3 py-2">{error}</p>
         )}
 
         <div className="flex gap-3">

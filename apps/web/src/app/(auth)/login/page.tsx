@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import api from "@/lib/api";
 import { setToken } from "@/lib/auth";
+import { LogoMark } from "@/components/brand/Logo";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -46,15 +47,19 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="w-full max-w-sm shadow-lg">
-      <CardHeader className="space-y-1 text-center">
-        <div className="flex justify-center mb-2">
-          <span className="text-3xl">🔧</span>
+    <Card className="w-full max-w-sm border-border bg-card shadow-2xl shadow-black/40">
+      <CardHeader className="space-y-3 text-center">
+        <div className="flex justify-center lg:hidden">
+          <LogoMark className="h-10 w-10" />
         </div>
-        <CardTitle className="text-2xl font-bold">TallerFácil RD</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Ingresa tus credenciales para continuar
-        </p>
+        <div className="space-y-1">
+          <CardTitle className="font-display text-2xl font-bold tracking-tight">
+            Bienvenido de nuevo
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Ingresa a tu taller en GarageFlow
+          </p>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -68,7 +73,7 @@ export default function LoginPage() {
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-xs text-red-500">{errors.email.message}</p>
+              <p className="text-xs text-destructive">{errors.email.message}</p>
             )}
           </div>
 
@@ -82,12 +87,14 @@ export default function LoginPage() {
               {...register("password")}
             />
             {errors.password && (
-              <p className="text-xs text-red-500">{errors.password.message}</p>
+              <p className="text-xs text-destructive">{errors.password.message}</p>
             )}
           </div>
 
           {serverError && (
-            <p className="text-sm text-red-500 text-center">{serverError}</p>
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+              {serverError}
+            </p>
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
