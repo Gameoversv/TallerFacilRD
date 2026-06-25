@@ -73,8 +73,8 @@ export function VehicleForm({
           onClick={() => setTab("basico")}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
             tab === "basico"
-              ? "border-gray-900 text-gray-900"
-              : "border-transparent text-gray-400 hover:text-gray-600"
+              ? "border-border text-white"
+              : "border-transparent text-muted-foreground hover:text-muted-foreground"
           }`}
         >
           Básico
@@ -84,8 +84,8 @@ export function VehicleForm({
           onClick={() => setTab("avanzado")}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
             tab === "avanzado"
-              ? "border-gray-900 text-gray-900"
-              : "border-transparent text-gray-400 hover:text-gray-600"
+              ? "border-border text-white"
+              : "border-transparent text-muted-foreground hover:text-muted-foreground"
           }`}
         >
           Avanzado
@@ -98,12 +98,12 @@ export function VehicleForm({
             <div className="space-y-1">
               <Label>Marca *</Label>
               <Input {...register("brand")} placeholder="Toyota" />
-              {errors.brand && <p className="text-xs text-red-500">{errors.brand.message}</p>}
+              {errors.brand && <p className="text-xs text-destructive">{errors.brand.message}</p>}
             </div>
             <div className="space-y-1">
               <Label>Modelo *</Label>
               <Input {...register("model")} placeholder="Corolla" />
-              {errors.model && <p className="text-xs text-red-500">{errors.model.message}</p>}
+              {errors.model && <p className="text-xs text-destructive">{errors.model.message}</p>}
             </div>
           </div>
 
@@ -111,7 +111,7 @@ export function VehicleForm({
             <div className="space-y-1">
               <Label>Año *</Label>
               <Input {...register("year", { valueAsNumber: true })} type="number" placeholder="2020" />
-              {errors.year && <p className="text-xs text-red-500">{errors.year.message}</p>}
+              {errors.year && <p className="text-xs text-destructive">{errors.year.message}</p>}
             </div>
             <div className="space-y-1">
               <Label>Motor</Label>
@@ -170,11 +170,11 @@ export function VehicleForm({
                 }}
               />
               {showDropdown && customers.length > 0 && (
-                <ul className="border rounded-md divide-y text-sm max-h-40 overflow-auto bg-white shadow-sm z-10 relative">
+                <ul className="border rounded-md divide-y text-sm max-h-40 overflow-auto bg-card shadow-sm z-10 relative">
                   {customers.map((c) => (
                     <li
                       key={c.id}
-                      className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                      className="px-3 py-2 hover:bg-muted/40 cursor-pointer"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
                         setValue("customerId", c.id, { shouldValidate: true });
@@ -184,14 +184,14 @@ export function VehicleForm({
                     >
                       <span className="font-medium">{c.full_name}</span>
                       {c.document_id && (
-                        <span className="text-gray-400 ml-2 text-xs">{c.document_id}</span>
+                        <span className="text-muted-foreground ml-2 text-xs">{c.document_id}</span>
                       )}
                     </li>
                   ))}
                 </ul>
               )}
               {errors.customerId && (
-                <p className="text-xs text-red-500">{errors.customerId.message}</p>
+                <p className="text-xs text-destructive">{errors.customerId.message}</p>
               )}
             </div>
           )}
@@ -205,7 +205,7 @@ export function VehicleForm({
               type="checkbox"
               id="turbo"
               {...register("turbo")}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 rounded border-border"
             />
             <Label htmlFor="turbo">Turbo</Label>
           </div>

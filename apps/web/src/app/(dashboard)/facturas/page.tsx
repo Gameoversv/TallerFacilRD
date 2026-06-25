@@ -16,9 +16,9 @@ const STATUS_LABEL: Record<InvoiceStatus, string> = {
 };
 
 const STATUS_COLOR: Record<InvoiceStatus, string> = {
-  PENDIENTE: "bg-yellow-100 text-yellow-800",
-  PAGADA: "bg-green-100 text-green-800",
-  ANULADA: "bg-gray-100 text-gray-500",
+  PENDIENTE: "bg-warning/15 text-warning",
+  PAGADA: "bg-success/15 text-success",
+  ANULADA: "bg-muted text-muted-foreground",
 };
 
 export default function FacturasPage() {
@@ -33,8 +33,8 @@ export default function FacturasPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Facturas</h1>
-          <p className="text-sm text-gray-500">{total} registros</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Facturas</h1>
+          <p className="text-sm text-muted-foreground">{total} registros</p>
         </div>
         <Link href="/facturas/nueva">
           <Button>+ Nueva factura</Button>
@@ -42,9 +42,9 @@ export default function FacturasPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -60,16 +60,16 @@ export default function FacturasPage() {
             <TableBody>
               {invoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     Sin facturas registradas
                   </TableCell>
                 </TableRow>
               )}
               {invoices.map((inv) => (
-                <TableRow key={inv.id} className="hover:bg-gray-50">
+                <TableRow key={inv.id} className="hover:bg-muted/40">
                   <TableCell className="font-mono font-medium">{inv.invoice_number}</TableCell>
                   <TableCell>{inv.customer_name}</TableCell>
-                  <TableCell className="text-sm text-gray-600">{inv.vehicle_label}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{inv.vehicle_label}</TableCell>
                   <TableCell>{new Date(inv.issue_date).toLocaleDateString("es-DO")}</TableCell>
                   <TableCell>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[inv.status]}`}>
@@ -96,7 +96,7 @@ export default function FacturasPage() {
           <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
             ← Anterior
           </Button>
-          <span className="text-gray-500">Página {page + 1} de {totalPages}</span>
+          <span className="text-muted-foreground">Página {page + 1} de {totalPages}</span>
           <Button variant="ghost" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>
             Siguiente →
           </Button>

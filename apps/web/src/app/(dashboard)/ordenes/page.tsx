@@ -22,10 +22,10 @@ const STATUS_LABELS: Record<WorkOrderStatus, string> = {
 };
 
 const STATUS_COLORS: Record<WorkOrderStatus, string> = {
-  PENDIENTE: "bg-yellow-100 text-yellow-800",
-  EN_PROGRESO: "bg-blue-100 text-blue-800",
-  COMPLETADA: "bg-green-100 text-green-800",
-  CANCELADA: "bg-gray-100 text-gray-600",
+  PENDIENTE: "bg-warning/15 text-warning",
+  EN_PROGRESO: "bg-primary/15 text-primary",
+  COMPLETADA: "bg-success/15 text-success",
+  CANCELADA: "bg-muted text-muted-foreground",
 };
 
 const STATUS_FILTERS: Array<{ label: string; value: WorkOrderStatus | null }> = [
@@ -50,8 +50,8 @@ export default function OrdenesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Órdenes de trabajo</h1>
-          <p className="text-sm text-gray-500">{total} registros</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Órdenes de trabajo</h1>
+          <p className="text-sm text-muted-foreground">{total} registros</p>
         </div>
         <Button onClick={() => router.push("/ordenes/nueva")}>+ Nueva orden</Button>
       </div>
@@ -66,8 +66,8 @@ export default function OrdenesPage() {
             }}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
               statusFilter === f.value
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                ? "border-primary/40 bg-primary/15 text-primary"
+                : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-white"
             }`}
           >
             {f.label}
@@ -76,9 +76,9 @@ export default function OrdenesPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -93,7 +93,7 @@ export default function OrdenesPage() {
             <TableBody>
               {orders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     Sin resultados
                   </TableCell>
                 </TableRow>
@@ -101,7 +101,7 @@ export default function OrdenesPage() {
               {orders.map((o) => (
                 <TableRow
                   key={o.id}
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-muted/40"
                   onClick={() => router.push(`/ordenes/${o.id}`)}
                 >
                   <TableCell className="font-medium">{o.vehicle_label}</TableCell>
@@ -119,7 +119,7 @@ export default function OrdenesPage() {
                       ? `RD$${o.estimated_cost.toLocaleString()}`
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-gray-500 text-sm">
+                  <TableCell className="text-muted-foreground text-sm">
                     {new Date(o.created_at).toLocaleDateString("es-DO")}
                   </TableCell>
                 </TableRow>
@@ -134,7 +134,7 @@ export default function OrdenesPage() {
           <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
             ← Anterior
           </Button>
-          <span className="text-gray-500">
+          <span className="text-muted-foreground">
             Página {page + 1} de {totalPages}
           </span>
           <Button

@@ -110,12 +110,12 @@ export default function NuevaCompraPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold">Nueva compra</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight text-white">Nueva compra</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Proveedor */}
-        <div className="rounded-lg border bg-white p-5 space-y-3">
-          <h2 className="font-semibold text-gray-700">Proveedor</h2>
+        <div className="rounded-lg border bg-card p-5 space-y-3">
+          <h2 className="font-semibold text-foreground">Proveedor</h2>
           <div className="flex gap-2">
             <select
               value={supplierId}
@@ -147,8 +147,8 @@ export default function NuevaCompraPage() {
         </div>
 
         {/* Productos */}
-        <div className="rounded-lg border bg-white p-5 space-y-4">
-          <h2 className="font-semibold text-gray-700">Productos</h2>
+        <div className="rounded-lg border bg-card p-5 space-y-4">
+          <h2 className="font-semibold text-foreground">Productos</h2>
           <div className="relative">
             <Input
               value={productSearch}
@@ -156,14 +156,14 @@ export default function NuevaCompraPage() {
               placeholder="Buscar por código o descripción..."
             />
             {filteredProducts.length > 0 && (
-              <ul className="absolute z-10 w-full mt-1 border rounded-md bg-white shadow-lg max-h-48 overflow-auto text-sm">
+              <ul className="absolute z-10 w-full mt-1 border rounded-md bg-card shadow-lg max-h-48 overflow-auto text-sm">
                 {filteredProducts.map((p) => (
                   <li
                     key={p.id}
                     onClick={() => addItem(p.id, p.internal_code, p.description)}
-                    className="px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    className="px-3 py-2 hover:bg-muted/40 cursor-pointer"
                   >
-                    <span className="font-mono text-gray-500">{p.internal_code}</span>
+                    <span className="font-mono text-muted-foreground">{p.internal_code}</span>
                     {" — "}{p.description}
                   </li>
                 ))}
@@ -174,7 +174,7 @@ export default function NuevaCompraPage() {
           {items.length > 0 && (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-gray-500">
+                <tr className="border-b text-left text-muted-foreground">
                   <th className="pb-2">Producto</th>
                   <th className="pb-2 w-24 text-center">Cantidad</th>
                   <th className="pb-2 w-32 text-right">Costo unit.</th>
@@ -187,7 +187,7 @@ export default function NuevaCompraPage() {
                   <tr key={item.productId}>
                     <td className="py-2">
                       <p className="font-medium">{item.productDescription}</p>
-                      <p className="text-xs text-gray-400 font-mono">{item.productCode}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{item.productCode}</p>
                     </td>
                     <td className="py-2">
                       <input
@@ -213,7 +213,7 @@ export default function NuevaCompraPage() {
                       RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
                     </td>
                     <td className="py-2 text-center">
-                      <button type="button" onClick={() => removeItem(idx)} className="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+                      <button type="button" onClick={() => removeItem(idx)} className="text-destructive hover:text-destructive text-lg leading-none">×</button>
                     </td>
                   </tr>
                 ))}
@@ -232,7 +232,7 @@ export default function NuevaCompraPage() {
         </div>
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</p>
+          <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2">{error}</p>
         )}
 
         <div className="flex gap-3">

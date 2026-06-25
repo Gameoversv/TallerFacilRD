@@ -14,9 +14,9 @@ const STATUS_LABEL: Record<InvoiceStatus, string> = {
 };
 
 const STATUS_COLOR: Record<InvoiceStatus, string> = {
-  PENDIENTE: "bg-yellow-100 text-yellow-800",
-  PAGADA: "bg-green-100 text-green-800",
-  ANULADA: "bg-gray-100 text-gray-500",
+  PENDIENTE: "bg-warning/15 text-warning",
+  PAGADA: "bg-success/15 text-success",
+  ANULADA: "bg-muted text-muted-foreground",
 };
 
 export default function FacturaDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,8 +25,8 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
   const updateStatus = useUpdateInvoiceStatus(id);
   const inv = data?.data;
 
-  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
-  if (!inv) return <p className="text-sm text-red-500">Factura no encontrada</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
+  if (!inv) return <p className="text-sm text-destructive">Factura no encontrada</p>;
 
   const manoObra = inv.items.filter((i) => i.item_type === "MANO_OBRA");
   const piezas = inv.items.filter((i) => i.item_type === "PIEZA");
@@ -61,12 +61,12 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Invoice document */}
-      <div className="rounded-lg border bg-white p-8 space-y-6 print:border-none print:p-0 print:shadow-none">
+      <div className="rounded-lg border bg-card p-8 space-y-6 print:border-none print:p-0 print:shadow-none">
         {/* Top */}
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">🔧 TallerFácil RD</h1>
-            <p className="text-sm text-gray-500 mt-1">Sistema de gestión de taller</p>
+            <p className="text-sm text-muted-foreground mt-1">Sistema de gestión de taller</p>
           </div>
           <div className="text-right">
             <p className="text-xl font-bold font-mono">{inv.invoice_number}</p>
@@ -79,30 +79,30 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
         {/* Client & vehicle */}
         <div className="grid grid-cols-2 gap-6 text-sm border-t border-b py-4">
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-400 uppercase">Cliente</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase">Cliente</p>
             <p className="font-medium">{inv.customer_name}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-400 uppercase">Vehículo</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase">Vehículo</p>
             <p className="font-medium">{inv.vehicle_label}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-400 uppercase">Fecha emisión</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase">Fecha emisión</p>
             <p>{new Date(inv.issue_date).toLocaleDateString("es-DO")}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-400 uppercase">Orden de trabajo</p>
-            <p className="font-mono text-xs text-gray-500">{inv.work_order_id}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase">Orden de trabajo</p>
+            <p className="font-mono text-xs text-muted-foreground">{inv.work_order_id}</p>
           </div>
         </div>
 
         {/* Items */}
         {manoObra.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Mano de obra</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Mano de obra</p>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-gray-500 text-xs">
+                <tr className="border-b text-left text-muted-foreground text-xs">
                   <th className="pb-1">Descripción</th>
                   <th className="pb-1 w-16 text-center">Cant.</th>
                   <th className="pb-1 w-32 text-right">Precio</th>
@@ -113,8 +113,8 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
                 {manoObra.map((item) => (
                   <tr key={item.id}>
                     <td className="py-1.5">{item.description}</td>
-                    <td className="py-1.5 text-center text-gray-500">{item.quantity}</td>
-                    <td className="py-1.5 text-right text-gray-500">RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</td>
+                    <td className="py-1.5 text-center text-muted-foreground">{item.quantity}</td>
+                    <td className="py-1.5 text-right text-muted-foreground">RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</td>
                     <td className="py-1.5 text-right font-medium">RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
@@ -125,10 +125,10 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
 
         {piezas.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Piezas y repuestos</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Piezas y repuestos</p>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-gray-500 text-xs">
+                <tr className="border-b text-left text-muted-foreground text-xs">
                   <th className="pb-1">Descripción</th>
                   <th className="pb-1 w-16 text-center">Cant.</th>
                   <th className="pb-1 w-32 text-right">Precio</th>
@@ -139,8 +139,8 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
                 {piezas.map((item) => (
                   <tr key={item.id}>
                     <td className="py-1.5">{item.description}</td>
-                    <td className="py-1.5 text-center text-gray-500">{item.quantity}</td>
-                    <td className="py-1.5 text-right text-gray-500">RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</td>
+                    <td className="py-1.5 text-center text-muted-foreground">{item.quantity}</td>
+                    <td className="py-1.5 text-right text-muted-foreground">RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</td>
                     <td className="py-1.5 text-right font-medium">RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
@@ -151,12 +151,12 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
 
         {/* Totals */}
         <div className="space-y-1 text-sm border-t pt-4 max-w-xs ml-auto">
-          <div className="flex justify-between text-gray-600">
+          <div className="flex justify-between text-muted-foreground">
             <span>Subtotal</span>
             <span>RD$ {inv.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
           </div>
           {inv.apply_itbis && (
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-muted-foreground">
               <span>ITBIS (18%)</span>
               <span>RD$ {inv.itbis_amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
             </div>
@@ -168,18 +168,18 @@ export default function FacturaDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {inv.notes && (
-          <p className="text-xs text-gray-500 border-t pt-3">
+          <p className="text-xs text-muted-foreground border-t pt-3">
             <span className="font-medium">Notas: </span>{inv.notes}
           </p>
         )}
 
-        <p className="text-xs text-gray-400 text-center pt-4 border-t">
+        <p className="text-xs text-muted-foreground text-center pt-4 border-t">
           Gracias por su preferencia — TallerFácil RD
         </p>
       </div>
 
       {/* Payments section — hidden on print */}
-      <div className="rounded-lg border bg-white p-6 print:hidden">
+      <div className="rounded-lg border bg-card p-6 print:hidden">
         <h2 className="text-base font-semibold mb-4">Pagos</h2>
         <PaymentSection
           invoiceId={id}

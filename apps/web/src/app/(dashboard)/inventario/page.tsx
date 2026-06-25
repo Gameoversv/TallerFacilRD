@@ -77,8 +77,8 @@ export default function InventarioPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Inventario</h1>
-          <p className="text-sm text-gray-500">{total} productos</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Inventario</h1>
+          <p className="text-sm text-muted-foreground">{total} productos</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>+ Nuevo producto</Button>
       </div>
@@ -104,16 +104,16 @@ export default function InventarioPage() {
             type="checkbox"
             checked={lowStock}
             onChange={(e) => { setLowStock(e.target.checked); setPage(0); }}
-            className="h-4 w-4 rounded border-gray-300"
+            className="h-4 w-4 rounded border-border"
           />
           Solo stock bajo
         </label>
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -128,30 +128,30 @@ export default function InventarioPage() {
             <TableBody>
               {products.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     Sin productos
                   </TableCell>
                 </TableRow>
               )}
               {products.map((p) => (
-                <TableRow key={p.id} className="hover:bg-gray-50">
+                <TableRow key={p.id} className="hover:bg-muted/40">
                   <TableCell className="font-mono text-sm">{p.internal_code}</TableCell>
                   <TableCell>{p.description}</TableCell>
                   <TableCell>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                       {CATEGORY_LABELS[p.category]}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`font-medium ${p.low_stock ? "text-red-600" : ""}`}>
+                    <span className={`font-medium ${p.low_stock ? "text-destructive" : ""}`}>
                       {p.current_stock}
                     </span>
                     {p.low_stock && (
-                      <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-medium">
+                      <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-medium">
                         Stock Bajo
                       </span>
                     )}
-                    <span className="text-gray-400 text-xs ml-1">/ mín {p.min_stock}</span>
+                    <span className="text-muted-foreground text-xs ml-1">/ mín {p.min_stock}</span>
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     RD$ {p.sale_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
@@ -168,7 +168,7 @@ export default function InventarioPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-500 hover:text-red-700"
+                        className="text-destructive hover:text-destructive"
                         onClick={() => {
                           if (confirm(`¿Eliminar "${p.description}"?`)) {
                             deleteMutation.mutate(p.id);
@@ -191,7 +191,7 @@ export default function InventarioPage() {
           <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
             ← Anterior
           </Button>
-          <span className="text-gray-500">Página {page + 1} de {totalPages}</span>
+          <span className="text-muted-foreground">Página {page + 1} de {totalPages}</span>
           <Button variant="ghost" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>
             Siguiente →
           </Button>

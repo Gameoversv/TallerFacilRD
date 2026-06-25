@@ -130,18 +130,18 @@ export function ReceptionWizard() {
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < step
-                  ? "bg-gray-900 text-white"
+                  ? "bg-secondary text-white"
                   : i === step
-                  ? "bg-gray-900 text-white ring-2 ring-offset-2 ring-gray-400"
-                  : "bg-gray-100 text-gray-400"
+                  ? "bg-secondary text-white ring-2 ring-offset-2 ring-ring"
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               {i < step ? "✓" : i + 1}
             </div>
-            <span className={`text-xs hidden sm:block ${i === step ? "font-medium" : "text-gray-400"}`}>
+            <span className={`text-xs hidden sm:block ${i === step ? "font-medium" : "text-muted-foreground"}`}>
               {label}
             </span>
-            {i < STEPS.length - 1 && <div className="w-6 h-px bg-gray-200 mx-1" />}
+            {i < STEPS.length - 1 && <div className="w-6 h-px bg-muted mx-1" />}
           </div>
         ))}
       </div>
@@ -170,8 +170,8 @@ export function ReceptionWizard() {
                       setValue("vehicleId", "");
                       setCustomerSearch(`${c.first_name} ${c.last_name}`);
                     }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                      watch("customerId") === c.id ? "bg-gray-100 font-medium" : ""
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-muted/40 transition-colors ${
+                      watch("customerId") === c.id ? "bg-muted font-medium" : ""
                     }`}
                   >
                     {c.first_name} {c.last_name} — {c.phone}
@@ -180,14 +180,14 @@ export function ReceptionWizard() {
               </div>
             )}
             {errors.customerId && (
-              <p className="text-xs text-red-500">{errors.customerId.message}</p>
+              <p className="text-xs text-destructive">{errors.customerId.message}</p>
             )}
 
             {selectedCustomerId && (
               <div className="space-y-1">
                 <Label>Vehículo *</Label>
                 {vehicles.length === 0 ? (
-                  <p className="text-sm text-gray-400">Este cliente no tiene vehículos registrados.</p>
+                  <p className="text-sm text-muted-foreground">Este cliente no tiene vehículos registrados.</p>
                 ) : (
                   <select
                     {...register("vehicleId")}
@@ -203,7 +203,7 @@ export function ReceptionWizard() {
                   </select>
                 )}
                 {errors.vehicleId && (
-                  <p className="text-xs text-red-500">{errors.vehicleId.message}</p>
+                  <p className="text-xs text-destructive">{errors.vehicleId.message}</p>
                 )}
               </div>
             )}
@@ -217,7 +217,7 @@ export function ReceptionWizard() {
                   placeholder="52000"
                 />
                 {errors.entryKm && (
-                  <p className="text-xs text-red-500">{errors.entryKm.message}</p>
+                  <p className="text-xs text-destructive">{errors.entryKm.message}</p>
                 )}
               </div>
             </div>
@@ -231,7 +231,7 @@ export function ReceptionWizard() {
                 placeholder="Ej: Ruido en frenos delanteros, luz del motor encendida..."
               />
               {errors.reportedProblem && (
-                <p className="text-xs text-red-500">{errors.reportedProblem.message}</p>
+                <p className="text-xs text-destructive">{errors.reportedProblem.message}</p>
               )}
             </div>
 
@@ -276,16 +276,16 @@ export function ReceptionWizard() {
         {step === 2 && (
           <div className="space-y-4">
             <h2 className="font-semibold text-lg">Fotos del vehículo</h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Sube fotos del frente, atrás, laterales e interior para evitar reclamaciones.
             </p>
             <div
               onDragOver={(e) => e.preventDefault()}
               onDrop={handlePhotoDrop}
-              className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-border transition-colors cursor-pointer"
               onClick={() => document.getElementById("photo-input")?.click()}
             >
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Arrastra fotos aquí o haz clic para seleccionar
               </p>
               <input
@@ -318,7 +318,7 @@ export function ReceptionWizard() {
                 ))}
               </div>
             )}
-            <p className="text-xs text-gray-400">{photos.length} foto(s) seleccionada(s)</p>
+            <p className="text-xs text-muted-foreground">{photos.length} foto(s) seleccionada(s)</p>
           </div>
         )}
 
@@ -326,13 +326,13 @@ export function ReceptionWizard() {
         {step === 3 && (
           <div className="space-y-4">
             <h2 className="font-semibold text-lg">Confirmar recepción</h2>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+            <div className="bg-muted/40 rounded-lg p-4 space-y-2 text-sm">
               <p><span className="font-medium">Cliente:</span> {customerSearch}</p>
               <p><span className="font-medium">Problema:</span> {watch("reportedProblem")}</p>
               <p><span className="font-medium">Km entrada:</span> {watch("entryKm")}</p>
               <p><span className="font-medium">Fotos:</span> {photos.length}</p>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Al confirmar se creará la recepción y se subirán las fotos.
             </p>
           </div>
@@ -340,7 +340,7 @@ export function ReceptionWizard() {
 
         {/* Error message */}
         {submitError && (
-          <p className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+          <p className="mt-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2">
             {submitError}
           </p>
         )}
@@ -403,7 +403,7 @@ function ChecklistGroup({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
         {label}
       </h3>
       <div className="space-y-2">{children}</div>
@@ -421,10 +421,10 @@ function CheckItem({
       <input
         type="checkbox"
         id={id}
-        className="h-4 w-4 rounded border-gray-300"
+        className="h-4 w-4 rounded border-border"
         {...props}
       />
-      <span className="text-sm group-hover:text-gray-700">{label}</span>
+      <span className="text-sm group-hover:text-foreground">{label}</span>
     </label>
   );
 }

@@ -21,17 +21,17 @@ export default function CuentasCobrarPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Cuentas por Cobrar</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-white">Cuentas por Cobrar</h1>
+        <p className="text-sm text-muted-foreground">
           {invoices.length} facturas pendientes · Total: RD${" "}
           {totalPendiente.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
         </p>
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -48,24 +48,24 @@ export default function CuentasCobrarPage() {
             <TableBody>
               {invoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     Sin facturas pendientes de cobro
                   </TableCell>
                 </TableRow>
               )}
               {invoices.map((inv) => (
-                <TableRow key={inv.id} className="hover:bg-gray-50">
+                <TableRow key={inv.id} className="hover:bg-muted/40">
                   <TableCell className="font-mono font-medium">{inv.invoice_number}</TableCell>
                   <TableCell>{inv.customer_name}</TableCell>
-                  <TableCell className="text-sm text-gray-600">{inv.vehicle_label}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{inv.vehicle_label}</TableCell>
                   <TableCell>{new Date(inv.issue_date).toLocaleDateString("es-DO")}</TableCell>
                   <TableCell className="text-right">
                     RD$ {inv.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
                   </TableCell>
-                  <TableCell className="text-right text-green-700">
+                  <TableCell className="text-right text-success">
                     RD$ {inv.paid_amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
                   </TableCell>
-                  <TableCell className="text-right font-semibold text-yellow-700">
+                  <TableCell className="text-right font-semibold text-warning">
                     RD$ {inv.remaining_balance.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
                   </TableCell>
                   <TableCell>
@@ -85,7 +85,7 @@ export default function CuentasCobrarPage() {
           <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
             ← Anterior
           </Button>
-          <span className="text-gray-500">Página {page + 1} de {totalPages}</span>
+          <span className="text-muted-foreground">Página {page + 1} de {totalPages}</span>
           <Button variant="ghost" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>
             Siguiente →
           </Button>

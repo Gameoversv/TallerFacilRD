@@ -14,9 +14,9 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  PENDIENTE: "bg-yellow-100 text-yellow-800",
-  APROBADA: "bg-green-100 text-green-800",
-  RECHAZADA: "bg-red-100 text-red-800",
+  PENDIENTE: "bg-warning/15 text-warning",
+  APROBADA: "bg-success/15 text-success",
+  RECHAZADA: "bg-destructive/15 text-destructive",
 };
 
 interface Props {
@@ -95,8 +95,8 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-5 space-y-4">
-          <h3 className="font-medium text-gray-700">Nueva cotización</h3>
+        <form onSubmit={handleSubmit} className="rounded-lg border bg-card p-5 space-y-4">
+          <h3 className="font-medium text-foreground">Nueva cotización</h3>
 
           {/* Items */}
           <div className="space-y-2">
@@ -146,7 +146,7 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
                     <button
                       type="button"
                       onClick={() => removeItem(idx)}
-                      className="text-red-400 hover:text-red-600 text-xl leading-none"
+                      className="text-destructive hover:text-destructive text-xl leading-none"
                     >
                       ×
                     </button>
@@ -161,12 +161,12 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
 
           {/* Totals */}
           <div className="space-y-1 text-sm border-t pt-3">
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
               <span>RD$ {subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-gray-600 cursor-pointer">
+              <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
                 <input
                   type="checkbox"
                   checked={applyItbis}
@@ -175,7 +175,7 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
                 />
                 Aplicar ITBIS (18%)
               </label>
-              <span className="text-gray-600">
+              <span className="text-muted-foreground">
                 RD$ {itbisAmount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -192,7 +192,7 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
           </div>
 
           {formError && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{formError}</p>
+            <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded px-3 py-2">{formError}</p>
           )}
 
           <div className="flex gap-2">
@@ -208,7 +208,7 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
 
       {/* List */}
       {quotes.length === 0 && !showForm && (
-        <p className="text-sm text-gray-400">Sin cotizaciones</p>
+        <p className="text-sm text-muted-foreground">Sin cotizaciones</p>
       )}
 
       {quotes.map((q) => (
@@ -231,12 +231,12 @@ function QuoteCard({ quote, workOrderId }: { quote: Quote; workOrderId: string }
   const piezas = quote.items.filter((i) => i.item_type === "PIEZA");
 
   return (
-    <div className="rounded-lg border bg-white p-5 space-y-3">
+    <div className="rounded-lg border bg-card p-5 space-y-3">
       <div className="flex items-center justify-between">
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[quote.status]}`}>
           {STATUS_LABEL[quote.status]}
         </span>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-muted-foreground">
           {new Date(quote.created_at).toLocaleDateString("es-DO")}
         </span>
       </div>
@@ -249,12 +249,12 @@ function QuoteCard({ quote, workOrderId }: { quote: Quote; workOrderId: string }
       )}
 
       <div className="text-sm space-y-1 border-t pt-2">
-        <div className="flex justify-between text-gray-600">
+        <div className="flex justify-between text-muted-foreground">
           <span>Subtotal</span>
           <span>RD$ {quote.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
         </div>
         {quote.apply_itbis && (
-          <div className="flex justify-between text-gray-600">
+          <div className="flex justify-between text-muted-foreground">
             <span>ITBIS (18%)</span>
             <span>RD$ {quote.itbis_amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
           </div>
@@ -266,7 +266,7 @@ function QuoteCard({ quote, workOrderId }: { quote: Quote; workOrderId: string }
       </div>
 
       {quote.notes && (
-        <p className="text-xs text-gray-500 italic">{quote.notes}</p>
+        <p className="text-xs text-muted-foreground italic">{quote.notes}</p>
       )}
 
       {quote.status === "PENDIENTE" && (
@@ -300,14 +300,14 @@ function QuoteCard({ quote, workOrderId }: { quote: Quote; workOrderId: string }
 function ItemTable({ title, items }: { title: string; items: Quote["items"] }) {
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">{title}</p>
+      <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">{title}</p>
       <table className="w-full text-sm">
         <tbody className="divide-y">
           {items.map((item) => (
             <tr key={item.id}>
-              <td className="py-1 text-gray-700">{item.description}</td>
-              <td className="py-1 text-center text-gray-500 w-12">{item.quantity}</td>
-              <td className="py-1 text-right text-gray-500 w-32">
+              <td className="py-1 text-foreground">{item.description}</td>
+              <td className="py-1 text-center text-muted-foreground w-12">{item.quantity}</td>
+              <td className="py-1 text-right text-muted-foreground w-32">
                 RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
               </td>
               <td className="py-1 text-right font-medium w-32">

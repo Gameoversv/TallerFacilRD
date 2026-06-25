@@ -45,7 +45,7 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel = "Guardar", 
         <div className="space-y-1">
           <Label>Código interno *</Label>
           <Input {...register("internalCode")} placeholder="ACE-001" />
-          {errors.internalCode && <p className="text-xs text-red-500">{errors.internalCode.message}</p>}
+          {errors.internalCode && <p className="text-xs text-destructive">{errors.internalCode.message}</p>}
         </div>
         <div className="space-y-1">
           <Label>Categoría *</Label>
@@ -58,26 +58,26 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel = "Guardar", 
               <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase()}</option>
             ))}
           </select>
-          {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
+          {errors.category && <p className="text-xs text-destructive">{errors.category.message}</p>}
         </div>
       </div>
 
       <div className="space-y-1">
         <Label>Descripción *</Label>
         <Input {...register("description")} placeholder="Aceite de motor 5W-30 sintético" />
-        {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
+        {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Costo de compra (RD$) *</Label>
           <Input {...register("purchaseCost", { valueAsNumber: true })} type="number" step="0.01" min="0" placeholder="0.00" />
-          {errors.purchaseCost && <p className="text-xs text-red-500">{errors.purchaseCost.message}</p>}
+          {errors.purchaseCost && <p className="text-xs text-destructive">{errors.purchaseCost.message}</p>}
         </div>
         <div className="space-y-1">
           <Label>Precio de venta (RD$) *</Label>
           <Input {...register("salePrice", { valueAsNumber: true })} type="number" step="0.01" min="0" placeholder="0.00" />
-          {errors.salePrice && <p className="text-xs text-red-500">{errors.salePrice.message}</p>}
+          {errors.salePrice && <p className="text-xs text-destructive">{errors.salePrice.message}</p>}
         </div>
       </div>
 
@@ -85,17 +85,17 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel = "Guardar", 
         <div className="space-y-1">
           <Label>Stock actual *</Label>
           <Input {...register("currentStock", { valueAsNumber: true })} type="number" min="0" placeholder="0" />
-          {errors.currentStock && <p className="text-xs text-red-500">{errors.currentStock.message}</p>}
+          {errors.currentStock && <p className="text-xs text-destructive">{errors.currentStock.message}</p>}
         </div>
         <div className="space-y-1">
           <Label>Stock mínimo (alerta) *</Label>
           <Input {...register("minStock", { valueAsNumber: true })} type="number" min="0" placeholder="5" />
-          {errors.minStock && <p className="text-xs text-red-500">{errors.minStock.message}</p>}
+          {errors.minStock && <p className="text-xs text-destructive">{errors.minStock.message}</p>}
         </div>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+        <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2">
           {error}
         </p>
       )}

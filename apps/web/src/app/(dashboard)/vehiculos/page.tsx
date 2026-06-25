@@ -60,8 +60,8 @@ export default function VehiculosPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Vehículos</h1>
-          <p className="text-sm text-gray-500">{total} registros</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Vehículos</h1>
+          <p className="text-sm text-muted-foreground">{total} registros</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>+ Nuevo vehículo</Button>
       </div>
@@ -77,9 +77,9 @@ export default function VehiculosPage() {
       />
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <p className="text-sm text-muted-foreground">Cargando...</p>
       ) : (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -94,7 +94,7 @@ export default function VehiculosPage() {
             <TableBody>
               {vehicles.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     Sin resultados
                   </TableCell>
                 </TableRow>
@@ -102,7 +102,7 @@ export default function VehiculosPage() {
               {vehicles.map((v) => (
                 <TableRow
                   key={v.id}
-                  className="cursor-pointer hover:bg-gray-50"
+                  className="cursor-pointer hover:bg-muted/40"
                   onClick={() => router.push(`/vehiculos/${v.id}`)}
                 >
                   <TableCell className="font-medium">
@@ -116,7 +116,7 @@ export default function VehiculosPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-red-500 hover:text-red-700"
+                      className="text-destructive hover:text-destructive"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (confirm(`¿Eliminar ${v.brand} ${v.model}?`)) {
@@ -144,7 +144,7 @@ export default function VehiculosPage() {
           >
             ← Anterior
           </Button>
-          <span className="text-gray-500">
+          <span className="text-muted-foreground">
             Página {page + 1} de {totalPages}
           </span>
           <Button
