@@ -28,7 +28,7 @@ export default function NuevaFacturaPage() {
   // Fetch WO detail when selected to get items
   const { data: woDetail } = useWorkOrder(selectedWoId ?? "");
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!woDetail?.data?.items) return;
     const woItems = woDetail.data.items;
@@ -42,8 +42,7 @@ export default function NuevaFacturaPage() {
         }))
       );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [woDetail]);
+  }, [woDetail]); /* eslint-enable react-hooks/set-state-in-effect */
 
   // Load all work orders (no status filter so all appear)
   const { data: woData } = useWorkOrders(null, 0);
