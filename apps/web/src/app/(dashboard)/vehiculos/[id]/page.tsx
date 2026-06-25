@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useVehicle, useUpdateVehicle, useDeleteVehicle } from "@/hooks/useVehicles";
 import { useVehicleHistory } from "@/hooks/useVehicleHistory";
+import { useVehicleReceptions } from "@/hooks/useReceptions";
 import { VehicleForm, vehicleToFormValues, type VehicleFormValues } from "@/components/vehicles/VehicleForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -155,19 +156,11 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
       )}
 
       {activeTab === "recepciones" && (
-        <Card>
-          <CardContent className="text-sm text-gray-400 text-center py-6">
-            Recepciones disponibles en MOD-04.
-          </CardContent>
-        </Card>
+        <VehicleReceptionsTab vehicleId={id} />
       )}
 
       {activeTab === "ordenes" && (
-        <Card>
-          <CardContent className="text-sm text-gray-400 text-center py-6">
-            Órdenes de trabajo disponibles en MOD-06.
-          </CardContent>
-        </Card>
+        <VehicleOrdersTab vehicleId={id} />
       )}
 
       {activeTab === "historial" && (
@@ -204,6 +197,78 @@ function Detail({
     <div className={className}>
       <p className="text-xs text-gray-400 mb-0.5">{label}</p>
       <p className="font-medium text-gray-800">{value ?? "—"}</p>
+    </div>
+  );
+}
+
+function VehicleReceptionsTab({ vehicleId }: { vehicleId: string }) {
+  const { data, isLoading } = useVehicleReceptions(vehicleId);
+  const receptions = data?.data ?? [];
+
+  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
+  if (receptions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="text-sm text-gray-400 text-center py-6">Sin recepciones registradas</CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {receptions.map((r) => (
+        <Card key={r.id}>
+          <CardContent className="py-4 text-sm space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold">
+                {new Date(r.created_at).toLocaleDateString("es-DO", { year: "numeric", month: "long", day: "numeric" })}
+              </p>
+              <Link href={`/recepciones/${r.id}`}>
+                <Button variant="ghost" size="sm">Ver →</Button>
+              </Link>
+            </div>
+            <p className="text-gray-600">{r.reported_problem}</p>
+            <p className="text-xs text-gray-400">Km entrada: {r.entry_km.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function VehicleOrdersTab({ vehicleId }: { vehicleId: string }) {
+  const { data, isLoading } = useVehicleHistory(vehicleId);
+  const visits = data?.data?.visits ?? [];
+  const orders = visits.filter((v) => v.work_order != null).map((v) => v.work_order!);
+
+  if (isLoading) return <p className="text-sm text-gray-400">Cargando...</p>;
+  if (orders.length === 0) {
+    return (
+      <Card>
+        <CardContent className="text-sm text-gray-400 text-center py-6">Sin órdenes de trabajo</CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {orders.map((wo) => (
+        <Card key={wo.id}>
+          <CardContent className="py-4 text-sm space-y-1">
+            <div className="flex items-center justify-between">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${WO_STATUS_COLOR[wo.status] ?? "bg-gray-100 text-gray-600"}`}>
+                {WO_STATUS_LABEL[wo.status] ?? wo.status}
+              </span>
+              <Link href={`/ordenes/${wo.id}`}>
+                <Button variant="ghost" size="sm">Ver →</Button>
+              </Link>
+            </div>
+            {wo.items.length > 0 && (
+              <p className="text-xs text-gray-500">{wo.items.length} ítem(s): {wo.items.map((i) => i.description).join(", ")}</p>
+            )}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
