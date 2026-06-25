@@ -33,10 +33,10 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
       year: values.year,
       engine: values.engine || undefined,
       vin: values.vin || undefined,
-      licensePlate: values.licensePlate || undefined,
+      license_plate: values.licensePlate || undefined,
       color: values.color || undefined,
-      mileage: typeof values.mileage === "number" ? values.mileage : undefined,
-      transmission: values.transmission,
+      mileage: Number.isFinite(values.mileage) ? values.mileage : undefined,
+      transmission: values.transmission || undefined,
       modifications:
         values.turbo || values.suspension || values.tune || values.injectors || values.fuelType
           ? {
@@ -44,7 +44,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
               suspension: values.suspension || undefined,
               tune: values.tune || undefined,
               injectors: values.injectors || undefined,
-              fuelType: values.fuelType || undefined,
+              fuel_type: values.fuelType || undefined,
             }
           : undefined,
     });

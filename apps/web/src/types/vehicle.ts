@@ -32,7 +32,7 @@ export interface CreateVehicleRequest {
   year: number;
   engine?: string;
   vin?: string;
-  licensePlate?: string;
+  license_plate?: string;
   color?: string;
   mileage?: number;
   transmission?: Transmission;
@@ -41,9 +41,9 @@ export interface CreateVehicleRequest {
     suspension?: string;
     tune?: string;
     injectors?: string;
-    fuelType?: string;
+    fuel_type?: string;
   };
-  customerId: string;
+  customer_id: string;
 }
 
 export interface VehiclesPage {
