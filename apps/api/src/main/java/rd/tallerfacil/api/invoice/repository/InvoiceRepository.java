@@ -19,4 +19,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     @Query("SELECT COALESCE(MAX(CAST(SUBSTRING(i.invoiceNumber, 10) AS int)), 0) FROM Invoice i WHERE i.invoiceNumber LIKE CONCAT('FAC-', :year, '-%')")
     int findMaxSeqForYear(int year);
+
+    @Query("SELECT i FROM Invoice i JOIN i.workOrder wo JOIN wo.reception r JOIN r.vehicle v WHERE v.id = :vehicleId ORDER BY i.issueDate DESC")
+    List<Invoice> findByVehicleId(@Param("vehicleId") UUID vehicleId);
 }

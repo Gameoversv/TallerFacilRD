@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.vehicle.dto.CreateVehicleRequest;
 import rd.tallerfacil.api.vehicle.dto.UpdateVehicleRequest;
+import rd.tallerfacil.api.vehicle.dto.VehicleHistoryResponse;
 import rd.tallerfacil.api.vehicle.dto.VehicleResponse;
+import rd.tallerfacil.api.vehicle.service.VehicleHistoryService;
 import rd.tallerfacil.api.vehicle.service.VehicleService;
 
 import java.util.UUID;
@@ -18,6 +20,8 @@ import java.util.UUID;
 @RequestMapping("/api/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
+
+    private final VehicleHistoryService vehicleHistoryService;
 
     private final VehicleService service;
 
@@ -56,5 +60,10 @@ public class VehicleController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         service.delete(id);
+    }
+
+    @GetMapping("/{id}/history")
+    public ApiResponse<VehicleHistoryResponse> history(@PathVariable UUID id) {
+        return vehicleHistoryService.getHistory(id);
     }
 }
