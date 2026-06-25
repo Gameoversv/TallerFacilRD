@@ -23,6 +23,8 @@ export interface Invoice {
   subtotal: number;
   itbis_amount: number;
   total: number;
+  paid_amount: number;
+  remaining_balance: number;
   notes: string | null;
   items: InvoiceItem[];
   created_at: string;
