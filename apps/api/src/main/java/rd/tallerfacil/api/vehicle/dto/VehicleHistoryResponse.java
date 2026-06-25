@@ -39,7 +39,7 @@ public record VehicleHistoryResponse(
     public record ItemSummary(
             String type,
             String description,
-            int quantity,
+            BigDecimal quantity,
             BigDecimal unitPrice
     ) {}
 
@@ -55,7 +55,7 @@ public record VehicleHistoryResponse(
         WorkOrderSummary woSummary = null;
         if (wo != null) {
             List<ItemSummary> items = wo.getItems().stream()
-                    .map(i -> new ItemSummary(i.getType().name(), i.getDescription(), i.getQuantity(), i.getUnitPrice()))
+                    .<ItemSummary>map(i -> new ItemSummary(i.getType().name(), i.getDescription(), i.getQuantity(), i.getUnitPrice()))
                     .toList();
             List<InvoiceSummary> invSummaries = invoices.stream()
                     .map(inv -> new InvoiceSummary(inv.getId(), inv.getInvoiceNumber(), inv.getIssueDate(), inv.getStatus(), inv.getTotal()))
@@ -65,7 +65,7 @@ public record VehicleHistoryResponse(
         return new VisitSummary(
                 r.getId(),
                 r.getCreatedAt() != null ? r.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDate() : null,
-                r.getComplaint(),
+                r.getReportedProblem(),
                 woSummary
         );
     }
