@@ -23,7 +23,7 @@ public record PaymentResponse(
                 p.getPaymentDate(),
                 p.getPaymentMethod().name(),
                 p.getNotes(),
-                p.getCreatedAt().toString()
+                p.getCreatedAt() != null ? p.getCreatedAt().toString() : null
         );
     }
 }

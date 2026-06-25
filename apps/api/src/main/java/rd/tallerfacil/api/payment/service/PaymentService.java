@@ -69,7 +69,7 @@ public class PaymentService {
             payment.setPaymentMethod(PaymentMethod.valueOf(req.paymentMethod()));
         }
 
-        paymentRepository.save(payment);
+        Payment saved = paymentRepository.saveAndFlush(payment);
 
         BigDecimal newPaid = currentPaid.add(req.amount());
         if (newPaid.compareTo(invoice.getTotal()) >= 0) {
@@ -77,7 +77,8 @@ public class PaymentService {
             invoiceRepository.save(invoice);
         }
 
-        return ApiResponse.ok(PaymentResponse.from(payment));
+        Payment reloaded = paymentRepository.findById(saved.getId()).orElse(saved);
+        return ApiResponse.ok(PaymentResponse.from(reloaded));
     }
 
     @Transactional(readOnly = true)
