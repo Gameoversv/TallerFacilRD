@@ -81,9 +81,6 @@ export function GlobalSearch() {
 
   const loading = enabled && (customersQ.isFetching || vehiclesQ.isFetching);
 
-  // Reset highlight when results change
-  useEffect(() => setActive(0), [debounced, results.length]);
-
   // Cmd/Ctrl+K to focus
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -145,6 +142,7 @@ export function GlobalSearch() {
           onChange={(e) => {
             setQuery(e.target.value);
             setOpen(true);
+            setActive(0);
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
