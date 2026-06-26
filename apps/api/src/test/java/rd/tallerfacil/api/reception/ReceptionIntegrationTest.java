@@ -11,12 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import rd.tallerfacil.api.auth.domain.RoleName;
-import rd.tallerfacil.api.auth.dto.RegisterRequest;
-import rd.tallerfacil.api.auth.repository.UserRepository;
-import rd.tallerfacil.api.customer.repository.CustomerRepository;
-import rd.tallerfacil.api.reception.repository.ReceptionRepository;
-import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
+import rd.tallerfacil.api.support.IntegrationTestBase;
 
 import java.util.Map;
 
@@ -24,40 +19,15 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class ReceptionIntegrationTest {
-
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
-    @Autowired UserRepository userRepository;
-    @Autowired CustomerRepository customerRepository;
-    @Autowired VehicleRepository vehicleRepository;
-    @Autowired ReceptionRepository receptionRepository;
+class ReceptionIntegrationTest extends IntegrationTestBase {
 
     private String token;
     private String vehicleId;
 
     @BeforeEach
     void setUp() throws Exception {
-        receptionRepository.deleteAll();
-        vehicleRepository.deleteAll();
-        customerRepository.deleteAll();
-        userRepository.deleteAll();
-
-        var reg = new RegisterRequest("Taller Admin", "admin@test.rd", "pass1234", RoleName.OWNER);
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(reg)))
-                .andExpect(status().isOk());
-
-        var loginRes = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("email", "admin@test.rd", "password", "pass1234"))))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        token = objectMapper.readTree(loginRes).path("data").path("token").asText();
+        cleanAll();
+        token = registerTenantAndGetToken("admin@test.rd", "pass1234");
 
         var custRes = mockMvc.perform(post("/api/customers")
                         .header("Authorization", "Bearer " + token)

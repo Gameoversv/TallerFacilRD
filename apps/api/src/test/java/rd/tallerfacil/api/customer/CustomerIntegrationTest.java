@@ -10,50 +10,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import rd.tallerfacil.api.auth.dto.LoginRequest;
-import rd.tallerfacil.api.auth.dto.RegisterRequest;
-import rd.tallerfacil.api.auth.domain.RoleName;
-import rd.tallerfacil.api.auth.repository.UserRepository;
 import rd.tallerfacil.api.customer.dto.CreateCustomerRequest;
-import rd.tallerfacil.api.customer.repository.CustomerRepository;
-import rd.tallerfacil.api.reception.repository.ReceptionRepository;
-import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
+import rd.tallerfacil.api.support.IntegrationTestBase;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class CustomerIntegrationTest {
-
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
-    @Autowired UserRepository userRepository;
-    @Autowired CustomerRepository customerRepository;
-    @Autowired VehicleRepository vehicleRepository;
-    @Autowired ReceptionRepository receptionRepository;
+class CustomerIntegrationTest extends IntegrationTestBase {
 
     private String token;
 
     @BeforeEach
     void setup() throws Exception {
-        receptionRepository.deleteAll();
-        vehicleRepository.deleteAll();
-        customerRepository.deleteAll();
-        userRepository.deleteAll();
-
-        var register = new RegisterRequest("Admin", "admin@taller.rd", "password123", RoleName.OWNER);
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(register)));
-
-        var loginRes = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new LoginRequest("admin@taller.rd", "password123"))))
-                .andReturn().getResponse().getContentAsString();
-
-        token = objectMapper.readTree(loginRes).path("data").path("token").asText();
+        cleanAll();
+        token = registerTenantAndGetToken("admin@taller.rd", "password123");
     }
 
     @Test

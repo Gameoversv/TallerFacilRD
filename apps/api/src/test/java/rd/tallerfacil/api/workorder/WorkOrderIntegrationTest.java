@@ -10,13 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import rd.tallerfacil.api.auth.domain.RoleName;
-import rd.tallerfacil.api.auth.dto.RegisterRequest;
-import rd.tallerfacil.api.auth.repository.UserRepository;
-import rd.tallerfacil.api.customer.repository.CustomerRepository;
-import rd.tallerfacil.api.reception.repository.ReceptionRepository;
-import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
-import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
+import rd.tallerfacil.api.support.IntegrationTestBase;
 
 import java.util.Map;
 
@@ -24,43 +18,15 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class WorkOrderIntegrationTest {
-
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
-    @Autowired UserRepository userRepository;
-    @Autowired CustomerRepository customerRepository;
-    @Autowired VehicleRepository vehicleRepository;
-    @Autowired ReceptionRepository receptionRepository;
-    @Autowired WorkOrderRepository workOrderRepository;
+class WorkOrderIntegrationTest extends IntegrationTestBase {
 
     private String token;
     private String receptionId;
 
     @BeforeEach
     void setUp() throws Exception {
-        workOrderRepository.deleteAll();
-        receptionRepository.deleteAll();
-        vehicleRepository.deleteAll();
-        customerRepository.deleteAll();
-        userRepository.deleteAll();
-
-        var reg = new RegisterRequest("Admin WO", "admin@wo.rd", "pass1234", RoleName.OWNER);
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(reg)))
-                .andExpect(status().isOk());
-
-        var loginRes = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                Map.of("email", "admin@wo.rd", "password", "pass1234"))))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        token = objectMapper.readTree(loginRes).path("data").path("token").asText();
+        cleanAll();
+        token = registerTenantAndGetToken("admin@wo.rd", "pass1234");
 
         var custRes = mockMvc.perform(post("/api/customers")
                         .header("Authorization", "Bearer " + token)
