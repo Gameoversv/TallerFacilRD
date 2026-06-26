@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import rd.tallerfacil.api.auth.domain.RoleName;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Employee extends BaseEntity {
+public class Employee extends TenantAwareEntity {
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
@@ -45,3 +45,4 @@ public class Employee extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 }
+

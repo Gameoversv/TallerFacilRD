@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 import rd.tallerfacil.api.vehicle.domain.Vehicle;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Reception extends BaseEntity {
+public class Reception extends TenantAwareEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
@@ -43,3 +43,4 @@ public class Reception extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 }
+

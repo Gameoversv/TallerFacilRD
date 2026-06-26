@@ -5,13 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rd.tallerfacil.api.invoice.domain.Invoice;
 import rd.tallerfacil.api.invoice.domain.InvoiceStatus;
-import rd.tallerfacil.api.invoice.dto.InvoiceResponse;
 import rd.tallerfacil.api.invoice.repository.InvoiceRepository;
 import rd.tallerfacil.api.payment.domain.Payment;
 import rd.tallerfacil.api.payment.domain.PaymentMethod;
 import rd.tallerfacil.api.payment.dto.CreatePaymentRequest;
 import rd.tallerfacil.api.payment.dto.PaymentResponse;
 import rd.tallerfacil.api.payment.repository.PaymentRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 
@@ -29,7 +29,8 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<PaymentResponse>> listByInvoice(UUID invoiceId) {
-        invoiceRepository.findById(invoiceId)
+        UUID tenantId = TenantContext.require();
+        invoiceRepository.findByIdWithDetails(invoiceId, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada: " + invoiceId));
         var payments = paymentRepository.findByInvoiceIdOrderByPaymentDateDesc(invoiceId)
                 .stream().map(PaymentResponse::from).toList();
@@ -38,7 +39,8 @@ public class PaymentService {
 
     @Transactional
     public ApiResponse<PaymentResponse> create(CreatePaymentRequest req) {
-        Invoice invoice = invoiceRepository.findByIdWithDetails(req.invoiceId())
+        UUID tenantId = TenantContext.require();
+        Invoice invoice = invoiceRepository.findByIdWithDetails(req.invoiceId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada: " + req.invoiceId()));
 
         if (invoice.getStatus() == InvoiceStatus.ANULADA) {
@@ -60,6 +62,7 @@ public class PaymentService {
         }
 
         var payment = new Payment();
+        payment.setTenantId(tenantId);
         payment.setInvoice(invoice);
         payment.setAmount(req.amount());
         payment.setPaymentDate(req.paymentDate() != null ? req.paymentDate() : LocalDate.now());

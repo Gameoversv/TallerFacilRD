@@ -15,6 +15,7 @@ import rd.tallerfacil.api.purchase.dto.SupplierRequest;
 import rd.tallerfacil.api.purchase.dto.SupplierResponse;
 import rd.tallerfacil.api.purchase.repository.PurchaseRepository;
 import rd.tallerfacil.api.purchase.repository.SupplierRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 
@@ -34,13 +35,15 @@ public class PurchaseService {
 
     @Transactional(readOnly = true)
     public List<SupplierResponse> listSuppliers() {
-        return supplierRepository.findByActiveTrueOrderByNameAsc()
+        return supplierRepository.findByTenantIdAndActiveTrueOrderByNameAsc(TenantContext.require())
                 .stream().map(SupplierResponse::from).toList();
     }
 
     @Transactional
     public SupplierResponse createSupplier(SupplierRequest req) {
+        UUID tenantId = TenantContext.require();
         var supplier = new Supplier();
+        supplier.setTenantId(tenantId);
         supplier.setName(req.name());
         supplier.setPhone(req.phone());
         supplier.setEmail(req.email());
@@ -49,7 +52,7 @@ public class PurchaseService {
 
     @Transactional
     public void deleteSupplier(UUID id) {
-        var supplier = supplierRepository.findByIdAndActiveTrue(id)
+        var supplier = supplierRepository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado: " + id));
         supplier.setActive(false);
         supplierRepository.save(supplier);
@@ -59,24 +62,27 @@ public class PurchaseService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<PurchaseResponse>> list(int page, int size) {
-        var result = purchaseRepository.findAllWithSupplier(PageRequest.of(page, size));
+        UUID tenantId = TenantContext.require();
+        var result = purchaseRepository.findAllWithSupplier(tenantId, PageRequest.of(page, size));
         var data = result.getContent().stream().map(PurchaseResponse::from).toList();
         return ApiResponse.paged(data, result.getTotalElements(), page, size);
     }
 
     @Transactional(readOnly = true)
     public PurchaseResponse findById(UUID id) {
-        return purchaseRepository.findByIdWithDetails(id)
+        return purchaseRepository.findByIdWithDetails(id, TenantContext.require())
                 .map(PurchaseResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Compra no encontrada: " + id));
     }
 
     @Transactional
     public PurchaseResponse create(CreatePurchaseRequest req) {
-        var supplier = supplierRepository.findByIdAndActiveTrue(req.supplierId())
+        UUID tenantId = TenantContext.require();
+        var supplier = supplierRepository.findByIdAndTenantIdAndActiveTrue(req.supplierId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado: " + req.supplierId()));
 
         var purchase = new Purchase();
+        purchase.setTenantId(tenantId);
         purchase.setSupplier(supplier);
         purchase.setPurchaseDate(req.purchaseDate());
         purchase.setNotes(req.notes());
@@ -84,7 +90,7 @@ public class PurchaseService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (var itemReq : req.items()) {
-            Product product = productRepository.findByIdAndActiveTrue(itemReq.productId())
+            Product product = productRepository.findByIdAndTenantIdAndActiveTrue(itemReq.productId(), tenantId)
                     .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + itemReq.productId()));
 
             var item = new PurchaseItem();
@@ -99,7 +105,6 @@ public class PurchaseService {
 
             purchase.getItems().add(item);
 
-            // Increment stock
             product.setCurrentStock(product.getCurrentStock() + itemReq.quantity());
             productRepository.save(product);
         }

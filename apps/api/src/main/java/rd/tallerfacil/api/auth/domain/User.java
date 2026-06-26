@@ -33,6 +33,10 @@ public class User extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private boolean active = true;
 
+    // Nullable: SUPER_ADMIN has no tenant
+    @Column(name = "tenant_id")
+    private java.util.UUID tenantId;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -45,6 +49,15 @@ public class User extends BaseEntity implements UserDetails {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public User(String name, String email, String password, java.util.UUID tenantId) {
+        this(name, email, password);
+        this.tenantId = tenantId;
+    }
+
+    public void setTenantId(java.util.UUID tenantId) {
+        this.tenantId = tenantId;
     }
 
     public void addRole(Role role) {

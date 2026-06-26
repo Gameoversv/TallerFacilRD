@@ -10,11 +10,13 @@ import rd.tallerfacil.api.cash.dto.CashBalanceResponse;
 import rd.tallerfacil.api.cash.dto.CashTransactionResponse;
 import rd.tallerfacil.api.cash.dto.CreateCashTransactionRequest;
 import rd.tallerfacil.api.cash.repository.CashRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +26,12 @@ public class CashService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<CashTransactionResponse>> list(LocalDate from, LocalDate to, int page, int size) {
+        UUID tenantId = TenantContext.require();
         LocalDate dateFrom = from != null ? from : LocalDate.now().withDayOfMonth(1);
         LocalDate dateTo = to != null ? to : LocalDate.now();
 
-        var result = cashRepository.findByTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
-                dateFrom, dateTo, PageRequest.of(page, size));
+        var result = cashRepository.findByTenantIdAndTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
+                tenantId, dateFrom, dateTo, PageRequest.of(page, size));
 
         var data = result.getContent().stream().map(CashTransactionResponse::from).toList();
         return ApiResponse.paged(data, result.getTotalElements(), page, size);
@@ -36,11 +39,12 @@ public class CashService {
 
     @Transactional(readOnly = true)
     public ApiResponse<CashBalanceResponse> balance(LocalDate from, LocalDate to) {
+        UUID tenantId = TenantContext.require();
         LocalDate dateFrom = from != null ? from : LocalDate.now().withDayOfMonth(1);
         LocalDate dateTo = to != null ? to : LocalDate.now();
 
-        BigDecimal ingresos = cashRepository.sumByTypeAndDateRange(TransactionType.INGRESO, dateFrom, dateTo);
-        BigDecimal egresos = cashRepository.sumByTypeAndDateRange(TransactionType.EGRESO, dateFrom, dateTo);
+        BigDecimal ingresos = cashRepository.sumByTenantIdAndTypeAndDateRange(tenantId, TransactionType.INGRESO, dateFrom, dateTo);
+        BigDecimal egresos = cashRepository.sumByTenantIdAndTypeAndDateRange(tenantId, TransactionType.EGRESO, dateFrom, dateTo);
 
         return ApiResponse.ok(new CashBalanceResponse(
                 dateFrom, dateTo, ingresos, egresos, ingresos.subtract(egresos)));
@@ -48,6 +52,7 @@ public class CashService {
 
     @Transactional
     public ApiResponse<CashTransactionResponse> create(CreateCashTransactionRequest req) {
+        UUID tenantId = TenantContext.require();
         if (req.amount() == null || req.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El monto debe ser mayor a cero");
         }
@@ -56,6 +61,7 @@ public class CashService {
         }
 
         var tx = new CashTransaction();
+        tx.setTenantId(tenantId);
         tx.setType(TransactionType.valueOf(req.type()));
         tx.setAmount(req.amount());
         tx.setDescription(req.description().trim());

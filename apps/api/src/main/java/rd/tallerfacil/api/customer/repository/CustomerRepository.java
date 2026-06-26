@@ -7,23 +7,27 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rd.tallerfacil.api.customer.domain.Customer;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @Query("""
             SELECT c FROM Customer c
-            WHERE c.active = true
+            WHERE c.tenantId = :tenantId
+            AND c.active = true
             AND (:q IS NULL OR :q = ''
                 OR LOWER(c.firstName) LIKE LOWER(CONCAT('%', :q, '%'))
                 OR LOWER(c.lastName) LIKE LOWER(CONCAT('%', :q, '%'))
                 OR c.documentId LIKE CONCAT('%', :q, '%'))
             """)
-    Page<Customer> search(@Param("q") String q, Pageable pageable);
+    Page<Customer> search(@Param("tenantId") UUID tenantId,
+                          @Param("q") String q,
+                          Pageable pageable);
 
-    java.util.Optional<Customer> findByIdAndActiveTrue(java.util.UUID id);
+    Optional<Customer> findByIdAndTenantIdAndActiveTrue(UUID id, UUID tenantId);
 
-    boolean existsByDocumentIdAndActiveTrue(String documentId);
+    boolean existsByDocumentIdAndTenantIdAndActiveTrue(String documentId, UUID tenantId);
 
-    long countByActiveTrue();
+    long countByTenantIdAndActiveTrue(UUID tenantId);
 }

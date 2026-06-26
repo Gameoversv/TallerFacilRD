@@ -1,0 +1,70 @@
+package rd.tallerfacil.api.tenant.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import rd.tallerfacil.api.auth.domain.RoleName;
+import rd.tallerfacil.api.auth.domain.User;
+import rd.tallerfacil.api.auth.dto.AuthResponse;
+import rd.tallerfacil.api.auth.dto.UserResponse;
+import rd.tallerfacil.api.auth.repository.RoleRepository;
+import rd.tallerfacil.api.auth.repository.UserRepository;
+import rd.tallerfacil.api.auth.service.JwtService;
+import rd.tallerfacil.api.tenant.domain.Tenant;
+import rd.tallerfacil.api.tenant.dto.RegisterTenantRequest;
+import rd.tallerfacil.api.tenant.repository.TenantRepository;
+
+import java.text.Normalizer;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
+@Service
+@RequiredArgsConstructor
+public class TenantService {
+
+    private final TenantRepository tenantRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    @Transactional
+    public AuthResponse registerTenant(RegisterTenantRequest req) {
+        if (userRepository.existsByEmail(req.adminEmail())) {
+            throw new IllegalArgumentException("El correo ya está registrado");
+        }
+
+        String slug = buildSlug(req.tenantName());
+        if (tenantRepository.existsBySlug(slug)) {
+            slug = slug + "-" + System.currentTimeMillis() % 10000;
+        }
+
+        var tenant = new Tenant(req.tenantName(), slug);
+        tenant.setPhone(req.phone());
+        tenant.setCity(req.city());
+        tenant.setRnc(req.rnc());
+        tenant = tenantRepository.save(tenant);
+
+        var ownerRole = roleRepository.findByName(RoleName.OWNER)
+                .orElseThrow(() -> new IllegalStateException("Rol OWNER no encontrado"));
+
+        var admin = new User(req.adminName(), req.adminEmail(),
+                passwordEncoder.encode(req.adminPassword()), tenant.getId());
+        admin.addRole(ownerRole);
+        userRepository.save(admin);
+
+        String token = jwtService.generateToken(admin);
+        return new AuthResponse(token, UserResponse.from(admin));
+    }
+
+    private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^a-z0-9]+");
+
+    private String buildSlug(String name) {
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        return NON_ALPHANUMERIC.matcher(normalized.toLowerCase(Locale.ROOT))
+                .replaceAll("-")
+                .replaceAll("^-|-$", "");
+    }
+}

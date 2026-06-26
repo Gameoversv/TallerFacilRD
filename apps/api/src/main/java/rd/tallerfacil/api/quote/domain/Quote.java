@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 import rd.tallerfacil.api.workorder.domain.WorkOrder;
 
 import java.math.BigDecimal;
@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Quote extends BaseEntity {
+public class Quote extends TenantAwareEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_order_id", nullable = false)
@@ -47,3 +47,4 @@ public class Quote extends BaseEntity {
     @OneToMany(mappedBy = "quote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuoteItem> items = new ArrayList<>();
 }
+

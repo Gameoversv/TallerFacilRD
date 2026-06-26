@@ -10,6 +10,7 @@ import rd.tallerfacil.api.reception.domain.Reception;
 import rd.tallerfacil.api.reception.dto.CreateReceptionRequest;
 import rd.tallerfacil.api.reception.dto.ReceptionResponse;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.storage.StorageService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
@@ -28,10 +29,12 @@ public class ReceptionService {
 
     @Transactional
     public ReceptionResponse create(CreateReceptionRequest req) {
-        var vehicle = vehicleRepository.findByIdAndActiveTrue(req.vehicleId())
+        UUID tenantId = TenantContext.require();
+        var vehicle = vehicleRepository.findByIdAndTenantIdAndActiveTrue(req.vehicleId(), tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Vehículo no encontrado: " + req.vehicleId()));
 
         var reception = new Reception();
+        reception.setTenantId(tenantId);
         reception.setVehicle(vehicle);
         reception.setEntryKm(req.entryKm());
         reception.setReportedProblem(req.reportedProblem());
@@ -43,7 +46,8 @@ public class ReceptionService {
 
     @Transactional
     public ReceptionResponse addPhoto(UUID id, MultipartFile file) throws IOException {
-        var reception = receptionRepository.findByIdWithVehicle(id)
+        UUID tenantId = TenantContext.require();
+        var reception = receptionRepository.findByIdWithVehicle(id, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Recepción no encontrada: " + id));
 
         String ext = getExtension(file.getOriginalFilename());
@@ -56,15 +60,17 @@ public class ReceptionService {
 
     @Transactional(readOnly = true)
     public ReceptionResponse findById(UUID id) {
-        return receptionRepository.findByIdWithVehicle(id)
+        UUID tenantId = TenantContext.require();
+        return receptionRepository.findByIdWithVehicle(id, tenantId)
                 .map(ReceptionResponse::from)
                 .orElseThrow(() -> new IllegalArgumentException("Recepción no encontrada: " + id));
     }
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ReceptionResponse>> findAll(int page) {
+        UUID tenantId = TenantContext.require();
         var pageable = PageRequest.of(page, 20, Sort.by("createdAt").descending());
-        var result = receptionRepository.findAllActive(pageable);
+        var result = receptionRepository.findAllActive(tenantId, pageable);
         return ApiResponse.paged(
                 result.getContent().stream().map(ReceptionResponse::from).toList(),
                 result.getTotalElements(),
@@ -75,7 +81,8 @@ public class ReceptionService {
 
     @Transactional(readOnly = true)
     public List<ReceptionResponse> findByVehicle(UUID vehicleId) {
-        return receptionRepository.findByVehicleId(vehicleId)
+        UUID tenantId = TenantContext.require();
+        return receptionRepository.findByVehicleId(tenantId, vehicleId)
                 .stream()
                 .map(ReceptionResponse::from)
                 .toList();

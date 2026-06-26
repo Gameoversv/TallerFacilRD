@@ -24,15 +24,24 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiry = now.plus(properties.getJwt().getExpirationHours(), ChronoUnit.HOURS);
 
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
                 .claim("role", user.getPrimaryRole().name())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(expiry))
-                .signWith(getSigningKey())
-                .compact();
+                .expiration(Date.from(expiry));
+
+        if (user.getTenantId() != null) {
+            builder.claim("tenantId", user.getTenantId().toString());
+        }
+
+        return builder.signWith(getSigningKey()).compact();
+    }
+
+    public java.util.UUID extractTenantId(String token) {
+        String raw = getClaims(token).get("tenantId", String.class);
+        return raw != null ? java.util.UUID.fromString(raw) : null;
     }
 
     public String extractEmail(String token) {

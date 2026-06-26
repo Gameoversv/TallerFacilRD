@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import rd.tallerfacil.api.reception.domain.Reception;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class WorkOrder extends BaseEntity {
+public class WorkOrder extends TenantAwareEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reception_id", nullable = false, unique = true)
@@ -70,3 +70,4 @@ public class WorkOrder extends BaseEntity {
         this.status = next;
     }
 }
+

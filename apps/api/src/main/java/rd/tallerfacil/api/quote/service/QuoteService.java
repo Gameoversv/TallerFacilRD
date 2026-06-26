@@ -10,6 +10,7 @@ import rd.tallerfacil.api.quote.dto.CreateQuoteRequest;
 import rd.tallerfacil.api.quote.dto.QuoteResponse;
 import rd.tallerfacil.api.quote.dto.UpdateQuoteStatusRequest;
 import rd.tallerfacil.api.quote.repository.QuoteRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
 
@@ -27,23 +28,26 @@ public class QuoteService {
 
     @Transactional(readOnly = true)
     public List<QuoteResponse> findByWorkOrder(UUID workOrderId) {
-        return quoteRepository.findByWorkOrderId(workOrderId)
+        UUID tenantId = TenantContext.require();
+        return quoteRepository.findByWorkOrderId(tenantId, workOrderId)
                 .stream().map(QuoteResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public QuoteResponse findById(UUID id) {
-        return quoteRepository.findByIdWithItems(id)
+        return quoteRepository.findByIdWithItems(id, TenantContext.require())
                 .map(QuoteResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada: " + id));
     }
 
     @Transactional
     public QuoteResponse create(CreateQuoteRequest req) {
-        var workOrder = workOrderRepository.findById(req.workOrderId())
+        UUID tenantId = TenantContext.require();
+        var workOrder = workOrderRepository.findByIdWithDetails(req.workOrderId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada: " + req.workOrderId()));
 
         var quote = new Quote();
+        quote.setTenantId(tenantId);
         quote.setWorkOrder(workOrder);
         quote.setApplyItbis(req.applyItbis());
         quote.setNotes(req.notes());
@@ -80,7 +84,7 @@ public class QuoteService {
 
     @Transactional
     public QuoteResponse updateStatus(UUID id, UpdateQuoteStatusRequest req) {
-        var quote = quoteRepository.findByIdWithItems(id)
+        var quote = quoteRepository.findByIdWithItems(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Cotización no encontrada: " + id));
 
         if (quote.getStatus() != QuoteStatus.PENDIENTE) {

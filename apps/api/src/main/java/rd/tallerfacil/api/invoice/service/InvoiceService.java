@@ -12,6 +12,7 @@ import rd.tallerfacil.api.invoice.dto.InvoiceResponse;
 import rd.tallerfacil.api.invoice.dto.UpdateInvoiceStatusRequest;
 import rd.tallerfacil.api.invoice.repository.InvoiceRepository;
 import rd.tallerfacil.api.payment.repository.PaymentRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
@@ -32,7 +33,8 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<InvoiceResponse>> list(int page, int size) {
-        var result = invoiceRepository.findAllWithDetails(PageRequest.of(page, size));
+        UUID tenantId = TenantContext.require();
+        var result = invoiceRepository.findAllWithDetails(tenantId, PageRequest.of(page, size));
         var data = result.getContent().stream()
                 .map(inv -> InvoiceResponse.from(inv, paymentRepository.sumAmountByInvoiceId(inv.getId())))
                 .toList();
@@ -41,22 +43,25 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public InvoiceResponse findById(UUID id) {
-        return invoiceRepository.findByIdWithDetails(id)
+        UUID tenantId = TenantContext.require();
+        return invoiceRepository.findByIdWithDetails(id, tenantId)
                 .map(inv -> InvoiceResponse.from(inv, paymentRepository.sumAmountByInvoiceId(inv.getId())))
                 .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada: " + id));
     }
 
     @Transactional
     public InvoiceResponse create(CreateInvoiceRequest req) {
-        var workOrder = workOrderRepository.findById(req.workOrderId())
+        UUID tenantId = TenantContext.require();
+        var workOrder = workOrderRepository.findByIdWithDetails(req.workOrderId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada: " + req.workOrderId()));
 
         var invoice = new Invoice();
+        invoice.setTenantId(tenantId);
         invoice.setWorkOrder(workOrder);
         invoice.setIssueDate(req.issueDate() != null ? req.issueDate() : LocalDate.now());
         invoice.setApplyItbis(req.applyItbis());
         invoice.setNotes(req.notes());
-        invoice.setInvoiceNumber(generateNumber());
+        invoice.setInvoiceNumber(generateNumber(tenantId));
 
         BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -85,14 +90,15 @@ public class InvoiceService {
         invoice.setTotal(subtotal.add(itbisAmount));
 
         var saved = invoiceRepository.save(invoice);
-        return invoiceRepository.findByIdWithDetails(saved.getId())
+        return invoiceRepository.findByIdWithDetails(saved.getId(), tenantId)
                 .map(inv -> InvoiceResponse.from(inv, BigDecimal.ZERO))
                 .orElseThrow();
     }
 
     @Transactional
     public InvoiceResponse updateStatus(UUID id, UpdateInvoiceStatusRequest req) {
-        var invoice = invoiceRepository.findByIdWithDetails(id)
+        UUID tenantId = TenantContext.require();
+        var invoice = invoiceRepository.findByIdWithDetails(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada: " + id));
 
         if (invoice.getStatus() == InvoiceStatus.ANULADA) {
@@ -101,14 +107,14 @@ public class InvoiceService {
 
         invoice.setStatus(req.status());
         invoiceRepository.save(invoice);
-        return invoiceRepository.findByIdWithDetails(id)
+        return invoiceRepository.findByIdWithDetails(id, tenantId)
                 .map(inv -> InvoiceResponse.from(inv, paymentRepository.sumAmountByInvoiceId(id)))
                 .orElseThrow();
     }
 
-    private String generateNumber() {
+    private String generateNumber(UUID tenantId) {
         int year = LocalDate.now().getYear();
-        int next = invoiceRepository.findMaxSeqForYear(year) + 1;
+        int next = invoiceRepository.findMaxSeqForYear(tenantId, year) + 1;
         return String.format("FAC-%d-%04d", year, next);
     }
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 
 import java.math.BigDecimal;
 
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Product extends BaseEntity {
+public class Product extends TenantAwareEntity {
 
     @Column(name = "internal_code", nullable = false, length = 50)
     private String internalCode;
@@ -40,3 +40,4 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 }
+

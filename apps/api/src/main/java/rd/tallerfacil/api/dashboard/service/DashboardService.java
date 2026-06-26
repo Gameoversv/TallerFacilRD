@@ -10,6 +10,7 @@ import rd.tallerfacil.api.dashboard.dto.ActivityEvent;
 import rd.tallerfacil.api.dashboard.dto.AlertItem;
 import rd.tallerfacil.api.dashboard.dto.DashboardSummaryResponse;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
 import rd.tallerfacil.api.workorder.domain.WorkOrderStatus;
 import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
@@ -17,6 +18,7 @@ import rd.tallerfacil.api.workorder.repository.WorkOrderRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,30 +31,32 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DashboardSummaryResponse summary() {
+        UUID tenantId = TenantContext.require();
         var openStatuses = List.of(WorkOrderStatus.PENDIENTE, WorkOrderStatus.EN_PROGRESO);
         var todayStart = Instant.now().truncatedTo(ChronoUnit.DAYS);
 
         return new DashboardSummaryResponse(
-                workOrderRepository.countByStatusIn(List.of(WorkOrderStatus.EN_PROGRESO)),
-                workOrderRepository.countByStatusIn(List.of(WorkOrderStatus.COMPLETADA)),
-                workOrderRepository.countByStatusIn(openStatuses),
-                workOrderRepository.countByStatusAndCompletedAtAfter(WorkOrderStatus.COMPLETADA, todayStart),
-                customerRepository.countByActiveTrue(),
-                vehicleRepository.countByActiveTrue()
+                workOrderRepository.countByTenantIdAndStatusIn(tenantId, List.of(WorkOrderStatus.EN_PROGRESO)),
+                workOrderRepository.countByTenantIdAndStatusIn(tenantId, List.of(WorkOrderStatus.COMPLETADA)),
+                workOrderRepository.countByTenantIdAndStatusIn(tenantId, openStatuses),
+                workOrderRepository.countByTenantIdAndStatusAndCompletedAtAfter(tenantId, WorkOrderStatus.COMPLETADA, todayStart),
+                customerRepository.countByTenantIdAndActiveTrue(tenantId),
+                vehicleRepository.countByTenantIdAndActiveTrue(tenantId)
         );
     }
 
     @Transactional(readOnly = true)
     public List<ActivityEvent> activity() {
+        UUID tenantId = TenantContext.require();
         var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-        return receptionRepository.findAllActive(pageable)
+        return receptionRepository.findAllActive(tenantId, pageable)
                 .getContent()
                 .stream()
                 .map(r -> new ActivityEvent(
                         "RECEPTION",
                         r.getVehicle().getCustomer().getFirstName() + " " +
                         r.getVehicle().getCustomer().getLastName() +
-                        " — " + r.getVehicle().getBrand() + " " + r.getVehicle().getModel(),
+                        " – " + r.getVehicle().getBrand() + " " + r.getVehicle().getModel(),
                         r.getId(),
                         r.getCreatedAt()
                 ))
@@ -61,10 +65,11 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public List<AlertItem> alerts() {
+        UUID tenantId = TenantContext.require();
         var openStatuses = List.of(WorkOrderStatus.PENDIENTE, WorkOrderStatus.EN_PROGRESO);
         var sevenDaysAgo = Instant.now().minus(7, ChronoUnit.DAYS);
 
-        return workOrderRepository.findOverdue(openStatuses, sevenDaysAgo)
+        return workOrderRepository.findOverdue(tenantId, openStatuses, sevenDaysAgo)
                 .stream()
                 .map(wo -> {
                     long days = ChronoUnit.DAYS.between(wo.getCreatedAt(), Instant.now());
@@ -73,7 +78,7 @@ public class DashboardService {
                             "OVERDUE_ORDER",
                             vehicle.getBrand() + " " + vehicle.getModel() +
                             " (" + vehicle.getCustomer().getFirstName() + " " +
-                            vehicle.getCustomer().getLastName() + ") — " +
+                            vehicle.getCustomer().getLastName() + ") – " +
                             days + " días sin cerrar",
                             wo.getId(),
                             days

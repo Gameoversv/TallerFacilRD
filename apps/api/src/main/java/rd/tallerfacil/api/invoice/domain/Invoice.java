@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 import rd.tallerfacil.api.workorder.domain.WorkOrder;
 
 import java.math.BigDecimal;
@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Invoice extends BaseEntity {
+public class Invoice extends TenantAwareEntity {
 
     @Column(name = "invoice_number", nullable = false, unique = true, length = 20)
     private String invoiceNumber;
@@ -54,3 +54,4 @@ public class Invoice extends BaseEntity {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItem> items = new ArrayList<>();
 }
+

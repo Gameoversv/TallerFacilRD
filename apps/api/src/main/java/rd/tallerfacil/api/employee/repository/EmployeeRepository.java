@@ -10,11 +10,13 @@ import java.util.UUID;
 
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
-    Page<Employee> findByActiveAndRoleOrderByLastNameAscFirstNameAsc(
-            boolean active, RoleName role, Pageable pageable);
+    Page<Employee> findByTenantIdAndActiveAndRoleOrderByLastNameAscFirstNameAsc(
+            java.util.UUID tenantId, boolean active, RoleName role, Pageable pageable);
 
-    Page<Employee> findByActiveOrderByLastNameAscFirstNameAsc(
-            boolean active, Pageable pageable);
+    Page<Employee> findByTenantIdAndActiveOrderByLastNameAscFirstNameAsc(
+            java.util.UUID tenantId, boolean active, Pageable pageable);
 
-    Page<Employee> findAllByOrderByLastNameAscFirstNameAsc(Pageable pageable);
+    Page<Employee> findByTenantIdOrderByLastNameAscFirstNameAsc(java.util.UUID tenantId, Pageable pageable);
+
+    java.util.Optional<Employee> findByIdAndTenantId(java.util.UUID id, java.util.UUID tenantId);
 }

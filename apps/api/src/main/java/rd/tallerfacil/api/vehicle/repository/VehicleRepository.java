@@ -13,19 +13,20 @@ import java.util.UUID;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
 
-    Optional<Vehicle> findByIdAndActiveTrue(UUID id);
+    Optional<Vehicle> findByIdAndTenantIdAndActiveTrue(UUID id, UUID tenantId);
 
-    List<Vehicle> findByCustomerIdAndActiveTrue(UUID customerId);
+    List<Vehicle> findByCustomerIdAndTenantIdAndActiveTrue(UUID customerId, UUID tenantId);
 
-    boolean existsByVinAndActiveTrue(String vin);
+    boolean existsByVinAndTenantIdAndActiveTrue(String vin, UUID tenantId);
 
-    boolean existsByLicensePlateAndActiveTrue(String licensePlate);
+    boolean existsByLicensePlateAndTenantIdAndActiveTrue(String licensePlate, UUID tenantId);
 
-    long countByActiveTrue();
+    long countByTenantIdAndActiveTrue(UUID tenantId);
 
     @Query(value = """
             SELECT v FROM Vehicle v JOIN FETCH v.customer c
-            WHERE v.active = true
+            WHERE v.tenantId = :tenantId
+            AND v.active = true
             AND (:customerId IS NULL OR c.id = :customerId)
             AND (:q IS NULL OR :q = ''
                 OR LOWER(v.licensePlate) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -35,7 +36,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
             """,
             countQuery = """
             SELECT COUNT(v) FROM Vehicle v JOIN v.customer c
-            WHERE v.active = true
+            WHERE v.tenantId = :tenantId
+            AND v.active = true
             AND (:customerId IS NULL OR c.id = :customerId)
             AND (:q IS NULL OR :q = ''
                 OR LOWER(v.licensePlate) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -43,7 +45,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
                 OR LOWER(c.firstName)    LIKE LOWER(CONCAT('%', :q, '%'))
                 OR LOWER(c.lastName)     LIKE LOWER(CONCAT('%', :q, '%')))
             """)
-    Page<Vehicle> search(@Param("customerId") UUID customerId,
+    Page<Vehicle> search(@Param("tenantId") UUID tenantId,
+                         @Param("customerId") UUID customerId,
                          @Param("q") String q,
                          Pageable pageable);
 }

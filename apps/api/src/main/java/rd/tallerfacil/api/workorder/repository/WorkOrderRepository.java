@@ -21,44 +21,45 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {
             JOIN FETCH r.vehicle v
             JOIN FETCH v.customer
             LEFT JOIN FETCH wo.items
-            WHERE wo.id = :id
+            WHERE wo.id = :id AND wo.tenantId = :tenantId
             """)
-    Optional<WorkOrder> findByIdWithDetails(@Param("id") UUID id);
+    Optional<WorkOrder> findByIdWithDetails(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
     @Query("""
             SELECT wo FROM WorkOrder wo
             JOIN FETCH wo.reception r
             JOIN FETCH r.vehicle v
             JOIN FETCH v.customer
-            WHERE r.id = :receptionId
+            WHERE r.id = :receptionId AND wo.tenantId = :tenantId
             """)
-    Optional<WorkOrder> findByReceptionId(@Param("receptionId") UUID receptionId);
+    Optional<WorkOrder> findByReceptionId(@Param("receptionId") UUID receptionId, @Param("tenantId") UUID tenantId);
 
     @Query("""
             SELECT wo FROM WorkOrder wo
             JOIN FETCH wo.reception r
             JOIN FETCH r.vehicle v
             LEFT JOIN FETCH wo.items
-            WHERE v.id = :vehicleId
+            WHERE wo.tenantId = :tenantId AND v.id = :vehicleId
             ORDER BY wo.createdAt DESC
             """)
-    List<WorkOrder> findByVehicleIdWithItems(@Param("vehicleId") UUID vehicleId);
+    List<WorkOrder> findByVehicleIdWithItems(@Param("tenantId") UUID tenantId, @Param("vehicleId") UUID vehicleId);
 
-    boolean existsByReceptionId(UUID receptionId);
+    boolean existsByReceptionIdAndTenantId(UUID receptionId, UUID tenantId);
 
-    long countByStatusIn(List<WorkOrderStatus> statuses);
+    long countByTenantIdAndStatusIn(UUID tenantId, List<WorkOrderStatus> statuses);
 
-    long countByStatusAndCompletedAtAfter(WorkOrderStatus status, Instant after);
+    long countByTenantIdAndStatusAndCompletedAtAfter(UUID tenantId, WorkOrderStatus status, Instant after);
 
     @Query("""
             SELECT wo FROM WorkOrder wo
             JOIN FETCH wo.reception r
             JOIN FETCH r.vehicle v
             JOIN FETCH v.customer
-            WHERE wo.status IN :statuses AND wo.createdAt < :before
+            WHERE wo.tenantId = :tenantId AND wo.status IN :statuses AND wo.createdAt < :before
             ORDER BY wo.createdAt ASC
             """)
-    List<WorkOrder> findOverdue(@Param("statuses") List<WorkOrderStatus> statuses,
+    List<WorkOrder> findOverdue(@Param("tenantId") UUID tenantId,
+                                @Param("statuses") List<WorkOrderStatus> statuses,
                                 @Param("before") Instant before);
 
     @Query("""
@@ -66,7 +67,9 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {
             JOIN FETCH wo.reception r
             JOIN FETCH r.vehicle v
             JOIN FETCH v.customer
-            WHERE (:status IS NULL OR wo.status = :status)
+            WHERE wo.tenantId = :tenantId AND (:status IS NULL OR wo.status = :status)
             """)
-    Page<WorkOrder> findAllWithDetails(@Param("status") WorkOrderStatus status, Pageable pageable);
+    Page<WorkOrder> findAllWithDetails(@Param("tenantId") UUID tenantId,
+                                       @Param("status") WorkOrderStatus status,
+                                       Pageable pageable);
 }

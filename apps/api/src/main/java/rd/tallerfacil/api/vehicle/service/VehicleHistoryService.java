@@ -7,6 +7,7 @@ import rd.tallerfacil.api.invoice.domain.Invoice;
 import rd.tallerfacil.api.invoice.repository.InvoiceRepository;
 import rd.tallerfacil.api.reception.domain.Reception;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 import rd.tallerfacil.api.vehicle.domain.Vehicle;
@@ -31,18 +32,17 @@ public class VehicleHistoryService {
 
     @Transactional(readOnly = true)
     public ApiResponse<VehicleHistoryResponse> getHistory(UUID vehicleId) {
-        Vehicle vehicle = vehicleRepository.findByIdAndActiveTrue(vehicleId)
+        UUID tenantId = TenantContext.require();
+        Vehicle vehicle = vehicleRepository.findByIdAndTenantIdAndActiveTrue(vehicleId, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado: " + vehicleId));
 
-        List<Reception> receptions = receptionRepository.findByVehicleId(vehicleId);
+        List<Reception> receptions = receptionRepository.findByVehicleId(tenantId, vehicleId);
 
-        // Map receptionId → WorkOrder (with items)
-        List<WorkOrder> workOrders = workOrderRepository.findByVehicleIdWithItems(vehicleId);
+        List<WorkOrder> workOrders = workOrderRepository.findByVehicleIdWithItems(tenantId, vehicleId);
         Map<UUID, WorkOrder> woByReceptionId = workOrders.stream()
                 .collect(Collectors.toMap(wo -> wo.getReception().getId(), wo -> wo, (a, b) -> a));
 
-        // Map workOrderId → Invoices
-        List<Invoice> invoices = invoiceRepository.findByVehicleId(vehicleId);
+        List<Invoice> invoices = invoiceRepository.findByVehicleId(tenantId, vehicleId);
         Map<UUID, List<Invoice>> invoicesByWoId = invoices.stream()
                 .collect(Collectors.groupingBy(inv -> inv.getWorkOrder().getId()));
 

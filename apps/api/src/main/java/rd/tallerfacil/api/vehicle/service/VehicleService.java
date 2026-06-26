@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rd.tallerfacil.api.customer.repository.CustomerRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 import rd.tallerfacil.api.vehicle.domain.Vehicle;
 import rd.tallerfacil.api.vehicle.domain.VehicleModifications;
@@ -26,40 +27,43 @@ public class VehicleService {
 
     @Transactional(readOnly = true)
     public Page<VehicleResponse> search(UUID customerId, String q, Pageable pageable) {
-        return vehicleRepository.search(customerId, q, pageable).map(VehicleResponse::from);
+        return vehicleRepository.search(TenantContext.require(), customerId, q, pageable)
+                .map(VehicleResponse::from);
     }
 
     @Transactional(readOnly = true)
     public VehicleResponse findById(UUID id) {
-        return vehicleRepository.findByIdAndActiveTrue(id)
+        return vehicleRepository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .map(VehicleResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado: " + id));
     }
 
     @Transactional(readOnly = true)
     public List<VehicleResponse> findByCustomer(UUID customerId) {
-        if (!customerRepository.existsById(customerId)) {
-            throw new ResourceNotFoundException("Cliente no encontrado: " + customerId);
-        }
-        return vehicleRepository.findByCustomerIdAndActiveTrue(customerId)
+        UUID tenantId = TenantContext.require();
+        customerRepository.findByIdAndTenantIdAndActiveTrue(customerId, tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + customerId));
+        return vehicleRepository.findByCustomerIdAndTenantIdAndActiveTrue(customerId, tenantId)
                 .stream().map(VehicleResponse::from).toList();
     }
 
     @Transactional
     public VehicleResponse create(CreateVehicleRequest req) {
+        UUID tenantId = TenantContext.require();
         if (req.vin() != null && !req.vin().isBlank()
-                && vehicleRepository.existsByVinAndActiveTrue(req.vin())) {
+                && vehicleRepository.existsByVinAndTenantIdAndActiveTrue(req.vin(), tenantId)) {
             throw new IllegalArgumentException("Ya existe un vehículo con ese VIN");
         }
         if (req.licensePlate() != null && !req.licensePlate().isBlank()
-                && vehicleRepository.existsByLicensePlateAndActiveTrue(req.licensePlate())) {
+                && vehicleRepository.existsByLicensePlateAndTenantIdAndActiveTrue(req.licensePlate(), tenantId)) {
             throw new IllegalArgumentException("Ya existe un vehículo con esa placa");
         }
 
-        var customer = customerRepository.findByIdAndActiveTrue(req.customerId())
+        var customer = customerRepository.findByIdAndTenantIdAndActiveTrue(req.customerId(), tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + req.customerId()));
 
         var vehicle = new Vehicle();
+        vehicle.setTenantId(tenantId);
         vehicle.setBrand(req.brand());
         vehicle.setModel(req.model());
         vehicle.setYear(req.year());
@@ -77,7 +81,7 @@ public class VehicleService {
 
     @Transactional
     public VehicleResponse update(UUID id, UpdateVehicleRequest req) {
-        var vehicle = vehicleRepository.findByIdAndActiveTrue(id)
+        var vehicle = vehicleRepository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado: " + id));
 
         if (req.brand() != null) vehicle.setBrand(req.brand());
@@ -96,7 +100,7 @@ public class VehicleService {
 
     @Transactional
     public void delete(UUID id) {
-        var vehicle = vehicleRepository.findByIdAndActiveTrue(id)
+        var vehicle = vehicleRepository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado: " + id));
         vehicle.setActive(false);
         vehicleRepository.save(vehicle);
@@ -106,11 +110,6 @@ public class VehicleService {
             rd.tallerfacil.api.vehicle.dto.VehicleModificationsDto dto) {
         if (dto == null) return null;
         return new VehicleModifications(
-                dto.turbo(),
-                dto.suspension(),
-                dto.tune(),
-                dto.injectors(),
-                dto.fuelType()
-        );
+                dto.turbo(), dto.suspension(), dto.tune(), dto.injectors(), dto.fuelType());
     }
 }

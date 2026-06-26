@@ -13,10 +13,10 @@ import java.util.UUID;
 
 public interface SupplierRepository extends JpaRepository<Supplier, UUID> {
 
-    @Query("SELECT s FROM Supplier s WHERE s.active = true AND (:q IS NULL OR :q = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%')))")
-    Page<Supplier> search(@Param("q") String q, Pageable pageable);
+    @Query("SELECT s FROM Supplier s WHERE s.tenantId = :tenantId AND s.active = true AND (:q IS NULL OR :q = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%')))")
+    Page<Supplier> search(@Param("tenantId") UUID tenantId, @Param("q") String q, Pageable pageable);
 
-    List<Supplier> findByActiveTrueOrderByNameAsc();
+    List<Supplier> findByTenantIdAndActiveTrueOrderByNameAsc(UUID tenantId);
 
-    Optional<Supplier> findByIdAndActiveTrue(UUID id);
+    Optional<Supplier> findByIdAndTenantIdAndActiveTrue(UUID id, UUID tenantId);
 }

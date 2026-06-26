@@ -10,6 +10,7 @@ import rd.tallerfacil.api.customer.dto.CreateCustomerRequest;
 import rd.tallerfacil.api.customer.dto.CustomerResponse;
 import rd.tallerfacil.api.customer.dto.UpdateCustomerRequest;
 import rd.tallerfacil.api.customer.repository.CustomerRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 
 import java.util.UUID;
@@ -21,23 +22,25 @@ public class CustomerService {
     private final CustomerRepository repository;
 
     public Page<CustomerResponse> search(String q, Pageable pageable) {
-        return repository.search(q, pageable).map(CustomerResponse::from);
+        return repository.search(TenantContext.require(), q, pageable).map(CustomerResponse::from);
     }
 
     public CustomerResponse findById(UUID id) {
-        return repository.findByIdAndActiveTrue(id)
+        return repository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .map(CustomerResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + id));
     }
 
     @Transactional
     public CustomerResponse create(CreateCustomerRequest req) {
+        UUID tenantId = TenantContext.require();
         if (req.documentId() != null && !req.documentId().isBlank()
-                && repository.existsByDocumentIdAndActiveTrue(req.documentId())) {
+                && repository.existsByDocumentIdAndTenantIdAndActiveTrue(req.documentId(), tenantId)) {
             throw new IllegalArgumentException("Ya existe un cliente con esa cédula/RNC");
         }
 
         var customer = new Customer();
+        customer.setTenantId(tenantId);
         customer.setFirstName(req.firstName());
         customer.setLastName(req.lastName());
         customer.setPhone(req.phone());
@@ -51,7 +54,7 @@ public class CustomerService {
 
     @Transactional
     public CustomerResponse update(UUID id, UpdateCustomerRequest req) {
-        var customer = repository.findByIdAndActiveTrue(id)
+        var customer = repository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + id));
 
         if (req.firstName() != null) customer.setFirstName(req.firstName());
@@ -67,7 +70,7 @@ public class CustomerService {
 
     @Transactional
     public void delete(UUID id) {
-        var customer = repository.findByIdAndActiveTrue(id)
+        var customer = repository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + id));
         customer.setActive(false);
         repository.save(customer);

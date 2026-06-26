@@ -9,6 +9,7 @@ import rd.tallerfacil.api.employee.domain.Employee;
 import rd.tallerfacil.api.employee.dto.EmployeeRequest;
 import rd.tallerfacil.api.employee.dto.EmployeeResponse;
 import rd.tallerfacil.api.employee.repository.EmployeeRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 
@@ -23,14 +24,15 @@ public class EmployeeService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<EmployeeResponse>> list(String role, Boolean active, int page, int size) {
+        UUID tenantId = TenantContext.require();
         var pageable = PageRequest.of(page, size);
 
         var result = (role != null && active != null)
-                ? employeeRepository.findByActiveAndRoleOrderByLastNameAscFirstNameAsc(
-                        active, RoleName.valueOf(role), pageable)
+                ? employeeRepository.findByTenantIdAndActiveAndRoleOrderByLastNameAscFirstNameAsc(
+                        tenantId, active, RoleName.valueOf(role), pageable)
                 : (active != null)
-                ? employeeRepository.findByActiveOrderByLastNameAscFirstNameAsc(active, pageable)
-                : employeeRepository.findAllByOrderByLastNameAscFirstNameAsc(pageable);
+                ? employeeRepository.findByTenantIdAndActiveOrderByLastNameAscFirstNameAsc(tenantId, active, pageable)
+                : employeeRepository.findByTenantIdOrderByLastNameAscFirstNameAsc(tenantId, pageable);
 
         var data = result.getContent().stream().map(EmployeeResponse::from).toList();
         return ApiResponse.paged(data, result.getTotalElements(), page, size);
@@ -38,7 +40,7 @@ public class EmployeeService {
 
     @Transactional(readOnly = true)
     public EmployeeResponse findById(UUID id) {
-        return employeeRepository.findById(id)
+        return employeeRepository.findByIdAndTenantId(id, TenantContext.require())
                 .map(EmployeeResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado: " + id));
     }
@@ -46,7 +48,9 @@ public class EmployeeService {
     @Transactional
     public EmployeeResponse create(EmployeeRequest req) {
         validate(req);
+        UUID tenantId = TenantContext.require();
         var employee = new Employee();
+        employee.setTenantId(tenantId);
         applyRequest(employee, req);
         var saved = employeeRepository.saveAndFlush(employee);
         return EmployeeResponse.from(employeeRepository.findById(saved.getId()).orElse(saved));
@@ -55,7 +59,7 @@ public class EmployeeService {
     @Transactional
     public EmployeeResponse update(UUID id, EmployeeRequest req) {
         validate(req);
-        var employee = employeeRepository.findById(id)
+        var employee = employeeRepository.findByIdAndTenantId(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado: " + id));
         applyRequest(employee, req);
         return EmployeeResponse.from(employeeRepository.save(employee));
@@ -63,7 +67,7 @@ public class EmployeeService {
 
     @Transactional
     public void toggleActive(UUID id) {
-        var employee = employeeRepository.findById(id)
+        var employee = employeeRepository.findByIdAndTenantId(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado: " + id));
         employee.setActive(!employee.isActive());
         employeeRepository.save(employee);

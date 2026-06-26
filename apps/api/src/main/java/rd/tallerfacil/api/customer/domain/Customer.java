@@ -2,14 +2,14 @@ package rd.tallerfacil.api.customer.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 
 @Entity
 @Table(name = "customers")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Customer extends BaseEntity {
+public class Customer extends TenantAwareEntity {
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;

@@ -5,14 +5,14 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import rd.tallerfacil.api.customer.domain.Customer;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 
 @Entity
 @Table(name = "vehicles")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Vehicle extends BaseEntity {
+public class Vehicle extends TenantAwareEntity {
 
     @Column(nullable = false, length = 100)
     private String brand;

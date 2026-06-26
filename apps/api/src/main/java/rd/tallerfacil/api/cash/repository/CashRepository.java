@@ -14,11 +14,17 @@ import java.util.UUID;
 
 public interface CashRepository extends JpaRepository<CashTransaction, UUID> {
 
-    Page<CashTransaction> findByTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
-            LocalDate from, LocalDate to, Pageable pageable);
+    Page<CashTransaction> findByTenantIdAndTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
+            UUID tenantId, LocalDate from, LocalDate to, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM CashTransaction t WHERE t.type = :type AND t.transactionDate BETWEEN :from AND :to")
-    BigDecimal sumByTypeAndDateRange(
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0) FROM CashTransaction t
+            WHERE t.tenantId = :tenantId
+            AND t.type = :type
+            AND t.transactionDate BETWEEN :from AND :to
+            """)
+    BigDecimal sumByTenantIdAndTypeAndDateRange(
+            @Param("tenantId") UUID tenantId,
             @Param("type") TransactionType type,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);

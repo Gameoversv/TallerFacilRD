@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,8 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Credenciales incorrectas";
+        (err as { response?: { data?: { error?: string } } })?.response?.data
+          ?.error ?? "Credenciales incorrectas";
       setServerError(message);
     }
   }
@@ -100,6 +102,13 @@ export default function LoginPage() {
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Entrando..." : "Entrar"}
           </Button>
+
+          <p className="text-center text-xs text-muted-foreground">
+            ¿No tienes taller registrado?{" "}
+            <Link href="/register" className="text-primary hover:underline">
+              Créalo gratis
+            </Link>
+          </p>
         </form>
       </CardContent>
     </Card>

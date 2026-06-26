@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.workorder.domain.WorkOrder;
 import rd.tallerfacil.api.workorder.domain.WorkOrderItem;
@@ -30,14 +31,16 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrderResponse create(CreateWorkOrderRequest req) {
-        var reception = receptionRepository.findByIdWithVehicle(req.receptionId())
+        UUID tenantId = TenantContext.require();
+        var reception = receptionRepository.findByIdWithVehicle(req.receptionId(), tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Recepción no encontrada: " + req.receptionId()));
 
-        if (workOrderRepository.existsByReceptionId(req.receptionId())) {
+        if (workOrderRepository.existsByReceptionIdAndTenantId(req.receptionId(), tenantId)) {
             throw new IllegalStateException("La recepción ya tiene una orden de trabajo asignada");
         }
 
         var wo = new WorkOrder();
+        wo.setTenantId(tenantId);
         wo.setReception(reception);
         wo.setDiagnosis(req.diagnosis());
         wo.setAssignedTo(req.assignedTo());
@@ -48,22 +51,23 @@ public class WorkOrderService {
 
     @Transactional(readOnly = true)
     public WorkOrderResponse findById(UUID id) {
-        return workOrderRepository.findByIdWithDetails(id)
+        return workOrderRepository.findByIdWithDetails(id, TenantContext.require())
                 .map(WorkOrderResponse::from)
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada: " + id));
     }
 
     @Transactional(readOnly = true)
     public WorkOrderResponse findByReception(UUID receptionId) {
-        return workOrderRepository.findByReceptionId(receptionId)
+        return workOrderRepository.findByReceptionId(receptionId, TenantContext.require())
                 .map(WorkOrderResponse::from)
                 .orElseThrow(() -> new IllegalArgumentException("No existe orden para la recepción: " + receptionId));
     }
 
     @Transactional(readOnly = true)
     public ApiResponse<List<WorkOrderResponse>> findAll(WorkOrderStatus status, int page, int size) {
+        UUID tenantId = TenantContext.require();
         Page<WorkOrder> result = workOrderRepository.findAllWithDetails(
-                status,
+                tenantId, status,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
         );
         List<WorkOrderResponse> data = result.getContent().stream()
@@ -74,7 +78,7 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrderResponse addItem(UUID id, AddWorkOrderItemRequest req) {
-        var wo = workOrderRepository.findByIdWithDetails(id)
+        var wo = workOrderRepository.findByIdWithDetails(id, TenantContext.require())
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada: " + id));
 
         if (wo.getStatus() == WorkOrderStatus.COMPLETADA || wo.getStatus() == WorkOrderStatus.CANCELADA) {
@@ -95,7 +99,7 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrderResponse removeItem(UUID orderId, UUID itemId) {
-        var wo = workOrderRepository.findByIdWithDetails(orderId)
+        var wo = workOrderRepository.findByIdWithDetails(orderId, TenantContext.require())
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada: " + orderId));
 
         if (wo.getStatus() == WorkOrderStatus.COMPLETADA || wo.getStatus() == WorkOrderStatus.CANCELADA) {
@@ -112,7 +116,7 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrderResponse updateDiagnostic(UUID id, UpdateDiagnosticRequest req) {
-        var wo = workOrderRepository.findByIdWithDetails(id)
+        var wo = workOrderRepository.findByIdWithDetails(id, TenantContext.require())
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada: " + id));
 
         wo.setDiagnosis(req.diagnosis());
@@ -122,7 +126,7 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrderResponse updateStatus(UUID id, UpdateWorkOrderStatusRequest req) {
-        var wo = workOrderRepository.findByIdWithDetails(id)
+        var wo = workOrderRepository.findByIdWithDetails(id, TenantContext.require())
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada: " + id));
 
         wo.transitionTo(req.status());

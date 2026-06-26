@@ -12,6 +12,7 @@ import rd.tallerfacil.api.inventory.dto.CreateProductRequest;
 import rd.tallerfacil.api.inventory.dto.ProductResponse;
 import rd.tallerfacil.api.inventory.dto.UpdateProductRequest;
 import rd.tallerfacil.api.inventory.repository.ProductRepository;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.shared.web.ResourceNotFoundException;
 
@@ -26,8 +27,9 @@ public class InventoryService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ProductResponse>> search(ProductCategory category, boolean lowStock, int page, int size) {
+        UUID tenantId = TenantContext.require();
         Page<Product> result = repository.search(
-                category, lowStock,
+                tenantId, category, lowStock,
                 PageRequest.of(page, size, Sort.by("internalCode").ascending())
         );
         List<ProductResponse> data = result.getContent().stream().map(ProductResponse::from).toList();
@@ -36,23 +38,25 @@ public class InventoryService {
 
     @Transactional(readOnly = true)
     public List<ProductResponse> findLowStock() {
-        return repository.findLowStock().stream().map(ProductResponse::from).toList();
+        return repository.findLowStock(TenantContext.require()).stream().map(ProductResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public ProductResponse findById(UUID id) {
-        return repository.findByIdAndActiveTrue(id)
+        return repository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .map(ProductResponse::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
     }
 
     @Transactional
     public ProductResponse create(CreateProductRequest req) {
-        if (repository.existsByInternalCodeAndActiveTrue(req.internalCode())) {
+        UUID tenantId = TenantContext.require();
+        if (repository.existsByInternalCodeAndTenantIdAndActiveTrue(req.internalCode(), tenantId)) {
             throw new IllegalArgumentException("Ya existe un producto con el código: " + req.internalCode());
         }
 
         var product = new Product();
+        product.setTenantId(tenantId);
         product.setInternalCode(req.internalCode());
         product.setDescription(req.description());
         product.setPurchaseCost(req.purchaseCost());
@@ -66,11 +70,12 @@ public class InventoryService {
 
     @Transactional
     public ProductResponse update(UUID id, UpdateProductRequest req) {
-        var product = repository.findByIdAndActiveTrue(id)
+        UUID tenantId = TenantContext.require();
+        var product = repository.findByIdAndTenantIdAndActiveTrue(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
 
         if (req.internalCode() != null && !req.internalCode().equals(product.getInternalCode())
-                && repository.existsByInternalCodeAndActiveTrue(req.internalCode())) {
+                && repository.existsByInternalCodeAndTenantIdAndActiveTrue(req.internalCode(), tenantId)) {
             throw new IllegalArgumentException("Ya existe un producto con el código: " + req.internalCode());
         }
 
@@ -87,7 +92,7 @@ public class InventoryService {
 
     @Transactional
     public void delete(UUID id) {
-        var product = repository.findByIdAndActiveTrue(id)
+        var product = repository.findByIdAndTenantIdAndActiveTrue(id, TenantContext.require())
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id));
         product.setActive(false);
         repository.save(product);

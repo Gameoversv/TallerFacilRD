@@ -4,14 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import rd.tallerfacil.api.shared.domain.BaseEntity;
+import rd.tallerfacil.api.shared.domain.TenantAwareEntity;
 
 @Entity
 @Table(name = "suppliers")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Supplier extends BaseEntity {
+public class Supplier extends TenantAwareEntity {
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -25,3 +25,4 @@ public class Supplier extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 }
+

@@ -16,24 +16,26 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     @Query("""
             SELECT p FROM Product p
-            WHERE p.active = true
+            WHERE p.tenantId = :tenantId
+              AND p.active = true
               AND (:category IS NULL OR p.category = :category)
               AND (:lowStock = false OR p.currentStock <= p.minStock)
             ORDER BY p.internalCode ASC
             """)
     Page<Product> search(
+            @Param("tenantId") UUID tenantId,
             @Param("category") ProductCategory category,
             @Param("lowStock") boolean lowStock,
             Pageable pageable
     );
 
-    @Query("SELECT p FROM Product p WHERE p.active = true AND p.currentStock <= p.minStock ORDER BY p.currentStock ASC")
-    List<Product> findLowStock();
+    @Query("SELECT p FROM Product p WHERE p.tenantId = :tenantId AND p.active = true AND p.currentStock <= p.minStock ORDER BY p.currentStock ASC")
+    List<Product> findLowStock(@Param("tenantId") UUID tenantId);
 
-    Optional<Product> findByIdAndActiveTrue(UUID id);
+    Optional<Product> findByIdAndTenantIdAndActiveTrue(UUID id, UUID tenantId);
 
-    boolean existsByInternalCodeAndActiveTrue(String internalCode);
+    boolean existsByInternalCodeAndTenantIdAndActiveTrue(String internalCode, UUID tenantId);
 
-    @Query("SELECT COUNT(p) FROM Product p WHERE p.active = true AND p.currentStock <= p.minStock")
-    long countLowStock();
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.tenantId = :tenantId AND p.active = true AND p.currentStock <= p.minStock")
+    long countLowStock(@Param("tenantId") UUID tenantId);
 }
