@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, X } from "lucide-react";
 
@@ -26,8 +27,13 @@ export function stopImpersonation(): void {
 
 export default function ImpersonationBanner() {
   const router = useRouter();
+  const [impersonating, setImpersonating] = useState(false);
 
-  if (!isImpersonating()) return null;
+  useEffect(() => {
+    setImpersonating(isImpersonating());
+  }, []);
+
+  if (!impersonating) return null;
 
   function handleExit() {
     stopImpersonation();
