@@ -46,6 +46,8 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {
 
     boolean existsByReceptionIdAndTenantId(UUID receptionId, UUID tenantId);
 
+    long countByTenantId(UUID tenantId);
+
     long countByTenantIdAndStatusIn(UUID tenantId, List<WorkOrderStatus> statuses);
 
     long countByTenantIdAndStatusAndCompletedAtAfter(UUID tenantId, WorkOrderStatus status, Instant after);

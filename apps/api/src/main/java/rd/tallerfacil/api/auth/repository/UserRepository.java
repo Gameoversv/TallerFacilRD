@@ -9,4 +9,9 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    long countByTenantId(java.util.UUID tenantId);
+    long countByTenantIdIsNotNull();
+    java.util.List<User> findByTenantId(java.util.UUID tenantId);
+    org.springframework.data.domain.Page<User> findByEmailContainingIgnoreCaseAndTenantIdIsNotNull(
+        String email, org.springframework.data.domain.Pageable pageable);
 }

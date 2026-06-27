@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { isAuthenticated, getUser, clearToken } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
+import ImpersonationBanner from "@/components/ImpersonationBanner";
 
 export default function DashboardLayout({
   children,
@@ -34,6 +35,7 @@ export default function DashboardLayout({
       <Sidebar user={user} onLogout={handleLogout} />
 
       <div className="flex min-w-0 flex-1 flex-col">
+        <ImpersonationBanner />
         <Topbar />
         <main className="flex-1 overflow-y-auto print:overflow-visible">
           <div className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8 print:max-w-none print:p-0">

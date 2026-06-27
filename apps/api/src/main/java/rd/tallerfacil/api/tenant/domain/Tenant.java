@@ -51,7 +51,7 @@ public class Tenant extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private TenantStatus status = TenantStatus.TRIAL;
+    private TenantStatus status = TenantStatus.PENDING;
 
     @Column(name = "trial_ends_at")
     private Instant trialEndsAt;
