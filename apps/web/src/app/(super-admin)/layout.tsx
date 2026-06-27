@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getUser, isAuthenticated, clearToken } from "@/lib/auth";
-import { LayoutDashboard, Building2, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Building2, LogOut, Shield, Users, ScrollText } from "lucide-react";
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -42,6 +42,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         <nav className="flex-1 space-y-0.5 p-2">
           <NavItem href="/super-admin/dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem href="/super-admin/talleres" icon={Building2} label="Talleres" />
+          <NavItem href="/super-admin/usuarios" icon={Users} label="Usuarios" />
+          <NavItem href="/super-admin/audit" icon={ScrollText} label="Audit Log" />
         </nav>
 
         <button

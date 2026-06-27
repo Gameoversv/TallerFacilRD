@@ -31,20 +31,32 @@ public class DataSeeder implements ApplicationRunner {
     @Value("${app.seed.admin-name:Administrador}")
     private String adminName;
 
+    @Value("${app.seed.super-admin-email:superadmin@tallerfacil.rd}")
+    private String superAdminEmail;
+
+    @Value("${app.seed.super-admin-password:superadmin123}")
+    private String superAdminPassword;
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (userRepository.existsByEmail(adminEmail)) {
-            return;
-        }
-
         var ownerRole = roleRepository.findByName(RoleName.OWNER)
                 .orElseThrow(() -> new IllegalStateException("Rol OWNER no encontrado — verificar migración V2"));
 
-        var admin = new User(adminName, adminEmail, passwordEncoder.encode(adminPassword));
-        admin.addRole(ownerRole);
-        userRepository.save(admin);
+        if (!userRepository.existsByEmail(adminEmail)) {
+            var admin = new User(adminName, adminEmail, passwordEncoder.encode(adminPassword));
+            admin.addRole(ownerRole);
+            userRepository.save(admin);
+            log.info("Admin creado: {} / {}", adminEmail, adminPassword);
+        }
 
-        log.info("Admin creado: {} / {}", adminEmail, adminPassword);
+        if (!userRepository.existsByEmail(superAdminEmail)) {
+            var superAdminRole = roleRepository.findByName(RoleName.SUPER_ADMIN)
+                    .orElseThrow(() -> new IllegalStateException("Rol SUPER_ADMIN no encontrado"));
+            var superAdmin = new User("Super Admin", superAdminEmail, passwordEncoder.encode(superAdminPassword));
+            superAdmin.addRole(superAdminRole);
+            userRepository.save(superAdmin);
+            log.info("Super Admin creado: {} / {}", superAdminEmail, superAdminPassword);
+        }
     }
 }

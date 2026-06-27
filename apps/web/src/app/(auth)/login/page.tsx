@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import api from "@/lib/api";
-import { setToken } from "@/lib/auth";
+import { setToken, getUser } from "@/lib/auth";
 import { LogoMark } from "@/components/brand/Logo";
 
 const loginSchema = z.object({
@@ -39,7 +39,8 @@ export default function LoginPage() {
         data,
       );
       setToken(res.data.data.token);
-      router.push("/dashboard");
+      const user = getUser();
+      router.push(user?.role === "SUPER_ADMIN" ? "/super-admin/dashboard" : "/dashboard");
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } })?.response?.data

@@ -3,11 +3,11 @@ package rd.tallerfacil.api.tenant.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import rd.tallerfacil.api.tenant.domain.Tenant;
 import rd.tallerfacil.api.tenant.domain.TenantStatus;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,6 +19,11 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID> {
 
     long countByStatus(TenantStatus status);
 
-    @Query("SELECT t FROM Tenant t WHERE :q IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :q, '%'))")
-    Page<Tenant> search(@Param("q") String q, Pageable pageable);
+    Page<Tenant> findAll(Pageable pageable);
+
+    Page<Tenant> findByStatus(TenantStatus status, Pageable pageable);
+
+    List<Tenant> findByTrialEndsAtBetweenOrderByTrialEndsAtAsc(Instant from, Instant to);
+
+    List<Tenant> findTop5ByOrderByCreatedAtDesc();
 }
