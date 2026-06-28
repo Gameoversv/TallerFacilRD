@@ -27,5 +27,7 @@ export interface Reception {
   checklist: ReceptionChecklist;
   photos: string[];
   notes?: string;
+  signature_data?: string;
+  signed_at?: string;
   created_at: string;
 }

@@ -72,3 +72,15 @@ export function useAddReceptionPhoto() {
       qc.invalidateQueries({ queryKey: ["receptions", vars.id] }),
   });
 }
+
+export function useAddReceptionSignature() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, signatureData }: { id: string; signatureData: string }) =>
+      api
+        .put(`/api/receptions/${id}/signature`, { signature_data: signatureData })
+        .then((r) => r.data),
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: ["receptions", vars.id] }),
+  });
+}

@@ -3,6 +3,7 @@ package rd.tallerfacil.api.vehicle.dto;
 import rd.tallerfacil.api.invoice.domain.Invoice;
 import rd.tallerfacil.api.invoice.domain.InvoiceStatus;
 import rd.tallerfacil.api.reception.domain.Reception;
+import rd.tallerfacil.api.reception.domain.ReceptionChecklist;
 import rd.tallerfacil.api.workorder.domain.WorkOrder;
 import rd.tallerfacil.api.workorder.domain.WorkOrderItem;
 
@@ -26,6 +27,8 @@ public record VehicleHistoryResponse(
             UUID receptionId,
             LocalDate receptionDate,
             String complaint,
+            ReceptionChecklist checklist,
+            String signatureData,
             WorkOrderSummary workOrder
     ) {}
 
@@ -66,6 +69,8 @@ public record VehicleHistoryResponse(
                 r.getId(),
                 r.getCreatedAt() != null ? r.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDate() : null,
                 r.getReportedProblem(),
+                r.getChecklist(),
+                r.getSignatureData(),
                 woSummary
         );
     }

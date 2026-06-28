@@ -18,6 +18,8 @@ public record ReceptionResponse(
         ReceptionChecklist checklist,
         List<String> photos,
         String notes,
+        String signatureData,
+        Instant signedAt,
         Instant createdAt
 ) {
     public static ReceptionResponse from(Reception r) {
@@ -35,6 +37,8 @@ public record ReceptionResponse(
                 r.getChecklist(),
                 r.getPhotos(),
                 r.getNotes(),
+                r.getSignatureData(),
+                r.getSignedAt(),
                 r.getCreatedAt()
         );
     }

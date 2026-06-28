@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import rd.tallerfacil.api.reception.domain.Reception;
 import rd.tallerfacil.api.reception.dto.CreateReceptionRequest;
 import rd.tallerfacil.api.reception.dto.ReceptionResponse;
+import rd.tallerfacil.api.reception.dto.SaveSignatureRequest;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
 import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.storage.StorageService;
@@ -16,6 +17,7 @@ import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.vehicle.repository.VehicleRepository;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -86,6 +88,19 @@ public class ReceptionService {
                 .stream()
                 .map(ReceptionResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public ReceptionResponse saveSignature(UUID id, SaveSignatureRequest req) {
+        UUID tenantId = TenantContext.require();
+        var reception = receptionRepository.findByIdWithVehicle(id, tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("Recepción no encontrada: " + id));
+        if (req.signatureData() == null || req.signatureData().isBlank()) {
+            throw new IllegalArgumentException("Firma no puede estar vacía");
+        }
+        reception.setSignatureData(req.signatureData());
+        reception.setSignedAt(Instant.now());
+        return ReceptionResponse.from(receptionRepository.save(reception));
     }
 
     private String getExtension(String filename) {

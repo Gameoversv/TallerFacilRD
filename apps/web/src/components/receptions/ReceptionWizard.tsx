@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import SignaturePad from "signature_pad";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateReception, useAddReceptionPhoto } from "@/hooks/useReceptions";
+import {
+  useCreateReception,
+  useAddReceptionPhoto,
+  useAddReceptionSignature,
+} from "@/hooks/useReceptions";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useCustomerVehicles } from "@/hooks/useVehicles";
 
@@ -31,18 +36,22 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const STEPS = ["Cliente & Vehículo", "Checklist", "Fotos", "Confirmar"];
+const STEPS = ["Cliente & Vehículo", "Checklist", "Fotos", "Firma", "Confirmar"];
 
 export function ReceptionWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState<File[]>([]);
-  const [createdId, setCreatedId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
+  const [signatureError, setSignatureError] = useState<string | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const padRef = useRef<SignaturePad | null>(null);
 
   const createReception = useCreateReception();
   const addPhoto = useAddReceptionPhoto();
+  const addSignature = useAddReceptionSignature();
   const { data: customersData } = useCustomers(customerSearch, 0);
   const customers = customersData?.data ?? [];
 
@@ -65,6 +74,29 @@ export function ReceptionWizard() {
   const { data: vehiclesData } = useCustomerVehicles(selectedCustomerId ?? "");
   const vehicles = vehiclesData?.data ?? [];
 
+  // Initialize signature pad when entering step 3
+  useEffect(() => {
+    if (step !== 3 || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const pad = new SignaturePad(canvas, { penColor: "#1e293b" });
+    padRef.current = pad;
+
+    const resize = () => {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.scale(ratio, ratio);
+      pad.clear();
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    return () => {
+      window.removeEventListener("resize", resize);
+      pad.off();
+    };
+  }, [step]);
+
   const handlePhotoDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files).filter((f) =>
@@ -78,8 +110,18 @@ export function ReceptionWizard() {
     setPhotos((prev) => [...prev, ...Array.from(e.target.files!)]);
   };
 
+  const clearSignature = () => padRef.current?.clear();
+
   const onSubmit = async (data: FormValues) => {
     setSubmitError(null);
+
+    if (!padRef.current || padRef.current.isEmpty()) {
+      setSignatureError("El cliente debe firmar antes de confirmar.");
+      setStep(3);
+      return;
+    }
+    const signatureData = padRef.current.toDataURL("image/png");
+
     try {
       const result = await createReception.mutateAsync({
         vehicle_id: data.vehicleId,
@@ -106,11 +148,12 @@ export function ReceptionWizard() {
       });
 
       const id = result.data.id;
-      setCreatedId(id);
 
       for (const photo of photos) {
         await addPhoto.mutateAsync({ id, file: photo });
       }
+
+      await addSignature.mutateAsync({ id, signatureData });
 
       router.push(`/recepciones/${id}`);
     } catch (err: unknown) {
@@ -322,8 +365,37 @@ export function ReceptionWizard() {
           </div>
         )}
 
-        {/* Step 3: Confirm */}
+        {/* Step 3: Firma */}
         {step === 3 && (
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Firma del cliente</h2>
+            <p className="text-sm text-muted-foreground">
+              El cliente confirma con su firma que el estado del vehículo descrito es correcto.
+            </p>
+            <div className="rounded-xl border-2 border-border bg-white overflow-hidden">
+              <canvas
+                ref={canvasRef}
+                className="w-full touch-none block"
+                style={{ height: "200px" }}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={clearSignature}
+                className="text-xs text-muted-foreground underline hover:text-foreground"
+              >
+                Limpiar firma
+              </button>
+            </div>
+            {signatureError && (
+              <p className="text-xs text-destructive">{signatureError}</p>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Confirmar */}
+        {step === 4 && (
           <div className="space-y-4">
             <h2 className="font-semibold text-lg">Confirmar recepción</h2>
             <div className="bg-muted/40 rounded-lg p-4 space-y-2 text-sm">
@@ -331,9 +403,13 @@ export function ReceptionWizard() {
               <p><span className="font-medium">Problema:</span> {watch("reportedProblem")}</p>
               <p><span className="font-medium">Km entrada:</span> {watch("entryKm")}</p>
               <p><span className="font-medium">Fotos:</span> {photos.length}</p>
+              <p>
+                <span className="font-medium">Firma:</span>{" "}
+                {padRef.current && !padRef.current.isEmpty() ? "✓ Capturada" : "⚠ Pendiente"}
+              </p>
             </div>
             <p className="text-sm text-muted-foreground">
-              Al confirmar se creará la recepción y se subirán las fotos.
+              Al confirmar se creará la recepción, se subirán las fotos y se guardará la firma.
             </p>
           </div>
         )}
@@ -361,22 +437,22 @@ export function ReceptionWizard() {
               type="button"
               onClick={async () => {
                 if (step === 0) {
-                  const valid = await new Promise<boolean>((resolve) => {
-                    const customerId = watch("customerId");
-                    const vehicleId = watch("vehicleId");
-                    const entryKm = watch("entryKm");
-                    const reportedProblem = watch("reportedProblem");
-                    if (!customerId || !vehicleId || !entryKm || !reportedProblem) {
-                      resolve(false);
-                    } else {
-                      resolve(true);
-                    }
-                  });
-                  if (!valid) {
+                  const customerId = watch("customerId");
+                  const vehicleId = watch("vehicleId");
+                  const entryKm = watch("entryKm");
+                  const reportedProblem = watch("reportedProblem");
+                  if (!customerId || !vehicleId || !entryKm || !reportedProblem) {
                     setSubmitError("Completa todos los campos obligatorios: cliente, vehículo, km y problema.");
                     return;
                   }
                   setSubmitError(null);
+                }
+                if (step === 3) {
+                  if (!padRef.current || padRef.current.isEmpty()) {
+                    setSignatureError("El cliente debe firmar antes de continuar.");
+                    return;
+                  }
+                  setSignatureError(null);
                 }
                 setStep((s) => s + 1);
               }}
@@ -417,14 +493,17 @@ function CheckItem({
   ...props
 }: { label: string; id: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label htmlFor={id} className="flex items-center gap-3 cursor-pointer group">
+    <label
+      htmlFor={id}
+      className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 cursor-pointer hover:bg-muted/30 transition-colors"
+    >
       <input
-        type="checkbox"
         id={id}
-        className="h-4 w-4 rounded border-border"
+        type="checkbox"
+        className="h-4 w-4 rounded border-input accent-secondary"
         {...props}
       />
-      <span className="text-sm group-hover:text-foreground">{label}</span>
+      <span className="text-sm text-foreground">{label}</span>
     </label>
   );
 }
