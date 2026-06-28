@@ -8,27 +8,28 @@ import portalApi from "@/lib/portalApi";
 
 interface InvoiceItem {
   id: string;
-  itemType: string;
+  item_type: string;
   description: string;
   quantity: number;
-  unitPrice: number;
+  unit_price: number;
   subtotal: number;
 }
 
 interface InvoiceDetail {
   id: string;
-  invoiceNumber: string;
-  vehicleLabel: string;
-  customerName: string;
-  issueDate: string;
+  invoice_number: string;
+  work_order_id: string;
+  vehicle_label: string;
+  customer_name: string;
+  issue_date: string;
   status: string;
-  applyItbis: boolean;
-  itbisRate: number;
+  apply_itbis: boolean;
+  itbis_rate: number;
   subtotal: number;
-  itbisAmount: number;
+  itbis_amount: number;
   total: number;
-  paidAmount: number;
-  remainingBalance: number;
+  paid_amount: number;
+  remaining_balance: number;
   notes: string | null;
   items: InvoiceItem[];
 }
@@ -46,7 +47,7 @@ const STATUS_PAPER: Record<string, string> = {
 };
 
 function money(n: number) {
-  return `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
+  return `RD$ ${Number(n).toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
 }
 
 function usePortalInvoice(invoiceId: string) {
@@ -82,8 +83,8 @@ export default function PortalInvoiceDetailPage({
     return <p className="text-sm text-destructive">Factura no encontrada.</p>;
   }
 
-  const manoObra = inv.items.filter((i) => i.itemType === "MANO_OBRA");
-  const piezas = inv.items.filter((i) => i.itemType === "PIEZA");
+  const manoObra = inv.items.filter((i) => i.item_type === "MANO_OBRA");
+  const piezas = inv.items.filter((i) => i.item_type === "PIEZA");
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -114,10 +115,10 @@ export default function PortalInvoiceDetailPage({
               Factura
             </p>
             <p className="nums mt-1 text-2xl font-bold text-zinc-900">
-              {inv.invoiceNumber}
+              {inv.invoice_number}
             </p>
             <p className="mt-0.5 text-sm text-zinc-500">
-              {new Date(inv.issueDate).toLocaleDateString("es-DO", {
+              {new Date(inv.issue_date).toLocaleDateString("es-DO", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -137,13 +138,13 @@ export default function PortalInvoiceDetailPage({
             <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Cliente
             </p>
-            <p className="font-semibold text-zinc-900">{inv.customerName}</p>
+            <p className="font-semibold text-zinc-900">{inv.customer_name}</p>
           </div>
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Vehículo
             </p>
-            <p className="font-semibold text-zinc-900">{inv.vehicleLabel}</p>
+            <p className="font-semibold text-zinc-900">{inv.vehicle_label}</p>
           </div>
         </div>
 
@@ -181,25 +182,21 @@ export default function PortalInvoiceDetailPage({
         <div className="border-t border-zinc-100 px-8 py-6">
           <div className="ml-auto max-w-xs space-y-2">
             <Row label="Subtotal" value={money(inv.subtotal)} />
-            {inv.applyItbis && (
+            {inv.apply_itbis && (
               <Row
-                label={`ITBIS (${(inv.itbisRate * 100).toFixed(0)}%)`}
-                value={money(inv.itbisAmount)}
+                label={`ITBIS (${(inv.itbis_rate * 100).toFixed(0)}%)`}
+                value={money(inv.itbis_amount)}
               />
             )}
             <div className="my-2 border-t border-zinc-200" />
-            <Row
-              label="Total"
-              value={money(inv.total)}
-              bold
-            />
-            {inv.paidAmount > 0 && (
+            <Row label="Total" value={money(inv.total)} bold />
+            {inv.paid_amount > 0 && (
               <>
-                <Row label="Pagado" value={money(inv.paidAmount)} />
+                <Row label="Pagado" value={money(inv.paid_amount)} />
                 <Row
                   label="Balance"
-                  value={money(inv.remainingBalance)}
-                  bold={inv.remainingBalance > 0}
+                  value={money(inv.remaining_balance)}
+                  bold={inv.remaining_balance > 0}
                 />
               </>
             )}
@@ -235,7 +232,7 @@ function ItemTable({ items }: { items: InvoiceDetail["items"] }) {
             <td className="py-2.5 text-zinc-800">{item.description}</td>
             <td className="nums py-2.5 text-right text-zinc-600">{item.quantity}</td>
             <td className="nums py-2.5 text-right text-zinc-600">
-              {money(item.unitPrice)}
+              {money(item.unit_price)}
             </td>
             <td className="nums py-2.5 text-right font-medium text-zinc-900">
               {money(item.subtotal)}

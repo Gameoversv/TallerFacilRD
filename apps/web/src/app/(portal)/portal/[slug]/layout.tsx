@@ -29,7 +29,7 @@ export default function PortalLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
+      <header className="print:hidden border-b border-border bg-card px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-sm">
             T
@@ -49,7 +49,7 @@ export default function PortalLayout({
         </div>
       </header>
 
-      <nav className="border-b border-border bg-card/50">
+      <nav className="print:hidden border-b border-border bg-card/50">
         <div className="mx-auto max-w-5xl px-6 flex gap-6">
           <a
             href={`/portal/${slug}/mis-vehiculos`}
