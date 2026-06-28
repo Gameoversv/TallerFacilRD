@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -267,7 +269,7 @@ function ClientLoginForm({ slug }: { slug: string }) {
 
 // ─── Main page ───────────────────────────────────────────────────────────────
 
-export default function LoginPage() {
+function LoginPageInner() {
   const searchParams = useSearchParams();
   const tallerParam = searchParams.get("taller");
 
@@ -370,5 +372,13 @@ export default function LoginPage() {
         {mode === "staff" && <StaffLoginForm />}
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   );
 }
