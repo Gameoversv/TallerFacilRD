@@ -8,11 +8,11 @@ import portalApi from "@/lib/portalApi";
 
 interface PortalInvoice {
   id: string;
-  invoiceNumber: string;
-  issueDate: string;
+  invoice_number: string;
+  issue_date: string;
   status: string;
   total: number;
-  vehicleLabel: string;
+  vehicle_label: string;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
@@ -97,7 +97,7 @@ export default function PortalInvoicesPage({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="nums font-semibold text-foreground">
-                        {inv.invoiceNumber}
+                        {inv.invoice_number}
                       </p>
                       {cfg && (
                         <span className={`flex items-center gap-1 text-xs ${cfg.color}`}>
@@ -107,8 +107,8 @@ export default function PortalInvoicesPage({
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {inv.vehicleLabel} ·{" "}
-                      {new Date(inv.issueDate).toLocaleDateString("es-DO")}
+                      {inv.vehicle_label} ·{" "}
+                      {new Date(inv.issue_date).toLocaleDateString("es-DO")}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

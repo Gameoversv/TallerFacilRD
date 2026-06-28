@@ -51,13 +51,13 @@ function TenantSearch({ onSelect }: { onSelect: (t: TenantResult) => void }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (q.trim().length < 2) {
-      setResults([]);
-      setOpen(false);
-      return;
-    }
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
+      if (q.trim().length < 2) {
+        setResults([]);
+        setOpen(false);
+        return;
+      }
       setLoading(true);
       try {
         const res = await api.get<{ data: TenantResult[] }>(

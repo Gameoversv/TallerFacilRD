@@ -9,14 +9,14 @@ import portalApi from "@/lib/portalApi";
 interface ItemSummary {
   type: string;
   description: string;
-  quantity: string;
-  unitPrice: string;
+  quantity: number;
+  unit_price: number;
 }
 
 interface InvoiceSummary {
   id: string;
-  invoiceNumber: string;
-  issueDate: string;
+  invoice_number: string;
+  issue_date: string;
   status: string;
   total: number;
 }
@@ -29,20 +29,20 @@ interface WorkOrderSummary {
 }
 
 interface VisitSummary {
-  receptionId: string;
-  receptionDate: string;
+  reception_id: string;
+  reception_date: string;
   complaint: string;
-  workOrder: WorkOrderSummary | null;
+  work_order: WorkOrderSummary | null;
 }
 
 interface VehicleHistory {
-  vehicleId: string;
-  licensePlate: string;
+  vehicle_id: string;
+  license_plate: string;
   brand: string;
   model: string;
   year: number;
-  customerName: string;
-  totalVisits: number;
+  customer_name: string;
+  total_visits: number;
   visits: VisitSummary[];
 }
 
@@ -108,7 +108,7 @@ export default function PortalVehicleHistoryPage({
           <span className="font-normal text-muted-foreground">{history.year}</span>
         </h1>
         <p className="text-sm text-muted-foreground">
-          {history.licensePlate} · {history.totalVisits} visita{history.totalVisits !== 1 ? "s" : ""}
+          {history.license_plate} · {history.total_visits} visita{history.total_visits !== 1 ? "s" : ""}
         </p>
       </div>
 
@@ -121,15 +121,15 @@ export default function PortalVehicleHistoryPage({
         <div className="space-y-4">
           {history.visits.map((visit) => (
             <div
-              key={visit.receptionId}
+              key={visit.reception_id}
               className="rounded-xl border border-border bg-card overflow-hidden"
             >
               <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-muted/30">
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">
-                    {visit.receptionDate
-                      ? new Date(visit.receptionDate).toLocaleDateString("es-DO", {
+                    {visit.reception_date
+                      ? new Date(visit.reception_date).toLocaleDateString("es-DO", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",
@@ -137,11 +137,11 @@ export default function PortalVehicleHistoryPage({
                       : "—"}
                   </span>
                 </div>
-                {visit.workOrder && (
+                {visit.work_order && (
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[visit.workOrder.status] ?? "bg-muted text-muted-foreground"}`}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLOR[visit.work_order.status] ?? "bg-muted text-muted-foreground"}`}
                   >
-                    {STATUS_LABEL[visit.workOrder.status] ?? visit.workOrder.status}
+                    {STATUS_LABEL[visit.work_order.status] ?? visit.work_order.status}
                   </span>
                 )}
               </div>
@@ -156,14 +156,14 @@ export default function PortalVehicleHistoryPage({
                   </div>
                 )}
 
-                {visit.workOrder && visit.workOrder.items.length > 0 && (
+                {visit.work_order && visit.work_order.items.length > 0 && (
                   <div>
                     <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-2">
                       <Wrench className="h-3.5 w-3.5" />
                       Servicios / Piezas
                     </div>
                     <ul className="space-y-1">
-                      {visit.workOrder.items.map((item, idx) => (
+                      {visit.work_order.items.map((item, idx) => (
                         <li
                           key={idx}
                           className="flex items-center justify-between text-sm"
@@ -178,14 +178,14 @@ export default function PortalVehicleHistoryPage({
                   </div>
                 )}
 
-                {visit.workOrder && visit.workOrder.invoices.length > 0 && (
+                {visit.work_order && visit.work_order.invoices.length > 0 && (
                   <div>
                     <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-2">
                       <FileText className="h-3.5 w-3.5" />
                       Facturas
                     </div>
                     <ul className="space-y-2">
-                      {visit.workOrder.invoices.map((inv) => (
+                      {visit.work_order.invoices.map((inv) => (
                         <li
                           key={inv.id}
                           className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2"
@@ -200,7 +200,7 @@ export default function PortalVehicleHistoryPage({
                               href={`/portal/${slug}/mis-facturas/${inv.id}`}
                               className="text-sm font-medium text-primary hover:underline nums"
                             >
-                              {inv.invoiceNumber}
+                              {inv.invoice_number}
                             </Link>
                           </div>
                           <span className="nums text-sm font-semibold text-foreground">
