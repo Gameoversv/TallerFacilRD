@@ -1,6 +1,7 @@
 import {
   Banknote,
   BarChart3,
+  BellRing,
   Car,
   ClipboardList,
   HandCoins,
@@ -60,7 +61,10 @@ export const navGroups: NavGroup[] = [
   },
   {
     label: "Análisis",
-    items: [{ href: "/reportes", label: "Reportes", icon: BarChart3 }],
+    items: [
+      { href: "/reportes", label: "Reportes", icon: BarChart3 },
+      { href: "/recordatorios", label: "Recordatorios", icon: BellRing },
+    ],
   },
 ];
 
