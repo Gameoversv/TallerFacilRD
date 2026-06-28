@@ -95,6 +95,21 @@ public class PortalAuthService {
         return new PortalInviteResponse(customer.getDocumentId(), password, portalUrl);
     }
 
+    @Transactional
+    public void changePassword(UUID customerId, UUID tenantId, String currentPassword, String newPassword) {
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new IllegalArgumentException("La contraseña debe tener mínimo 8 caracteres");
+        }
+        User portalUser = userRepository.findByCustomerIdAndTenantId(customerId, tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario de portal no encontrado"));
+
+        if (!passwordEncoder.matches(currentPassword, portalUser.getPassword())) {
+            throw new IllegalArgumentException("Contraseña actual incorrecta");
+        }
+        portalUser.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(portalUser);
+    }
+
     private String generatePassword(int length) {
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {

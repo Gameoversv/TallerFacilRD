@@ -63,6 +63,12 @@ export default function PortalLayout({
           >
             Mis Facturas
           </a>
+          <a
+            href={`/portal/${slug}/mi-cuenta`}
+            className="py-3 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent hover:border-primary transition-colors"
+          >
+            Mi Cuenta
+          </a>
         </div>
       </nav>
 

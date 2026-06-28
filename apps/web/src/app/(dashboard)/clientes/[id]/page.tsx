@@ -23,20 +23,22 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const updateMutation = useUpdateCustomer(id);
   const deleteMutation = useDeleteCustomer();
   const [portalCreds, setPortalCreds] = useState<{
-    documentId: string;
-    temporaryPassword: string;
-    portalUrl: string;
+    document_id: string;
+    temporary_password: string;
+    portal_url: string;
   } | null>(null);
   const [inviting, setInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   async function handleInvitePortal() {
     setInviting(true);
+    setInviteError(null);
     try {
       const res = await api.post(`/api/customers/${id}/portal/invite`);
       setPortalCreds(res.data.data);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: string } } };
-      alert(axiosErr.response?.data?.error ?? "Error al habilitar portal");
+      setInviteError(axiosErr.response?.data?.error ?? "Error al habilitar portal");
     } finally {
       setInviting(false);
     }
@@ -71,7 +73,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           </button>
           <h1 className="font-display text-2xl font-bold tracking-tight text-white">{c.full_name}</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -84,6 +87,10 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={handleDelete}>
             Eliminar
           </Button>
+          </div>
+          {inviteError && (
+            <p className="text-xs text-destructive">{inviteError}</p>
+          )}
         </div>
       </div>
 
@@ -179,10 +186,19 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               <p className="text-muted-foreground">
                 Entrega estas credenciales al cliente. La contraseña solo se muestra una vez.
               </p>
-              <div className="rounded-lg bg-muted p-4 space-y-2 font-mono text-xs">
-                <p><span className="text-muted-foreground">URL:</span> {portalCreds.portalUrl}</p>
-                <p><span className="text-muted-foreground">Cédula:</span> {portalCreds.documentId}</p>
-                <p><span className="text-muted-foreground">Contraseña:</span> {portalCreds.temporaryPassword}</p>
+              <div className="rounded-lg bg-muted p-4 space-y-2 font-mono text-xs select-all">
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground shrink-0">URL:</span>
+                  <span className="text-foreground break-all">{portalCreds.portal_url}</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground shrink-0">Cédula:</span>
+                  <span className="text-foreground">{portalCreds.document_id}</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground shrink-0">Contraseña:</span>
+                  <span className="text-foreground font-bold tracking-widest">{portalCreds.temporary_password}</span>
+                </div>
               </div>
               <Button className="w-full" onClick={() => setPortalCreds(null)}>Entendido</Button>
             </div>
