@@ -29,5 +29,7 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     boolean existsByDocumentIdAndTenantIdAndActiveTrue(String documentId, UUID tenantId);
 
+    Optional<Customer> findByDocumentIdAndTenantIdAndActiveTrue(String documentId, UUID tenantId);
+
     long countByTenantIdAndActiveTrue(UUID tenantId);
 }

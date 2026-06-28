@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import api from "@/lib/api";
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -21,6 +22,25 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const vehiclesQuery = useCustomerVehicles(id);
   const updateMutation = useUpdateCustomer(id);
   const deleteMutation = useDeleteCustomer();
+  const [portalCreds, setPortalCreds] = useState<{
+    documentId: string;
+    temporaryPassword: string;
+    portalUrl: string;
+  } | null>(null);
+  const [inviting, setInviting] = useState(false);
+
+  async function handleInvitePortal() {
+    setInviting(true);
+    try {
+      const res = await api.post(`/api/customers/${id}/portal/invite`);
+      setPortalCreds(res.data.data);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      alert(axiosErr.response?.data?.error ?? "Error al habilitar portal");
+    } finally {
+      setInviting(false);
+    }
+  }
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Cargando...</p>;
   if (isError || !data?.data) return <p className="text-sm text-destructive">Cliente no encontrado.</p>;
@@ -52,6 +72,14 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <h1 className="font-display text-2xl font-bold tracking-tight text-white">{c.full_name}</h1>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleInvitePortal}
+            disabled={inviting}
+          >
+            {inviting ? "Habilitando…" : "Habilitar Portal"}
+          </Button>
           <Button variant="outline" onClick={() => setShowEdit(true)}>Editar</Button>
           <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={handleDelete}>
             Eliminar
@@ -139,6 +167,28 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           )}
         </CardContent>
       </Card>
+
+      {/* Portal credentials one-time display */}
+      <Dialog open={!!portalCreds} onOpenChange={() => setPortalCreds(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Portal habilitado</DialogTitle>
+          </DialogHeader>
+          {portalCreds && (
+            <div className="space-y-4 text-sm">
+              <p className="text-muted-foreground">
+                Entrega estas credenciales al cliente. La contraseña solo se muestra una vez.
+              </p>
+              <div className="rounded-lg bg-muted p-4 space-y-2 font-mono text-xs">
+                <p><span className="text-muted-foreground">URL:</span> {portalCreds.portalUrl}</p>
+                <p><span className="text-muted-foreground">Cédula:</span> {portalCreds.documentId}</p>
+                <p><span className="text-muted-foreground">Contraseña:</span> {portalCreds.temporaryPassword}</p>
+              </div>
+              <Button className="w-full" onClick={() => setPortalCreds(null)}>Entendido</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent>
