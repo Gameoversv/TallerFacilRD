@@ -57,6 +57,28 @@ public class JwtService {
                 .compact();
     }
 
+    public String generatePortalToken(User user, java.util.UUID customerId) {
+        Instant now = Instant.now();
+        Instant expiry = now.plus(properties.getJwt().getExpirationHours(), ChronoUnit.HOURS);
+
+        return Jwts.builder()
+                .subject(user.getId().toString())
+                .claim("email", user.getEmail())
+                .claim("name", user.getName())
+                .claim("role", "CLIENT")
+                .claim("tenantId", user.getTenantId().toString())
+                .claim("customerId", customerId.toString())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiry))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public java.util.UUID extractCustomerId(String token) {
+        String raw = getClaims(token).get("customerId", String.class);
+        return raw != null ? java.util.UUID.fromString(raw) : null;
+    }
+
     public boolean isImpersonating(String token) {
         try {
             Boolean flag = getClaims(token).get("impersonating", Boolean.class);

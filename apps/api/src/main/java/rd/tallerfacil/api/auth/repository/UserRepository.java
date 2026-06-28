@@ -14,4 +14,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     java.util.List<User> findByTenantId(java.util.UUID tenantId);
     org.springframework.data.domain.Page<User> findByEmailContainingIgnoreCaseAndTenantIdIsNotNull(
         String email, org.springframework.data.domain.Pageable pageable);
+
+    java.util.Optional<User> findByCustomerIdAndTenantId(java.util.UUID customerId, java.util.UUID tenantId);
+
+    boolean existsByCustomerId(java.util.UUID customerId);
 }

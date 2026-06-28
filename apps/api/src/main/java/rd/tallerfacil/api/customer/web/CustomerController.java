@@ -10,6 +10,9 @@ import rd.tallerfacil.api.customer.dto.CreateCustomerRequest;
 import rd.tallerfacil.api.customer.dto.CustomerResponse;
 import rd.tallerfacil.api.customer.dto.UpdateCustomerRequest;
 import rd.tallerfacil.api.customer.service.CustomerService;
+import rd.tallerfacil.api.portal.dto.PortalInviteResponse;
+import rd.tallerfacil.api.portal.service.PortalAuthService;
+import rd.tallerfacil.api.shared.domain.TenantContext;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 
 import java.util.UUID;
@@ -20,6 +23,7 @@ import java.util.UUID;
 public class CustomerController {
 
     private final CustomerService service;
+    private final PortalAuthService portalAuthService;
 
     @GetMapping
     public ApiResponse<Iterable<CustomerResponse>> list(
@@ -55,5 +59,12 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         service.delete(id);
+    }
+
+    @PostMapping("/{id}/portal/invite")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<PortalInviteResponse> inviteToPortal(@PathVariable UUID id) {
+        UUID tenantId = TenantContext.require();
+        return ApiResponse.ok(portalAuthService.invite(id, tenantId));
     }
 }

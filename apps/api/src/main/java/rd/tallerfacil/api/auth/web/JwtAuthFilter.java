@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import rd.tallerfacil.api.auth.service.JwtService;
+import rd.tallerfacil.api.shared.domain.CustomerContext;
 import rd.tallerfacil.api.shared.domain.TenantContext;
 
 import java.io.IOException;
@@ -59,12 +60,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     if (tenantId != null) {
                         TenantContext.set(tenantId);
                     }
+                    var customerId = jwtService.extractCustomerId(token);
+                    if (customerId != null) {
+                        CustomerContext.set(customerId);
+                    }
                 }
             }
 
             filterChain.doFilter(request, response);
         } finally {
             TenantContext.clear();
+            CustomerContext.clear();
         }
     }
 }

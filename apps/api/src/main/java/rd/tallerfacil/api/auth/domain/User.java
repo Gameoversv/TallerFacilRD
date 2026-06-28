@@ -37,6 +37,10 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "tenant_id")
     private java.util.UUID tenantId;
 
+    // Nullable: only set for CLIENT-role portal users
+    @Column(name = "customer_id")
+    private java.util.UUID customerId;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -58,6 +62,10 @@ public class User extends BaseEntity implements UserDetails {
 
     public void setTenantId(java.util.UUID tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public void setCustomerId(java.util.UUID customerId) {
+        this.customerId = customerId;
     }
 
     public void addRole(Role role) {
