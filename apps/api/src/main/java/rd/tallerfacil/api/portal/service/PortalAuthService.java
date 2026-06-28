@@ -91,7 +91,7 @@ public class PortalAuthService {
         user.addRole(clientRole);
         userRepository.save(user);
 
-        String portalUrl = "/portal/" + tenant.getSlug() + "/login";
+        String portalUrl = "/login?taller=" + tenant.getSlug();
         return new PortalInviteResponse(customer.getDocumentId(), password, portalUrl);
     }
 

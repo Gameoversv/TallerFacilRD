@@ -13,9 +13,13 @@ import rd.tallerfacil.api.auth.repository.UserRepository;
 import rd.tallerfacil.api.auth.service.JwtService;
 import rd.tallerfacil.api.tenant.domain.Tenant;
 import rd.tallerfacil.api.tenant.dto.RegisterTenantRequest;
+import rd.tallerfacil.api.tenant.dto.TenantPublicResult;
 import rd.tallerfacil.api.tenant.repository.TenantRepository;
 
+import org.springframework.data.domain.PageRequest;
+
 import java.text.Normalizer;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -56,6 +60,13 @@ public class TenantService {
 
         String token = jwtService.generateToken(admin);
         return new AuthResponse(token, UserResponse.from(admin));
+    }
+
+    public List<TenantPublicResult> searchPublic(String q) {
+        return tenantRepository.searchPublic(q, PageRequest.of(0, 10))
+                .stream()
+                .map(TenantPublicResult::from)
+                .toList();
     }
 
     private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^a-z0-9]+");

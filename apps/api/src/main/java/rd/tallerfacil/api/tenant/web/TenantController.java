@@ -4,10 +4,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.PageRequest;
 import rd.tallerfacil.api.auth.dto.AuthResponse;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.tenant.dto.RegisterTenantRequest;
+import rd.tallerfacil.api.tenant.dto.TenantPublicResult;
 import rd.tallerfacil.api.tenant.service.TenantService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tenants")
@@ -20,5 +24,12 @@ public class TenantController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterTenantRequest req) {
         return ApiResponse.ok(tenantService.registerTenant(req));
+    }
+
+    @GetMapping("/public/search")
+    public ApiResponse<List<TenantPublicResult>> search(
+            @RequestParam(defaultValue = "") String q
+    ) {
+        return ApiResponse.ok(tenantService.searchPublic(q));
     }
 }

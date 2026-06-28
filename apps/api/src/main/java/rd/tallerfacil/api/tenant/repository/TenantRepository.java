@@ -26,4 +26,16 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID> {
     List<Tenant> findByTrialEndsAtBetweenOrderByTrialEndsAtAsc(Instant from, Instant to);
 
     List<Tenant> findTop5ByOrderByCreatedAtDesc();
+
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT t FROM Tenant t
+            WHERE t.status = 'ACTIVE'
+            AND (:q IS NULL OR :q = ''
+                OR LOWER(t.name) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(t.slug) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(t.city) LIKE LOWER(CONCAT('%', :q, '%')))
+            ORDER BY t.name
+            """)
+    List<Tenant> searchPublic(@org.springframework.data.repository.query.Param("q") String q,
+                              org.springframework.data.domain.Pageable pageable);
 }
