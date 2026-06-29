@@ -68,6 +68,31 @@ export default function RecepcionDetailPage({
           </div>
         </div>
       )}
+
+      {reception.signature_data ? (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Firma del cliente
+          </h2>
+          <div className="rounded-xl border border-border bg-white p-4 inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={reception.signature_data}
+              alt="Firma del cliente"
+              className="max-h-28 w-auto"
+            />
+          </div>
+          {reception.signed_at && (
+            <p className="text-xs text-muted-foreground">
+              Firmado el {new Date(reception.signed_at).toLocaleString("es-DO")}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-lg border border-dashed border-border px-4 py-3">
+          <p className="text-xs text-muted-foreground">Sin firma capturada.</p>
+        </div>
+      )}
     </div>
   );
 }
