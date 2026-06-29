@@ -39,11 +39,8 @@ class PortalIntegrationTest extends IntegrationTestBase {
                 .andReturn().getResponse().getContentAsString();
         staffToken = objectMapper.readTree(tenantRes).path("data").path("token").asText();
 
-        // Get tenant slug for portal login
-        var slugRes = mockMvc.perform(get("/api/tenants/public/search")
-                        .param("q", "Taller Portal Test"))
-                .andReturn().getResponse().getContentAsString();
-        tenantSlug = objectMapper.readTree(slugRes).path("data").get(0).path("slug").asText();
+        // Slug is deterministic: buildSlug("Taller Portal Test") = "taller-portal-test"
+        tenantSlug = "taller-portal-test";
 
         // Create customer with documentId
         documentId = "00112233445";

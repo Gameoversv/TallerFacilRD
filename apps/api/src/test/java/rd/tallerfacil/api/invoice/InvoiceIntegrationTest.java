@@ -79,7 +79,7 @@ class InvoiceIntegrationTest extends IntegrationTestBase {
                 .andExpect(jsonPath("$.data.work_order_id").value(workOrderId))
                 .andExpect(jsonPath("$.data.status").value("PENDIENTE"))
                 .andExpect(jsonPath("$.data.subtotal").value(1900))
-                .andExpect(jsonPath("$.data.itbis").value(0))
+                .andExpect(jsonPath("$.data.itbis_amount").value(0))
                 .andExpect(jsonPath("$.data.total").value(1900))
                 .andExpect(jsonPath("$.data.items", hasSize(2)));
     }
@@ -102,7 +102,7 @@ class InvoiceIntegrationTest extends IntegrationTestBase {
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.subtotal").value(2000))
-                .andExpect(jsonPath("$.data.itbis").value(360))
+                .andExpect(jsonPath("$.data.itbis_amount").value(360))
                 .andExpect(jsonPath("$.data.total").value(2360));
     }
 

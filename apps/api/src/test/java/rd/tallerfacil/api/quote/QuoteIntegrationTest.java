@@ -78,7 +78,7 @@ class QuoteIntegrationTest extends IntegrationTestBase {
                 .andExpect(jsonPath("$.data.status").value("PENDIENTE"))
                 .andExpect(jsonPath("$.data.items", hasSize(2)))
                 .andExpect(jsonPath("$.data.subtotal").value(1550))
-                .andExpect(jsonPath("$.data.itbis").value(0))
+                .andExpect(jsonPath("$.data.itbis_amount").value(0))
                 .andExpect(jsonPath("$.data.total").value(1550));
     }
 
@@ -99,7 +99,7 @@ class QuoteIntegrationTest extends IntegrationTestBase {
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.subtotal").value(1000))
-                .andExpect(jsonPath("$.data.itbis").value(180))
+                .andExpect(jsonPath("$.data.itbis_amount").value(180))
                 .andExpect(jsonPath("$.data.total").value(1180));
     }
 
