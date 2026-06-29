@@ -48,7 +48,7 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
         vehicleId = objectMapper.readTree(vehRes).path("data").path("id").asText();
     }
 
-    private Map<String, Object> buildChecklist() {
+    private Map<String, Object> buildDetailedChecklist() {
         return Map.of(
                 "exterior", Map.of("scratches", "OK", "dents", "NA", "lights", "LEVE"),
                 "interior", Map.of("radio", "OK", "screen", "NA", "mats", "OK"),
@@ -63,7 +63,7 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
                 "vehicle_id", vehicleId,
                 "entry_km", 52000,
                 "reported_problem", "Ruido en frenos delanteros",
-                "checklist", buildChecklist()
+                "checklist", buildDetailedChecklist()
         );
 
         mockMvc.perform(post("/api/receptions")
@@ -85,7 +85,7 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
         var body = Map.of(
                 "entry_km", 52000,
                 "reported_problem", "Falla motor",
-                "checklist", buildChecklist()
+                "checklist", buildDetailedChecklist()
         );
 
         mockMvc.perform(post("/api/receptions")
@@ -102,7 +102,7 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
                 "vehicle_id", vehicleId,
                 "entry_km", 30000,
                 "reported_problem", "Cambio de aceite",
-                "checklist", buildChecklist()
+                "checklist", buildDetailedChecklist()
         );
 
         var createRes = mockMvc.perform(post("/api/receptions")
@@ -126,7 +126,7 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
                 "vehicle_id", vehicleId,
                 "entry_km", 10000,
                 "reported_problem", "Revisión general",
-                "checklist", buildChecklist()
+                "checklist", buildDetailedChecklist()
         );
 
         mockMvc.perform(post("/api/receptions")
@@ -147,7 +147,7 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
                 "vehicle_id", vehicleId,
                 "entry_km", 70000,
                 "reported_problem", "Revisión pre-compra",
-                "checklist", buildChecklist()
+                "checklist", buildDetailedChecklist()
         );
 
         var createRes = mockMvc.perform(post("/api/receptions")
