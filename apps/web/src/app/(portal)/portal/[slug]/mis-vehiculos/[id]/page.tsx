@@ -40,10 +40,12 @@ interface WorkOrderSummary {
   invoices: InvoiceSummary[];
 }
 
+type Severity = "OK" | "LEVE" | "GRAVE" | "NA";
+
 interface ChecklistData {
-  exterior?: { scratches?: boolean; dents?: boolean; lights?: boolean };
-  interior?: { radio?: boolean; screen?: boolean; mats?: boolean };
-  mechanical?: { oil_level?: boolean; coolant?: boolean; battery?: boolean };
+  exterior?: { scratches?: Severity; dents?: Severity; lights?: Severity };
+  interior?: { radio?: Severity; screen?: Severity; mats?: Severity };
+  mechanical?: { oil_level?: Severity; coolant?: Severity; battery?: Severity };
 }
 
 interface VisitSummary {
@@ -269,25 +271,35 @@ function ReceptionCard({ visit, slug }: { visit: VisitSummary; slug: string }) {
   );
 }
 
+const PORTAL_SEVERITY_BADGE: Record<string, string> = {
+  OK:    "bg-success/15 text-success",
+  LEVE:  "bg-warning/15 text-warning",
+  GRAVE: "bg-destructive/15 text-destructive",
+  NA:    "bg-muted text-muted-foreground",
+};
+const PORTAL_SEVERITY_LABEL: Record<string, string> = {
+  OK: "OK", LEVE: "Leve", GRAVE: "Grave", NA: "N/A",
+};
+
 function ChecklistSection({
   label,
   items,
 }: {
   label: string;
-  items: { label: string; value?: boolean }[];
+  items: { label: string; value?: Severity }[];
 }) {
-  const relevant = items.filter((i) => i.value !== undefined && i.value !== null);
+  const relevant = items.filter((i) => i.value && i.value !== "NA");
   if (relevant.length === 0) return null;
   return (
     <div className="rounded-lg bg-muted/30 px-3 py-2 mb-1">
-      <p className="text-xs font-semibold text-muted-foreground mb-1">{label}</p>
-      <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+      <p className="text-xs font-semibold text-muted-foreground mb-1.5">{label}</p>
+      <div className="flex flex-wrap gap-2">
         {relevant.map((item) => (
-          <span key={item.label} className="flex items-center gap-1 text-xs text-foreground">
-            <span className={item.value ? "text-success" : "text-destructive"}>
-              {item.value ? "✓" : "✗"}
+          <span key={item.label} className="flex items-center gap-1.5 text-xs">
+            <span className={`rounded px-1.5 py-0.5 font-medium ${PORTAL_SEVERITY_BADGE[item.value!] ?? PORTAL_SEVERITY_BADGE.NA}`}>
+              {PORTAL_SEVERITY_LABEL[item.value!] ?? item.value}
             </span>
-            {item.label}
+            <span className="text-foreground">{item.label}</span>
           </span>
         ))}
       </div>

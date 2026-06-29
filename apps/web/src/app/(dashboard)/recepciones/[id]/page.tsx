@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useReception } from "@/hooks/useReceptions";
-import type { ReceptionChecklist } from "@/types/reception";
+import type { ReceptionChecklist, ChecklistSeverity } from "@/types/reception";
 
 export default function RecepcionDetailPage({
   params,
@@ -106,41 +106,66 @@ function InfoCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ChecklistDisplay({ checklist }: { checklist: ReceptionChecklist }) {
-  const items: { section: string; label: string; value?: boolean }[] = [
-    { section: "Exterior", label: "Rayones", value: checklist.exterior?.scratches },
-    { section: "Exterior", label: "Golpes", value: checklist.exterior?.dents },
-    { section: "Exterior", label: "Luces", value: checklist.exterior?.lights },
-    { section: "Interior", label: "Radio", value: checklist.interior?.radio },
-    { section: "Interior", label: "Pantalla", value: checklist.interior?.screen },
-    { section: "Interior", label: "Alfombras", value: checklist.interior?.mats },
-    { section: "Mecánico", label: "Nivel aceite", value: checklist.mechanical?.oil_level },
-    { section: "Mecánico", label: "Coolant", value: checklist.mechanical?.coolant },
-    { section: "Mecánico", label: "Batería", value: checklist.mechanical?.battery },
-  ];
+const SEVERITY_BADGE: Record<string, string> = {
+  OK:    "bg-success/15 text-success border-success/30",
+  LEVE:  "bg-warning/15 text-warning border-warning/30",
+  GRAVE: "bg-destructive/15 text-destructive border-destructive/30",
+  NA:    "bg-muted text-muted-foreground border-border",
+};
 
-  const sections = [...new Set(items.map((i) => i.section))];
+const SEVERITY_LABEL: Record<string, string> = {
+  OK: "OK", LEVE: "Leve", GRAVE: "Grave", NA: "N/A",
+};
+
+function SeverityBadge({ value }: { value?: ChecklistSeverity }) {
+  const v = value ?? "NA";
+  return (
+    <span className={`rounded border px-1.5 py-0.5 text-xs font-medium ${SEVERITY_BADGE[v] ?? SEVERITY_BADGE.NA}`}>
+      {SEVERITY_LABEL[v] ?? v}
+    </span>
+  );
+}
+
+function ChecklistDisplay({ checklist }: { checklist: ReceptionChecklist }) {
+  const sections = [
+    {
+      label: "Exterior",
+      items: [
+        { label: "Rayones", value: checklist.exterior?.scratches },
+        { label: "Golpes", value: checklist.exterior?.dents },
+        { label: "Luces", value: checklist.exterior?.lights },
+      ],
+    },
+    {
+      label: "Interior",
+      items: [
+        { label: "Radio", value: checklist.interior?.radio },
+        { label: "Pantalla", value: checklist.interior?.screen },
+        { label: "Alfombras", value: checklist.interior?.mats },
+      ],
+    },
+    {
+      label: "Mecánico",
+      items: [
+        { label: "Nivel aceite", value: checklist.mechanical?.oil_level },
+        { label: "Coolant", value: checklist.mechanical?.coolant },
+        { label: "Batería", value: checklist.mechanical?.battery },
+      ],
+    },
+  ];
 
   return (
     <div className="grid grid-cols-3 gap-4">
       {sections.map((section) => (
-        <div key={section}>
-          <h3 className="text-xs font-medium text-muted-foreground mb-2">{section}</h3>
-          <ul className="space-y-1">
-            {items
-              .filter((i) => i.section === section)
-              .map((item) => (
-                <li key={item.label} className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${
-                      item.value ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {item.value ? "✓" : "–"}
-                  </span>
-                  {item.label}
-                </li>
-              ))}
+        <div key={section.label}>
+          <h3 className="text-xs font-medium text-muted-foreground mb-2">{section.label}</h3>
+          <ul className="space-y-1.5">
+            {section.items.map((item) => (
+              <li key={item.label} className="flex items-center justify-between gap-2 text-sm">
+                <span>{item.label}</span>
+                <SeverityBadge value={item.value} />
+              </li>
+            ))}
           </ul>
         </div>
       ))}

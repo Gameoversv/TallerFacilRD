@@ -5,7 +5,7 @@ public record ReceptionChecklist(
         InteriorChecklist interior,
         MechanicalChecklist mechanical
 ) {
-    public record ExteriorChecklist(Boolean scratches, Boolean dents, Boolean lights) {}
-    public record InteriorChecklist(Boolean radio, Boolean screen, Boolean mats) {}
-    public record MechanicalChecklist(Boolean oilLevel, Boolean coolant, Boolean battery) {}
+    public record ExteriorChecklist(String scratches, String dents, String lights) {}
+    public record InteriorChecklist(String radio, String screen, String mats) {}
+    public record MechanicalChecklist(String oilLevel, String coolant, String battery) {}
 }
