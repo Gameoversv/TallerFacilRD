@@ -50,9 +50,9 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
 
     private Map<String, Object> buildChecklist() {
         return Map.of(
-                "exterior", Map.of("scratches", true, "dents", false, "lights", true),
-                "interior", Map.of("radio", true, "screen", false, "mats", true),
-                "mechanical", Map.of("oil_level", true, "coolant", true, "battery", false)
+                "exterior", Map.of("scratches", "OK", "dents", "NA", "lights", "LEVE"),
+                "interior", Map.of("radio", "OK", "screen", "NA", "mats", "OK"),
+                "mechanical", Map.of("oil_level", "GRAVE", "coolant", "OK", "battery", "NA")
         );
     }
 
@@ -74,8 +74,8 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
                 .andExpect(jsonPath("$.data.vehicle_id").value(vehicleId))
                 .andExpect(jsonPath("$.data.entry_km").value(52000))
                 .andExpect(jsonPath("$.data.reported_problem").value("Ruido en frenos delanteros"))
-                .andExpect(jsonPath("$.data.checklist.exterior.scratches").value(true))
-                .andExpect(jsonPath("$.data.checklist.mechanical.oil_level").value(true))
+                .andExpect(jsonPath("$.data.checklist.exterior.scratches").value("OK"))
+                .andExpect(jsonPath("$.data.checklist.mechanical.oil_level").value("GRAVE"))
                 .andExpect(jsonPath("$.data.photos").isArray());
     }
 

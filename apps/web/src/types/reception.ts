@@ -1,18 +1,20 @@
+export type ChecklistSeverity = "OK" | "LEVE" | "GRAVE" | "NA";
+
 export interface ReceptionChecklist {
   exterior?: {
-    scratches?: boolean;
-    dents?: boolean;
-    lights?: boolean;
+    scratches?: ChecklistSeverity;
+    dents?: ChecklistSeverity;
+    lights?: ChecklistSeverity;
   };
   interior?: {
-    radio?: boolean;
-    screen?: boolean;
-    mats?: boolean;
+    radio?: ChecklistSeverity;
+    screen?: ChecklistSeverity;
+    mats?: ChecklistSeverity;
   };
   mechanical?: {
-    oil_level?: boolean;
-    coolant?: boolean;
-    battery?: boolean;
+    oil_level?: ChecklistSeverity;
+    coolant?: ChecklistSeverity;
+    battery?: ChecklistSeverity;
   };
 }
 
@@ -27,5 +29,7 @@ export interface Reception {
   checklist: ReceptionChecklist;
   photos: string[];
   notes?: string;
+  signature_data?: string;
+  signed_at?: string;
   created_at: string;
 }

@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import SignaturePad from "signature_pad";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateReception, useAddReceptionPhoto } from "@/hooks/useReceptions";
+import {
+  useCreateReception,
+  useAddReceptionPhoto,
+  useAddReceptionSignature,
+} from "@/hooks/useReceptions";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useCustomerVehicles } from "@/hooks/useVehicles";
+
+const SEVERITY = ["NA", "OK", "LEVE", "GRAVE"] as const;
+type Severity = (typeof SEVERITY)[number];
+
+const severityField = z.enum(SEVERITY);
 
 const schema = z.object({
   vehicleId: z.string().uuid("Selecciona un vehículo"),
@@ -18,31 +28,76 @@ const schema = z.object({
   entryKm: z.number().int().positive("Kilometraje requerido"),
   reportedProblem: z.string().min(3, "Describe el problema"),
   notes: z.string().optional(),
-  scratchesExterior: z.boolean().optional(),
-  dentsExterior: z.boolean().optional(),
-  lightsExterior: z.boolean().optional(),
-  radioInterior: z.boolean().optional(),
-  screenInterior: z.boolean().optional(),
-  matsInterior: z.boolean().optional(),
-  oilLevelMech: z.boolean().optional(),
-  coolantMech: z.boolean().optional(),
-  batteryMech: z.boolean().optional(),
+  scratchesExterior: severityField,
+  dentsExterior: severityField,
+  lightsExterior: severityField,
+  radioInterior: severityField,
+  screenInterior: severityField,
+  matsInterior: severityField,
+  oilLevelMech: severityField,
+  coolantMech: severityField,
+  batteryMech: severityField,
 });
 
 type FormValues = z.infer<typeof schema>;
 
-const STEPS = ["Cliente & Vehículo", "Checklist", "Fotos", "Confirmar"];
+const STEPS = ["Cliente & Vehículo", "Checklist", "Fotos", "Firma", "Confirmar"];
+
+const SEVERITY_STYLE: Record<Severity, string> = {
+  NA:    "bg-muted text-muted-foreground border-border",
+  OK:    "bg-success/15 text-success border-success/40",
+  LEVE:  "bg-warning/15 text-warning border-warning/40",
+  GRAVE: "bg-destructive/15 text-destructive border-destructive/40",
+};
+
+const SEVERITY_LABEL: Record<Severity, string> = {
+  NA:    "N/A",
+  OK:    "OK",
+  LEVE:  "Leve",
+  GRAVE: "Grave",
+};
+
+function SeveritySelector({
+  value,
+  onChange,
+}: {
+  value: Severity;
+  onChange: (v: Severity) => void;
+}) {
+  return (
+    <div className="flex gap-1">
+      {SEVERITY.map((s) => (
+        <button
+          key={s}
+          type="button"
+          onClick={() => onChange(s)}
+          className={`flex-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors ${
+            value === s
+              ? SEVERITY_STYLE[s] + " ring-1 ring-offset-1 ring-current"
+              : "bg-card text-muted-foreground border-border hover:bg-muted/40"
+          }`}
+        >
+          {SEVERITY_LABEL[s]}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function ReceptionWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState<File[]>([]);
-  const [createdId, setCreatedId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
+  const [signatureError, setSignatureError] = useState<string | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const padRef = useRef<SignaturePad | null>(null);
 
   const createReception = useCreateReception();
   const addPhoto = useAddReceptionPhoto();
+  const addSignature = useAddReceptionSignature();
   const { data: customersData } = useCustomers(customerSearch, 0);
   const customers = customersData?.data ?? [];
 
@@ -51,13 +106,14 @@ export function ReceptionWizard() {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      scratchesExterior: false, dentsExterior: false, lightsExterior: false,
-      radioInterior: false, screenInterior: false, matsInterior: false,
-      oilLevelMech: false, coolantMech: false, batteryMech: false,
+      scratchesExterior: "NA", dentsExterior: "NA", lightsExterior: "NA",
+      radioInterior: "NA", screenInterior: "NA", matsInterior: "NA",
+      oilLevelMech: "NA", coolantMech: "NA", batteryMech: "NA",
     },
   });
 
@@ -65,11 +121,31 @@ export function ReceptionWizard() {
   const { data: vehiclesData } = useCustomerVehicles(selectedCustomerId ?? "");
   const vehicles = vehiclesData?.data ?? [];
 
+  useEffect(() => {
+    if (step !== 3 || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const pad = new SignaturePad(canvas, { penColor: "#1e293b" });
+    padRef.current = pad;
+
+    const resize = () => {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.scale(ratio, ratio);
+      pad.clear();
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    return () => {
+      window.removeEventListener("resize", resize);
+      pad.off();
+    };
+  }, [step]);
+
   const handlePhotoDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const files = Array.from(e.dataTransfer.files).filter((f) =>
-      f.type.startsWith("image/")
-    );
+    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
     setPhotos((prev) => [...prev, ...files]);
   };
 
@@ -80,6 +156,13 @@ export function ReceptionWizard() {
 
   const onSubmit = async (data: FormValues) => {
     setSubmitError(null);
+    if (!padRef.current || padRef.current.isEmpty()) {
+      setSignatureError("El cliente debe firmar antes de confirmar.");
+      setStep(3);
+      return;
+    }
+    const signatureData = padRef.current.toDataURL("image/png");
+
     try {
       const result = await createReception.mutateAsync({
         vehicle_id: data.vehicleId,
@@ -106,12 +189,8 @@ export function ReceptionWizard() {
       });
 
       const id = result.data.id;
-      setCreatedId(id);
-
-      for (const photo of photos) {
-        await addPhoto.mutateAsync({ id, file: photo });
-      }
-
+      for (const photo of photos) await addPhoto.mutateAsync({ id, file: photo });
+      await addSignature.mutateAsync({ id, signatureData });
       router.push(`/recepciones/${id}`);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: string } }; message?: string };
@@ -208,18 +287,17 @@ export function ReceptionWizard() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label>Kilometraje de entrada *</Label>
-                <Input
-                  {...register("entryKm", { valueAsNumber: true })}
-                  type="number"
-                  placeholder="52000"
-                />
-                {errors.entryKm && (
-                  <p className="text-xs text-destructive">{errors.entryKm.message}</p>
-                )}
-              </div>
+            <div className="space-y-1">
+              <Label>Kilometraje de entrada *</Label>
+              <Input
+                {...register("entryKm", { valueAsNumber: true })}
+                type="number"
+                placeholder="52000"
+                className="max-w-[200px]"
+              />
+              {errors.entryKm && (
+                <p className="text-xs text-destructive">{errors.entryKm.message}</p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -250,24 +328,29 @@ export function ReceptionWizard() {
         {/* Step 1: Checklist */}
         {step === 1 && (
           <div className="space-y-6">
-            <h2 className="font-semibold text-lg">Checklist de inspección</h2>
+            <div>
+              <h2 className="font-semibold text-lg">Checklist de inspección</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Selecciona el estado de cada ítem: N/A, OK, Leve o Grave.
+              </p>
+            </div>
 
             <ChecklistGroup label="Exterior">
-              <CheckItem label="Rayones" id="scratches" {...register("scratchesExterior")} />
-              <CheckItem label="Golpes / abolladuras" id="dents" {...register("dentsExterior")} />
-              <CheckItem label="Luces funcionando" id="lights" {...register("lightsExterior")} />
+              <SeverityItem label="Rayones" name="scratchesExterior" control={control} />
+              <SeverityItem label="Golpes / abolladuras" name="dentsExterior" control={control} />
+              <SeverityItem label="Luces funcionando" name="lightsExterior" control={control} />
             </ChecklistGroup>
 
             <ChecklistGroup label="Interior">
-              <CheckItem label="Radio / audio" id="radio" {...register("radioInterior")} />
-              <CheckItem label="Pantalla / navegación" id="screen" {...register("screenInterior")} />
-              <CheckItem label="Alfombras" id="mats" {...register("matsInterior")} />
+              <SeverityItem label="Radio / audio" name="radioInterior" control={control} />
+              <SeverityItem label="Pantalla / navegación" name="screenInterior" control={control} />
+              <SeverityItem label="Alfombras" name="matsInterior" control={control} />
             </ChecklistGroup>
 
             <ChecklistGroup label="Mecánico">
-              <CheckItem label="Nivel de aceite OK" id="oil" {...register("oilLevelMech")} />
-              <CheckItem label="Nivel de coolant OK" id="coolant" {...register("coolantMech")} />
-              <CheckItem label="Batería OK" id="battery" {...register("batteryMech")} />
+              <SeverityItem label="Nivel de aceite" name="oilLevelMech" control={control} />
+              <SeverityItem label="Nivel de coolant" name="coolantMech" control={control} />
+              <SeverityItem label="Batería" name="batteryMech" control={control} />
             </ChecklistGroup>
           </div>
         )}
@@ -277,12 +360,12 @@ export function ReceptionWizard() {
           <div className="space-y-4">
             <h2 className="font-semibold text-lg">Fotos del vehículo</h2>
             <p className="text-sm text-muted-foreground">
-              Sube fotos del frente, atrás, laterales e interior para evitar reclamaciones.
+              Sube fotos del frente, atrás, laterales e interior.
             </p>
             <div
               onDragOver={(e) => e.preventDefault()}
               onDrop={handlePhotoDrop}
-              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-border transition-colors cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer"
               onClick={() => document.getElementById("photo-input")?.click()}
             >
               <p className="text-sm text-muted-foreground">
@@ -297,7 +380,6 @@ export function ReceptionWizard() {
                 onChange={handlePhotoInput}
               />
             </div>
-
             {photos.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((f, i) => (
@@ -322,8 +404,37 @@ export function ReceptionWizard() {
           </div>
         )}
 
-        {/* Step 3: Confirm */}
+        {/* Step 3: Firma */}
         {step === 3 && (
+          <div className="space-y-4">
+            <h2 className="font-semibold text-lg">Firma del cliente</h2>
+            <p className="text-sm text-muted-foreground">
+              El cliente confirma con su firma que el estado del vehículo descrito es correcto.
+            </p>
+            <div className="rounded-xl border-2 border-border bg-white overflow-hidden">
+              <canvas
+                ref={canvasRef}
+                className="w-full touch-none block"
+                style={{ height: "200px" }}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => padRef.current?.clear()}
+                className="text-xs text-muted-foreground underline hover:text-foreground"
+              >
+                Limpiar firma
+              </button>
+            </div>
+            {signatureError && (
+              <p className="text-xs text-destructive">{signatureError}</p>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Confirmar */}
+        {step === 4 && (
           <div className="space-y-4">
             <h2 className="font-semibold text-lg">Confirmar recepción</h2>
             <div className="bg-muted/40 rounded-lg p-4 space-y-2 text-sm">
@@ -331,21 +442,23 @@ export function ReceptionWizard() {
               <p><span className="font-medium">Problema:</span> {watch("reportedProblem")}</p>
               <p><span className="font-medium">Km entrada:</span> {watch("entryKm")}</p>
               <p><span className="font-medium">Fotos:</span> {photos.length}</p>
+              <p>
+                <span className="font-medium">Firma:</span>{" "}
+                {padRef.current && !padRef.current.isEmpty() ? "✓ Capturada" : "⚠ Pendiente"}
+              </p>
             </div>
             <p className="text-sm text-muted-foreground">
-              Al confirmar se creará la recepción y se subirán las fotos.
+              Al confirmar se creará la recepción, se subirán las fotos y se guardará la firma.
             </p>
           </div>
         )}
 
-        {/* Error message */}
         {submitError && (
           <p className="mt-4 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2">
             {submitError}
           </p>
         )}
 
-        {/* Navigation */}
         <div className="flex justify-between mt-8">
           <Button
             type="button"
@@ -359,24 +472,21 @@ export function ReceptionWizard() {
           {step < STEPS.length - 1 ? (
             <Button
               type="button"
-              onClick={async () => {
+              onClick={() => {
                 if (step === 0) {
-                  const valid = await new Promise<boolean>((resolve) => {
-                    const customerId = watch("customerId");
-                    const vehicleId = watch("vehicleId");
-                    const entryKm = watch("entryKm");
-                    const reportedProblem = watch("reportedProblem");
-                    if (!customerId || !vehicleId || !entryKm || !reportedProblem) {
-                      resolve(false);
-                    } else {
-                      resolve(true);
-                    }
-                  });
-                  if (!valid) {
+                  const { customerId, vehicleId, entryKm, reportedProblem } = watch();
+                  if (!customerId || !vehicleId || !entryKm || !reportedProblem) {
                     setSubmitError("Completa todos los campos obligatorios: cliente, vehículo, km y problema.");
                     return;
                   }
                   setSubmitError(null);
+                }
+                if (step === 3) {
+                  if (!padRef.current || padRef.current.isEmpty()) {
+                    setSignatureError("El cliente debe firmar antes de continuar.");
+                    return;
+                  }
+                  setSignatureError(null);
                 }
                 setStep((s) => s + 1);
               }}
@@ -394,37 +504,44 @@ export function ReceptionWizard() {
   );
 }
 
-function ChecklistGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function ChecklistGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
         {label}
       </h3>
-      <div className="space-y-2">{children}</div>
+      <div className="space-y-3">{children}</div>
     </div>
   );
 }
 
-function CheckItem({
+type SeverityFieldName =
+  | "scratchesExterior" | "dentsExterior" | "lightsExterior"
+  | "radioInterior" | "screenInterior" | "matsInterior"
+  | "oilLevelMech" | "coolantMech" | "batteryMech";
+
+function SeverityItem({
   label,
-  id,
-  ...props
-}: { label: string; id: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  name,
+  control,
+}: {
+  label: string;
+  name: SeverityFieldName;
+  control: Control<FormValues>;
+}) {
   return (
-    <label htmlFor={id} className="flex items-center gap-3 cursor-pointer group">
-      <input
-        type="checkbox"
-        id={id}
-        className="h-4 w-4 rounded border-border"
-        {...props}
+    <div className="rounded-lg border border-border bg-card px-3 py-3">
+      <p className="text-sm font-medium text-foreground mb-2">{label}</p>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <SeveritySelector
+            value={field.value as Severity}
+            onChange={field.onChange}
+          />
+        )}
       />
-      <span className="text-sm group-hover:text-foreground">{label}</span>
-    </label>
+    </div>
   );
 }

@@ -1,11 +1,18 @@
 package rd.tallerfacil.api.reception.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 public record ReceptionChecklist(
         ExteriorChecklist exterior,
         InteriorChecklist interior,
         MechanicalChecklist mechanical
 ) {
-    public record ExteriorChecklist(Boolean scratches, Boolean dents, Boolean lights) {}
-    public record InteriorChecklist(Boolean radio, Boolean screen, Boolean mats) {}
-    public record MechanicalChecklist(Boolean oilLevel, Boolean coolant, Boolean battery) {}
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record ExteriorChecklist(String scratches, String dents, String lights) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record InteriorChecklist(String radio, String screen, String mats) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record MechanicalChecklist(String oilLevel, String coolant, String battery) {}
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import rd.tallerfacil.api.reception.dto.CreateReceptionRequest;
 import rd.tallerfacil.api.reception.dto.ReceptionResponse;
+import rd.tallerfacil.api.reception.dto.SaveSignatureRequest;
 import rd.tallerfacil.api.reception.service.ReceptionService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 
@@ -45,5 +46,13 @@ public class ReceptionController {
             @RequestPart("file") MultipartFile file
     ) throws IOException {
         return ApiResponse.ok(service.addPhoto(id, file));
+    }
+
+    @PutMapping("/{id}/signature")
+    public ApiResponse<ReceptionResponse> saveSignature(
+            @PathVariable UUID id,
+            @RequestBody SaveSignatureRequest request
+    ) {
+        return ApiResponse.ok(service.saveSignature(id, request));
     }
 }

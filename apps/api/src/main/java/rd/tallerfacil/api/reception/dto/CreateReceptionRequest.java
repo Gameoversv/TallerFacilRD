@@ -20,9 +20,9 @@ public record CreateReceptionRequest(
             @Valid InteriorDto interior,
             @Valid MechanicalDto mechanical
     ) {
-        public record ExteriorDto(Boolean scratches, Boolean dents, Boolean lights) {}
-        public record InteriorDto(Boolean radio, Boolean screen, Boolean mats) {}
-        public record MechanicalDto(Boolean oilLevel, Boolean coolant, Boolean battery) {}
+        public record ExteriorDto(String scratches, String dents, String lights) {}
+        public record InteriorDto(String radio, String screen, String mats) {}
+        public record MechanicalDto(String oilLevel, String coolant, String battery) {}
 
         public ReceptionChecklist toDomain() {
             return new ReceptionChecklist(

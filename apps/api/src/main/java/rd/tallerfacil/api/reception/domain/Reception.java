@@ -40,6 +40,12 @@ public class Reception extends TenantAwareEntity {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "signature_data", columnDefinition = "TEXT")
+    private String signatureData;
+
+    @Column(name = "signed_at")
+    private java.time.Instant signedAt;
+
     @Column(nullable = false)
     private boolean active = true;
 }

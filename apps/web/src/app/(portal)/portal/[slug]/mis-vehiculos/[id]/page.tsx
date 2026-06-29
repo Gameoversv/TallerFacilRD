@@ -13,6 +13,8 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  ClipboardList,
+  PenLine,
 } from "lucide-react";
 import portalApi from "@/lib/portalApi";
 
@@ -38,10 +40,20 @@ interface WorkOrderSummary {
   invoices: InvoiceSummary[];
 }
 
+type Severity = "OK" | "LEVE" | "GRAVE" | "NA";
+
+interface ChecklistData {
+  exterior?: { scratches?: Severity; dents?: Severity; lights?: Severity };
+  interior?: { radio?: Severity; screen?: Severity; mats?: Severity };
+  mechanical?: { oil_level?: Severity; coolant?: Severity; battery?: Severity };
+}
+
 interface VisitSummary {
   reception_id: string;
   reception_date: string;
   complaint: string;
+  checklist?: ChecklistData;
+  signature_data?: string;
   work_order: WorkOrderSummary | null;
 }
 
@@ -149,6 +161,49 @@ function ReceptionCard({ visit, slug }: { visit: VisitSummary; slug: string }) {
             </div>
           )}
 
+          {visit.checklist && (
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-2">
+                <ClipboardList className="h-3.5 w-3.5" />
+                Inspección visual
+              </div>
+              <div className="grid grid-cols-1 gap-1 text-xs">
+                <ChecklistSection label="Exterior" items={[
+                  { label: "Rayones", value: visit.checklist.exterior?.scratches },
+                  { label: "Golpes/abolladuras", value: visit.checklist.exterior?.dents },
+                  { label: "Luces", value: visit.checklist.exterior?.lights },
+                ]} />
+                <ChecklistSection label="Interior" items={[
+                  { label: "Radio/audio", value: visit.checklist.interior?.radio },
+                  { label: "Pantalla", value: visit.checklist.interior?.screen },
+                  { label: "Alfombras", value: visit.checklist.interior?.mats },
+                ]} />
+                <ChecklistSection label="Mecánico" items={[
+                  { label: "Nivel de aceite", value: visit.checklist.mechanical?.oil_level },
+                  { label: "Coolant", value: visit.checklist.mechanical?.coolant },
+                  { label: "Batería", value: visit.checklist.mechanical?.battery },
+                ]} />
+              </div>
+            </div>
+          )}
+
+          {visit.signature_data && (
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-2">
+                <PenLine className="h-3.5 w-3.5" />
+                Firma del cliente
+              </div>
+              <div className="rounded-lg border border-border bg-white p-2 inline-block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={visit.signature_data}
+                  alt="Firma del cliente"
+                  className="max-h-20 w-auto"
+                />
+              </div>
+            </div>
+          )}
+
           {wo && wo.items.length > 0 && (
             <div>
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-2">
@@ -212,6 +267,42 @@ function ReceptionCard({ visit, slug }: { visit: VisitSummary; slug: string }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+const PORTAL_SEVERITY_BADGE: Record<string, string> = {
+  OK:    "bg-success/15 text-success",
+  LEVE:  "bg-warning/15 text-warning",
+  GRAVE: "bg-destructive/15 text-destructive",
+  NA:    "bg-muted text-muted-foreground",
+};
+const PORTAL_SEVERITY_LABEL: Record<string, string> = {
+  OK: "OK", LEVE: "Leve", GRAVE: "Grave", NA: "N/A",
+};
+
+function ChecklistSection({
+  label,
+  items,
+}: {
+  label: string;
+  items: { label: string; value?: Severity }[];
+}) {
+  const relevant = items.filter((i) => i.value && i.value !== "NA");
+  if (relevant.length === 0) return null;
+  return (
+    <div className="rounded-lg bg-muted/30 px-3 py-2 mb-1">
+      <p className="text-xs font-semibold text-muted-foreground mb-1.5">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {relevant.map((item) => (
+          <span key={item.label} className="flex items-center gap-1.5 text-xs">
+            <span className={`rounded px-1.5 py-0.5 font-medium ${PORTAL_SEVERITY_BADGE[item.value!] ?? PORTAL_SEVERITY_BADGE.NA}`}>
+              {PORTAL_SEVERITY_LABEL[item.value!] ?? item.value}
+            </span>
+            <span className="text-foreground">{item.label}</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
