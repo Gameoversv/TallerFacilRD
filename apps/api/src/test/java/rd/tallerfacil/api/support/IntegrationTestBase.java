@@ -8,6 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import rd.tallerfacil.api.customer.repository.CustomerRepository;
+import rd.tallerfacil.api.invoice.repository.InvoiceRepository;
+import rd.tallerfacil.api.payment.repository.PaymentRepository;
+import rd.tallerfacil.api.quote.repository.QuoteRepository;
 import rd.tallerfacil.api.reception.repository.ReceptionRepository;
 import rd.tallerfacil.api.tenant.repository.TenantRepository;
 import rd.tallerfacil.api.auth.repository.UserRepository;
@@ -31,13 +34,19 @@ public abstract class IntegrationTestBase {
     @Autowired protected VehicleRepository vehicleRepository;
     @Autowired protected ReceptionRepository receptionRepository;
     @Autowired protected WorkOrderRepository workOrderRepository;
+    @Autowired protected QuoteRepository quoteRepository;
+    @Autowired protected InvoiceRepository invoiceRepository;
+    @Autowired protected PaymentRepository paymentRepository;
 
     protected void cleanAll() {
+        paymentRepository.deleteAll();
+        invoiceRepository.deleteAll();
+        quoteRepository.deleteAll();
         workOrderRepository.deleteAll();
         receptionRepository.deleteAll();
         vehicleRepository.deleteAll();
+        userRepository.deleteAll();     // before customers: portal users have customer_id FK
         customerRepository.deleteAll();
-        userRepository.deleteAll();
         tenantRepository.deleteAll();
     }
 
@@ -53,5 +62,13 @@ public abstract class IntegrationTestBase {
                         .content(objectMapper.writeValueAsString(body)))
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(res).path("data").path("token").asText();
+    }
+
+    protected Map<String, Object> buildChecklist() {
+        return Map.of(
+                "exterior", Map.of("scratches", "NA", "dents", "NA", "lights", "OK"),
+                "interior", Map.of("radio", "OK", "screen", "OK", "mats", "OK"),
+                "mechanical", Map.of("oil_level", "OK", "coolant", "OK", "battery", "OK")
+        );
     }
 }
