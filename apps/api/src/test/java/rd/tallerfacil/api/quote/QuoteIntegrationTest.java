@@ -64,8 +64,8 @@ class QuoteIntegrationTest extends IntegrationTestBase {
                 "work_order_id", workOrderId,
                 "apply_itbis", false,
                 "items", List.of(
-                        Map.of("item_type", "LABOR", "description", "Cambio aceite", "quantity", 1, "unit_price", 1200),
-                        Map.of("item_type", "PARTS", "description", "Filtro aceite", "quantity", 1, "unit_price", 350)
+                        Map.of("item_type", "MANO_OBRA", "description", "Cambio aceite", "quantity", 1, "unit_price", 1200),
+                        Map.of("item_type", "PIEZA", "description", "Filtro aceite", "quantity", 1, "unit_price", 350)
                 )
         );
 
@@ -89,7 +89,7 @@ class QuoteIntegrationTest extends IntegrationTestBase {
                 "work_order_id", workOrderId,
                 "apply_itbis", true,
                 "items", List.of(
-                        Map.of("item_type", "LABOR", "description", "Mano de obra", "quantity", 1, "unit_price", 1000)
+                        Map.of("item_type", "MANO_OBRA", "description", "Mano de obra", "quantity", 1, "unit_price", 1000)
                 )
         );
 
@@ -161,7 +161,7 @@ class QuoteIntegrationTest extends IntegrationTestBase {
                 "work_order_id", workOrderId,
                 "apply_itbis", false,
                 "items", List.of(
-                        Map.of("item_type", "LABOR", "description", "Servicio", "quantity", 1, "unit_price", 800)
+                        Map.of("item_type", "MANO_OBRA", "description", "Servicio", "quantity", 1, "unit_price", 800)
                 )
         );
         var res = mockMvc.perform(post("/api/quotes")

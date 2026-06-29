@@ -66,8 +66,8 @@ class InvoiceIntegrationTest extends IntegrationTestBase {
                 "issue_date", LocalDate.now().toString(),
                 "apply_itbis", false,
                 "items", List.of(
-                        Map.of("item_type", "LABOR", "description", "Cambio aceite", "quantity", 1, "unit_price", 1200),
-                        Map.of("item_type", "PARTS", "description", "Filtro aceite", "quantity", 2, "unit_price", 350)
+                        Map.of("item_type", "MANO_OBRA", "description", "Cambio aceite", "quantity", 1, "unit_price", 1200),
+                        Map.of("item_type", "PIEZA", "description", "Filtro aceite", "quantity", 2, "unit_price", 350)
                 )
         );
 
@@ -92,7 +92,7 @@ class InvoiceIntegrationTest extends IntegrationTestBase {
                 "issue_date", LocalDate.now().toString(),
                 "apply_itbis", true,
                 "items", List.of(
-                        Map.of("item_type", "LABOR", "description", "Mano de obra", "quantity", 2, "unit_price", 1000)
+                        Map.of("item_type", "MANO_OBRA", "description", "Mano de obra", "quantity", 2, "unit_price", 1000)
                 )
         );
 
@@ -178,7 +178,7 @@ class InvoiceIntegrationTest extends IntegrationTestBase {
                 "issue_date", LocalDate.now().toString(),
                 "apply_itbis", false,
                 "items", List.of(
-                        Map.of("item_type", "LABOR", "description", "Servicio general", "quantity", 1, "unit_price", 2000)
+                        Map.of("item_type", "MANO_OBRA", "description", "Servicio general", "quantity", 1, "unit_price", 2000)
                 )
         );
         var res = mockMvc.perform(post("/api/invoices")
