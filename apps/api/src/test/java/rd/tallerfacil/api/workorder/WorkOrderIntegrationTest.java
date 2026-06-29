@@ -46,9 +46,9 @@ class WorkOrderIntegrationTest extends IntegrationTestBase {
         String vehicleId = objectMapper.readTree(vehRes).path("data").path("id").asText();
 
         var checklist = Map.of(
-                "exterior", Map.of("scratches", false, "dents", false, "lights", true),
-                "interior", Map.of("radio", true, "screen", true, "mats", true),
-                "mechanical", Map.of("oil_level", true, "coolant", true, "battery", true)
+                "exterior", Map.of("scratches", "NA", "dents", "NA", "lights", "OK"),
+                "interior", Map.of("radio", "OK", "screen", "OK", "mats", "OK"),
+                "mechanical", Map.of("oil_level", "OK", "coolant", "OK", "battery", "OK")
         );
         var recRes = mockMvc.perform(post("/api/receptions")
                         .header("Authorization", "Bearer " + token)
