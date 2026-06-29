@@ -45,8 +45,8 @@ public abstract class IntegrationTestBase {
         workOrderRepository.deleteAll();
         receptionRepository.deleteAll();
         vehicleRepository.deleteAll();
+        userRepository.deleteAll();     // before customers: portal users have customer_id FK
         customerRepository.deleteAll();
-        userRepository.deleteAll();
         tenantRepository.deleteAll();
     }
 

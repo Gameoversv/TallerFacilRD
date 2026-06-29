@@ -178,7 +178,7 @@ class PortalIntegrationTest extends IntegrationTestBase {
                         "work_order_id", woId,
                         "issue_date", LocalDate.now().toString(),
                         "apply_itbis", false,
-                        "items", List.of(Map.of("item_type", "LABOR", "description", "Reparación", "quantity", 1, "unit_price", 3000))
+                        "items", List.of(Map.of("item_type", "MANO_OBRA", "description", "Reparación", "quantity", 1, "unit_price", 3000))
                 ))));
 
         String portalToken = loginPortal();
