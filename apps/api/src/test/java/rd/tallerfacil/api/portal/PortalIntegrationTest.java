@@ -71,7 +71,7 @@ class PortalIntegrationTest extends IntegrationTestBase {
                         .header("Authorization", "Bearer " + staffToken))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.document_id").value(documentId))
-                .andExpect(jsonPath("$.data.password").isNotEmpty())
+                .andExpect(jsonPath("$.data.temporary_password").isNotEmpty())
                 .andExpect(jsonPath("$.data.portal_url").isNotEmpty());
     }
 
@@ -201,7 +201,7 @@ class PortalIntegrationTest extends IntegrationTestBase {
                         .header("Authorization", "Bearer " + staffToken))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        return objectMapper.readTree(res).path("data").path("password").asText();
+        return objectMapper.readTree(res).path("data").path("temporary_password").asText();
     }
 
     private String loginPortal() throws Exception {
