@@ -147,7 +147,7 @@ class PortalIntegrationTest extends IntegrationTestBase {
         mockMvc.perform(get("/api/portal/vehicles/" + vehicleId + "/history")
                         .header("Authorization", "Bearer " + portalToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.vehicle.license_plate").value("POR-001"))
+                .andExpect(jsonPath("$.data.license_plate").value("POR-001"))
                 .andExpect(jsonPath("$.data.visits", hasSize(greaterThanOrEqualTo(1))));
     }
 
