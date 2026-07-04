@@ -4,17 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCustomers, useCreateCustomer, useDeleteCustomer } from "@/hooks/useCustomers";
 import { CustomerForm, type CustomerFormValues } from "@/components/customers/CustomerForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 export default function ClientesPage() {
   const router = useRouter();
@@ -35,15 +29,44 @@ export default function ClientesPage() {
     setShowCreate(false);
   }
 
+  const columns: ResponsiveColumn<(typeof customers)[number]>[] = [
+    { header: "Nombre", primary: true, cell: (c) => c.full_name },
+    { header: "Cédula / RNC", cell: (c) => c.document_id ?? "—" },
+    { header: "Teléfono", cell: (c) => c.phone ?? "—" },
+    { header: "Correo", cell: (c) => c.email ?? "—" },
+    {
+      header: "",
+      isAction: true,
+      className: "w-24",
+      cell: (c) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm(`¿Eliminar a ${c.full_name}?`)) {
+              deleteMutation.mutate(c.id);
+            }
+          }}
+        >
+          Eliminar
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Clientes</h1>
-          <p className="text-sm text-muted-foreground">{total} registros</p>
-        </div>
-        <Button onClick={() => setShowCreate(true)}>+ Nuevo cliente</Button>
-      </div>
+      <PageHeader
+        title="Clientes"
+        description={`${total} registros`}
+        actions={
+          <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
+            + Nuevo cliente
+          </Button>
+        }
+      />
 
       <Input
         placeholder="Buscar por nombre o cédula..."
@@ -52,59 +75,14 @@ export default function ClientesPage() {
         className="max-w-sm"
       />
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Cédula / RNC</TableHead>
-                <TableHead>Teléfono</TableHead>
-                <TableHead>Correo</TableHead>
-                <TableHead className="w-24"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    Sin resultados
-                  </TableCell>
-                </TableRow>
-              )}
-              {customers.map((c) => (
-                <TableRow
-                  key={c.id}
-                  className="cursor-pointer hover:bg-muted/40"
-                  onClick={() => router.push(`/clientes/${c.id}`)}
-                >
-                  <TableCell className="font-medium">{c.full_name}</TableCell>
-                  <TableCell>{c.document_id ?? "—"}</TableCell>
-                  <TableCell>{c.phone ?? "—"}</TableCell>
-                  <TableCell>{c.email ?? "—"}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`¿Eliminar a ${c.full_name}?`)) {
-                          deleteMutation.mutate(c.id);
-                        }
-                      }}
-                    >
-                      Eliminar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={customers}
+        columns={columns}
+        getKey={(c) => c.id}
+        onRowClick={(c) => router.push(`/clientes/${c.id}`)}
+        isLoading={isLoading}
+        emptyMessage="Sin resultados"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">
