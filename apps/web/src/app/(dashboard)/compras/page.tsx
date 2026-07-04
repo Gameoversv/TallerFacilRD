@@ -4,14 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 
 export default function ComprasPage() {
   const [page, setPage] = useState(0);
@@ -21,61 +15,61 @@ export default function ComprasPage() {
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
+  const columns: ResponsiveColumn<(typeof purchases)[number]>[] = [
+    {
+      header: "Fecha",
+      primary: true,
+      cell: (p) => new Date(p.purchase_date).toLocaleDateString("es-DO"),
+    },
+    {
+      header: "Proveedor",
+      cell: (p) => <span className="font-medium">{p.supplier_name}</span>,
+    },
+    {
+      header: "Ítems",
+      className: "text-right",
+      cell: (p) => p.items?.length ?? "—",
+    },
+    {
+      header: "Total",
+      className: "text-right",
+      cell: (p) => (
+        <span className="font-medium">
+          RD$ {p.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+    {
+      header: "",
+      isAction: true,
+      className: "w-24",
+      cell: (p) => (
+        <Link href={`/compras/${p.id}`}>
+          <Button variant="ghost" size="sm">Ver</Button>
+        </Link>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Compras</h1>
-          <p className="text-sm text-muted-foreground">{total} registros</p>
-        </div>
-        <Link href="/compras/nueva">
-          <Button>+ Nueva compra</Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Compras"
+        description={`${total} registros`}
+        actions={
+          <Link href="/compras/nueva">
+            <Button className="w-full sm:w-auto">+ Nueva compra</Button>
+          </Link>
+        }
+      />
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Proveedor</TableHead>
-                <TableHead className="text-right">Ítems</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="w-24"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {purchases.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    Sin compras registradas
-                  </TableCell>
-                </TableRow>
-              )}
-              {purchases.map((p) => (
-                <TableRow key={p.id} className="hover:bg-muted/40">
-                  <TableCell>
-                    {new Date(p.purchase_date).toLocaleDateString("es-DO")}
-                  </TableCell>
-                  <TableCell className="font-medium">{p.supplier_name}</TableCell>
-                  <TableCell className="text-right">{p.items?.length ?? "—"}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    RD$ {p.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/compras/${p.id}`}>
-                      <Button variant="ghost" size="sm">Ver</Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={purchases}
+        columns={columns}
+        getKey={(p) => p.id}
+        isLoading={isLoading}
+        emptyMessage="Sin compras registradas"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">
