@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useToggleEmployeeActive } from "@/hooks/useEmployees";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 import type { Employee, EmployeeRole, EmployeeRequest } from "@/types/employee";
 
 const ROLE_LABEL: Record<EmployeeRole, string> = {
@@ -98,15 +100,52 @@ export default function EmpleadosPage() {
   const f = (key: keyof EmployeeRequest, val: string | number) =>
     setForm((prev) => ({ ...prev, [key]: val }));
 
+  const columns: ResponsiveColumn<Employee>[] = [
+    {
+      header: "Nombre",
+      primary: true,
+      cell: (emp) => (
+        <span className={emp.active ? "" : "opacity-50"}>{emp.full_name}</span>
+      ),
+    },
+    {
+      header: "Rol",
+      cell: (emp) => (
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLOR[emp.role]}`}>
+          {ROLE_LABEL[emp.role]}
+        </span>
+      ),
+    },
+    { header: "Cargo", cell: (emp) => emp.position ?? "—" },
+    { header: "Teléfono", cell: (emp) => emp.phone ?? "—" },
+    { header: "Email", cell: (emp) => emp.email ?? "—" },
+    {
+      header: "Estado",
+      cell: (emp) => (
+        <span className={`text-xs px-2 py-0.5 rounded-full ${emp.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+          {emp.active ? "Activo" : "Inactivo"}
+        </span>
+      ),
+    },
+    {
+      header: "",
+      isAction: true,
+      className: "w-28",
+      cell: (emp) => <EmployeeActions emp={emp} onEdit={openEdit} />,
+    },
+  ];
+
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Empleados</h1>
-          <p className="text-sm text-muted-foreground">{total} registros</p>
-        </div>
-        <Button onClick={openCreate}>+ Nuevo empleado</Button>
-      </div>
+      <PageHeader
+        title="Empleados"
+        description={`${total} registros`}
+        actions={
+          <Button onClick={openCreate} className="w-full sm:w-auto">
+            + Nuevo empleado
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex gap-3 items-center text-sm flex-wrap">
@@ -125,7 +164,7 @@ export default function EmpleadosPage() {
       {showForm && (
         <form onSubmit={handleSubmit} className="rounded-lg border bg-card p-5 space-y-4">
           <p className="font-medium">{editingId ? "Editar empleado" : "Nuevo empleado"}</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(["firstName", "lastName"] as const).map((field) => (
               <div key={field}>
                 <label className="text-xs text-muted-foreground">{field === "firstName" ? "Nombre" : "Apellido"} *</label>
@@ -178,33 +217,13 @@ export default function EmpleadosPage() {
       )}
 
       {/* List */}
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 border-b">
-              <tr className="text-left text-xs text-muted-foreground">
-                <th className="px-4 py-2">Nombre</th>
-                <th className="px-4 py-2">Rol</th>
-                <th className="px-4 py-2">Cargo</th>
-                <th className="px-4 py-2">Teléfono</th>
-                <th className="px-4 py-2">Email</th>
-                <th className="px-4 py-2">Estado</th>
-                <th className="px-4 py-2 w-28"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {employees.length === 0 && (
-                <tr><td colSpan={7} className="text-center text-muted-foreground py-8">Sin empleados registrados</td></tr>
-              )}
-              {employees.map((emp) => (
-                <EmployeeRow key={emp.id} emp={emp} onEdit={openEdit} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ResponsiveList
+        items={employees}
+        columns={columns}
+        getKey={(emp) => emp.id}
+        isLoading={isLoading}
+        emptyMessage="Sin empleados registrados"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">
@@ -217,33 +236,15 @@ export default function EmpleadosPage() {
   );
 }
 
-function EmployeeRow({ emp, onEdit }: { emp: Employee; onEdit: (e: Employee) => void }) {
+function EmployeeActions({ emp, onEdit }: { emp: Employee; onEdit: (e: Employee) => void }) {
   const toggle = useToggleEmployeeActive(emp.id);
   return (
-    <tr className={`hover:bg-muted/40 ${!emp.active ? "opacity-50" : ""}`}>
-      <td className="px-4 py-2 font-medium">{emp.full_name}</td>
-      <td className="px-4 py-2">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLOR[emp.role]}`}>
-          {ROLE_LABEL[emp.role]}
-        </span>
-      </td>
-      <td className="px-4 py-2 text-muted-foreground">{emp.position ?? "—"}</td>
-      <td className="px-4 py-2 text-muted-foreground">{emp.phone ?? "—"}</td>
-      <td className="px-4 py-2 text-muted-foreground">{emp.email ?? "—"}</td>
-      <td className="px-4 py-2">
-        <span className={`text-xs px-2 py-0.5 rounded-full ${emp.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
-          {emp.active ? "Activo" : "Inactivo"}
-        </span>
-      </td>
-      <td className="px-4 py-2">
-        <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(emp)}>Editar</Button>
-          <Button variant="ghost" size="sm" onClick={() => toggle.mutate()} disabled={toggle.isPending}
-            className={emp.active ? "text-destructive hover:text-destructive" : "text-success hover:text-success"}>
-            {emp.active ? "Desactivar" : "Activar"}
-          </Button>
-        </div>
-      </td>
-    </tr>
+    <div className="flex gap-1">
+      <Button variant="ghost" size="sm" onClick={() => onEdit(emp)}>Editar</Button>
+      <Button variant="ghost" size="sm" onClick={() => toggle.mutate()} disabled={toggle.isPending}
+        className={emp.active ? "text-destructive hover:text-destructive" : "text-success hover:text-success"}>
+        {emp.active ? "Desactivar" : "Activar"}
+      </Button>
+    </div>
   );
 }
