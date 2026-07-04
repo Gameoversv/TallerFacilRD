@@ -2,6 +2,13 @@ import Link from "next/link";
 
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu } from "lucide-react";
 
 import { MARKETING } from "./constants";
 
@@ -38,6 +45,22 @@ export function MarketingHeader() {
             </a>
           ))}
         </nav>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Abrir menú"
+            className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {ANCHOR_LINKS.map((link) => (
+              <DropdownMenuItem key={link.href} asChild>
+                <a href={link.href}>{link.label}</a>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
