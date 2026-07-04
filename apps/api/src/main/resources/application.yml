@@ -7,6 +7,13 @@ spring:
     username: ${DB_USER:tallerfacil}
     password: ${DB_PASSWORD:changeme}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: 10000
+      max-lifetime: 1800000
+      idle-timeout: 600000
+      leak-detection-threshold: 30000
 
   jpa:
     hibernate:
@@ -26,11 +33,23 @@ spring:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non_null
 
+  servlet:
+    multipart:
+      # Vehicle/damage reception photos. Keep image-sized; not a general document upload endpoint.
+      max-file-size: 10MB
+      max-request-size: 15MB
+
 server:
   port: ${SERVER_PORT:8080}
   error:
     include-message: always
     include-binding-errors: always
+  tomcat:
+    threads:
+      max: 100
+      min-spare: 10
+    accept-count: 50
+    connection-timeout: 20000
 
 management:
   endpoints:
