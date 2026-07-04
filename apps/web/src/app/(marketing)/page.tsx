@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import { Hero } from "@/components/marketing/hero";
+import { HowItWorks } from "@/components/marketing/how-it-works";
+import { Modules } from "@/components/marketing/modules";
 import { MoneyPunches } from "@/components/marketing/money-punches";
 import { Pains } from "@/components/marketing/pains";
 
@@ -16,6 +18,8 @@ export default function LandingPage() {
       <Hero />
       <Pains />
       <MoneyPunches />
+      <Modules />
+      <HowItWorks />
     </main>
   );
 }
