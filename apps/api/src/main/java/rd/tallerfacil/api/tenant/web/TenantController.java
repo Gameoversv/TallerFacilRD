@@ -11,6 +11,7 @@ import rd.tallerfacil.api.shared.ratelimit.ClientIpResolver;
 import rd.tallerfacil.api.shared.ratelimit.RateLimitProperties;
 import rd.tallerfacil.api.shared.ratelimit.RateLimiterService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
+import rd.tallerfacil.api.shared.web.HoneypotGuard;
 import rd.tallerfacil.api.shared.web.RateLimitExceededException;
 import rd.tallerfacil.api.tenant.dto.RegisterTenantRequest;
 import rd.tallerfacil.api.tenant.dto.TenantPublicResult;
@@ -30,6 +31,7 @@ public class TenantController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterTenantRequest req, HttpServletRequest httpRequest) {
+        HoneypotGuard.check(req.website());
         if (rateLimitProperties.isEnabled()) {
             String ip = ClientIpResolver.resolve(httpRequest);
             String key = "tenant-register:" + ip + ":" + req.adminEmail().toLowerCase();

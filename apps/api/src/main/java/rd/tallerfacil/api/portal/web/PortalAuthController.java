@@ -14,6 +14,7 @@ import rd.tallerfacil.api.shared.ratelimit.ClientIpResolver;
 import rd.tallerfacil.api.shared.ratelimit.RateLimitProperties;
 import rd.tallerfacil.api.shared.ratelimit.RateLimiterService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
+import rd.tallerfacil.api.shared.web.HoneypotGuard;
 
 @RestController
 @RequestMapping("/api/portal/auth")
@@ -28,6 +29,8 @@ public class PortalAuthController {
     public ResponseEntity<ApiResponse<PortalAuthResponse>> login(
             @RequestBody PortalLoginRequest request, HttpServletRequest httpRequest) {
         try {
+            HoneypotGuard.check(request.website());
+
             if (rateLimitProperties.isEnabled()) {
                 String ip = ClientIpResolver.resolve(httpRequest);
                 String key = "portal-login:" + ip + ":" + safeLower(request.tenantSlug()) + ":" + safeLower(request.documentId());

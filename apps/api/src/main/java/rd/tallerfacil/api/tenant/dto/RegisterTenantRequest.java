@@ -11,5 +11,10 @@ public record RegisterTenantRequest(
         @NotBlank @Size(min = 8) String adminPassword,
         String phone,
         String city,
-        String rnc
+        String rnc,
+        /**
+         * Honeypot field. Must stay blank; hidden from real users via CSS on the client form.
+         * Bots that auto-fill every field will populate it, which we treat as a spam signal.
+         */
+        String website
 ) {}
