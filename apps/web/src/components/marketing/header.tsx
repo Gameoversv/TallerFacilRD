@@ -14,9 +14,14 @@ const ANCHOR_LINKS = [
 export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6 lg:px-8">
         <a href="#inicio" className="shrink-0">
-          <Logo />
+          <span className="sm:hidden">
+            <Logo collapsed />
+          </span>
+          <span className="hidden sm:block">
+            <Logo />
+          </span>
         </a>
 
         <nav
@@ -34,7 +39,7 @@ export function MarketingHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href={MARKETING.loginHref}
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -43,7 +48,10 @@ export function MarketingHeader() {
           </Link>
           <Button asChild size="sm">
             <Link href={MARKETING.registerHref}>
-              {MARKETING.ctaPrimaryLabel}
+              <span className="sm:hidden">Prueba gratis</span>
+              <span className="hidden sm:inline">
+                {MARKETING.ctaPrimaryLabel}
+              </span>
             </Link>
           </Button>
         </div>

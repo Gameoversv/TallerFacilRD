@@ -10,7 +10,7 @@ import { Pains } from "@/components/marketing/pains";
 import { Pricing } from "@/components/marketing/pricing";
 
 export const metadata: Metadata = {
-  title: "GarageFlow — Deje de perder plata en su taller",
+  title: { absolute: "GarageFlow — Deje de perder plata en su taller" },
   description:
     "Software para talleres automotrices en República Dominicana: recepción con foto y firma, órdenes de trabajo, facturación con ITBIS, cuentas por cobrar y más. Prueba gratis 15 días.",
 };
