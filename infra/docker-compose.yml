@@ -7,8 +7,9 @@ services:
       POSTGRES_DB: ${DB_NAME:-tallerfacil}
       POSTGRES_USER: ${DB_USER:-tallerfacil}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-    ports:
-      - "${DB_PORT:-5432}:5432"
+    # No public port mapping: Postgres is only reachable from other services
+    # on the internal docker network. Use `docker compose exec postgres psql ...`
+    # or a temporary port-forward for local debugging if needed.
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +17,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -42,11 +48,17 @@ services:
       - ../.env
     environment:
       DB_HOST: postgres
-    ports:
-      - "8080:8080"
+    # No host port mapping: only reachable via the nginx reverse proxy on the
+    # internal docker network. Use the `tools` profile / a temporary
+    # `docker compose port` mapping for local debugging if needed.
     depends_on:
       postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
 
   web:
     build:
@@ -55,11 +67,32 @@ services:
     container_name: tallerfacil_web
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
-    ports:
-      - "3000:3000"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
+    # No host port mapping: only reachable via the nginx reverse proxy.
     depends_on:
       - api
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: tallerfacil_proxy
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "${PROXY_PORT:-80}:80"
+    depends_on:
+      - api
+      - web
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
 
 volumes:
   pgdata:

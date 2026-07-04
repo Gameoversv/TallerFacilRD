@@ -19,3 +19,7 @@ app:
     expiration-hours: 1
   cors:
     allowed-origins: http://localhost:3000
+  rate-limit:
+    # Disabled for integration tests: the shared Spring context means many test classes issue
+    # dozens of register/login calls from the same "IP" (localhost) in a short window.
+    enabled: false
