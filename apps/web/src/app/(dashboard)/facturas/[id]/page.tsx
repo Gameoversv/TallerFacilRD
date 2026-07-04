@@ -121,7 +121,7 @@ export default function FacturaDetailPage({
           </header>
 
           {/* Bill-to */}
-          <section className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-zinc-200 bg-zinc-50/60 p-5 text-sm">
+          <section className="grid grid-cols-1 gap-x-6 gap-y-4 rounded-xl border border-zinc-200 bg-zinc-50/60 p-5 text-sm sm:grid-cols-2">
             <Field label="Cliente" value={inv.customer_name} strong />
             <Field label="Vehículo" value={inv.vehicle_label} strong />
             <Field
@@ -255,32 +255,34 @@ function ItemTable({
       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
         {title}
       </p>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-zinc-200 text-left text-xs text-zinc-400">
-            <th className="pb-2 font-medium">Descripción</th>
-            <th className="w-16 pb-2 text-center font-medium">Cant.</th>
-            <th className="w-32 pb-2 text-right font-medium">Precio</th>
-            <th className="w-32 pb-2 text-right font-medium">Subtotal</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-zinc-100">
-          {items.map((item) => (
-            <tr key={item.id}>
-              <td className="py-2 text-zinc-800">{item.description}</td>
-              <td className="py-2 text-center text-zinc-500">
-                <span className="nums">{item.quantity}</span>
-              </td>
-              <td className="py-2 text-right text-zinc-500">
-                <span className="nums">{money(item.unit_price)}</span>
-              </td>
-              <td className="py-2 text-right font-medium text-zinc-900">
-                <span className="nums">{money(item.subtotal)}</span>
-              </td>
+      <div className="w-full overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-zinc-200 text-left text-xs text-zinc-400">
+              <th className="pb-2 font-medium">Descripción</th>
+              <th className="w-16 pb-2 text-center font-medium">Cant.</th>
+              <th className="w-32 pb-2 text-right font-medium">Precio</th>
+              <th className="w-32 pb-2 text-right font-medium">Subtotal</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {items.map((item) => (
+              <tr key={item.id}>
+                <td className="py-2 text-zinc-800">{item.description}</td>
+                <td className="py-2 text-center text-zinc-500">
+                  <span className="nums">{item.quantity}</span>
+                </td>
+                <td className="py-2 text-right text-zinc-500">
+                  <span className="nums">{money(item.unit_price)}</span>
+                </td>
+                <td className="py-2 text-right font-medium text-zinc-900">
+                  <span className="nums">{money(item.subtotal)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

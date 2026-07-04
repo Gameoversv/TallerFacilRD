@@ -58,7 +58,7 @@ export default function PaymentSection({ invoiceId, total, paidAmount, remaining
   return (
     <div className="space-y-4">
       {/* Balance summary */}
-      <div className="grid grid-cols-3 gap-3 text-sm">
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
         <div className="rounded-md bg-muted/40 border p-3 text-center">
           <p className="text-xs text-muted-foreground mb-0.5">Total factura</p>
           <p className="font-semibold">RD$ {total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</p>
@@ -80,28 +80,30 @@ export default function PaymentSection({ invoiceId, total, paidAmount, remaining
         <p className="text-xs text-muted-foreground">Cargando pagos...</p>
       ) : payments.length > 0 ? (
         <div className="rounded-md border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40">
-              <tr className="text-left text-xs text-muted-foreground">
-                <th className="px-3 py-2">Fecha</th>
-                <th className="px-3 py-2">Método</th>
-                <th className="px-3 py-2">Notas</th>
-                <th className="px-3 py-2 text-right">Monto</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {payments.map((p) => (
-                <tr key={p.id} className="hover:bg-muted/40">
-                  <td className="px-3 py-2">{new Date(p.payment_date).toLocaleDateString("es-DO")}</td>
-                  <td className="px-3 py-2">{METHOD_LABEL[p.payment_method]}</td>
-                  <td className="px-3 py-2 text-muted-foreground text-xs">{p.notes ?? "—"}</td>
-                  <td className="px-3 py-2 text-right font-medium">
-                    RD$ {p.amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </td>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40">
+                <tr className="text-left text-xs text-muted-foreground">
+                  <th className="px-3 py-2">Fecha</th>
+                  <th className="px-3 py-2">Método</th>
+                  <th className="px-3 py-2">Notas</th>
+                  <th className="px-3 py-2 text-right">Monto</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y">
+                {payments.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/40">
+                    <td className="px-3 py-2">{new Date(p.payment_date).toLocaleDateString("es-DO")}</td>
+                    <td className="px-3 py-2">{METHOD_LABEL[p.payment_method]}</td>
+                    <td className="px-3 py-2 text-muted-foreground text-xs">{p.notes ?? "—"}</td>
+                    <td className="px-3 py-2 text-right font-medium">
+                      RD$ {p.amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">Sin pagos registrados</p>
@@ -111,7 +113,7 @@ export default function PaymentSection({ invoiceId, total, paidAmount, remaining
       {canPay && remainingBalance > 0 && (
         <form onSubmit={handleSubmit} className="border rounded-md p-4 space-y-3 bg-muted/40">
           <p className="text-sm font-medium text-foreground">Registrar pago</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="text-xs text-muted-foreground">Monto (RD$)</label>
               <input
