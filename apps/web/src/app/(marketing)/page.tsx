@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { Hero } from "@/components/marketing/hero";
+
 export const metadata: Metadata = {
   title: "GarageFlow — Deje de perder plata en su taller",
   description:
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <main id="inicio" className="flex-1" />;
+  return (
+    <main id="inicio" className="flex-1">
+      <Hero />
+    </main>
+  );
 }
