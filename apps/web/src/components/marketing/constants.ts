@@ -1,8 +1,8 @@
 const WHATSAPP_NUMBER = "18296321220";
-const WHATSAPP_TEXT = "Hola, quiero información de GarageFlow para mi taller.";
+const WHATSAPP_TEXT = "Hola, quiero información de WorkshopTrack para mi taller.";
 
 export const MARKETING = {
-  brandName: "GarageFlow",
+  brandName: "WorkshopTrack",
   priceMonthly: "RD$2,500",
   pricePerDay: "RD$85",
   trialDays: 15,

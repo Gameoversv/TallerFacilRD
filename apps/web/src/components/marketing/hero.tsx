@@ -41,7 +41,7 @@ export function Hero() {
           </h1>
 
           <p className="max-w-xl text-lg text-muted-foreground">
-            GarageFlow controla su taller completo — recepción con foto y
+            WorkshopTrack controla su taller completo — recepción con foto y
             firma, órdenes de trabajo, facturación y cuentas por cobrar —
             desde el celular o la computadora.
           </p>
@@ -78,7 +78,7 @@ export function Hero() {
 
           <div
             role="img"
-            aria-label="Panel de control de GarageFlow mostrando ventas del día, carros en taller, cuentas por cobrar y órdenes de trabajo recientes"
+            aria-label="Panel de control de WorkshopTrack mostrando ventas del día, carros en taller, cuentas por cobrar y órdenes de trabajo recientes"
             className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl shadow-black/40 sm:max-w-lg"
           >
             <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
@@ -86,7 +86,7 @@ export function Hero() {
               <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
               <span className="ml-3 text-xs font-medium text-muted-foreground">
-                Panel — GarageFlow
+                Panel — WorkshopTrack
               </span>
             </div>
 

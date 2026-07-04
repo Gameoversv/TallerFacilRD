@@ -27,9 +27,9 @@ export function Pains() {
           {PAINS.map(({ icon: Icon, text }) => (
             <div
               key={text}
-              className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm shadow-black/20"
+              className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm shadow-black/20 transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-primary/40"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-opacity duration-300 group-hover:opacity-80">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <p className="text-pretty text-base text-foreground/90">

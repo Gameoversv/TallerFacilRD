@@ -4,7 +4,7 @@ interface LogoMarkProps {
   className?: string;
 }
 
-/** GarageFlow mark: a hex bay holding a bolt + motion slash. */
+/** WorkshopTrack mark: a hex bay holding a bolt + motion slash. */
 export function LogoMark({ className }: LogoMarkProps) {
   return (
     <svg
@@ -47,7 +47,7 @@ export function Logo({ className, collapsed = false }: LogoProps) {
       {!collapsed && (
         <div className="flex flex-col leading-none">
           <span className="font-display text-[1.05rem] font-bold tracking-tight text-white">
-            Garage<span className="text-primary">Flow</span>
+            Workshop<span className="text-primary">Track</span>
           </span>
           <span className="text-[0.62rem] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             Taller OS · RD

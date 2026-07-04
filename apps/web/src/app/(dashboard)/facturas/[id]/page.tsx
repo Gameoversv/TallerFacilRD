@@ -95,7 +95,7 @@ export default function FacturaDetailPage({
               <LogoMark className="h-10 w-10" />
               <div className="leading-tight">
                 <p className="font-display text-xl font-bold tracking-tight text-zinc-900">
-                  Garage<span className="text-[#0091e6]">Flow</span>
+                  Workshop<span className="text-[#0091e6]">Track</span>
                 </p>
                 <p className="text-xs text-zinc-500">
                   Gestión integral de taller mecánico
@@ -192,7 +192,7 @@ export default function FacturaDetailPage({
               Gracias por confiar en nuestro taller
             </p>
             <p className="mt-0.5 text-xs text-zinc-400">
-              Documento generado por GarageFlow · {inv.invoice_number}
+              Documento generado por WorkshopTrack · {inv.invoice_number}
             </p>
           </footer>
         </div>

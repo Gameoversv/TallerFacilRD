@@ -5,7 +5,7 @@ import { MARKETING } from "./constants";
 const FAQS = [
   {
     question: "¿Y no es caro?",
-    answer: `¿Cuánto perdió el mes pasado en un reclamo o en una cuenta que no cobró? GarageFlow cuesta menos de ${MARKETING.pricePerDay} al día y se paga solo.`,
+    answer: `¿Cuánto perdió el mes pasado en un reclamo o en una cuenta que no cobró? WorkshopTrack cuesta menos de ${MARKETING.pricePerDay} al día y se paga solo.`,
   },
   {
     question: "Yo no sé mucho de computadora",
@@ -15,7 +15,7 @@ const FAQS = [
   {
     question: "Ya llevo todo en mi cuaderno",
     answer:
-      "El cuaderno no le avisa cuándo le toca mantenimiento al cliente ni quién le debe. GarageFlow sí.",
+      "El cuaderno no le avisa cuándo le toca mantenimiento al cliente ni quién le debe. WorkshopTrack sí.",
   },
   {
     question: "¿Y si se va la luz o el internet?",

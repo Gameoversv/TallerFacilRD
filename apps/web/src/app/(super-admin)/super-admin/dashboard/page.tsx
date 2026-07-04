@@ -49,7 +49,7 @@ export default function SuperAdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">GarageFlow HQ</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">WorkshopTrack HQ</p>
         <h1 className="mt-1 font-display text-2xl font-bold tracking-tight">Dashboard global</h1>
         <p className="text-sm text-muted-foreground">Vista en tiempo real de toda la plataforma</p>
       </div>
