@@ -175,4 +175,93 @@ class ReceptionIntegrationTest extends IntegrationTestBase {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("POST /api/receptions/:id/photos - rechaza extensión no permitida")
+    void addPhoto_disallowedExtension_returns400() throws Exception {
+        var body = Map.of(
+                "vehicle_id", vehicleId,
+                "entry_km", 15000,
+                "reported_problem", "Prueba archivo invalido",
+                "checklist", buildDetailedChecklist()
+        );
+        var createRes = mockMvc.perform(post("/api/receptions")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andReturn().getResponse().getContentAsString();
+        String receptionId = objectMapper.readTree(createRes).path("data").path("id").asText();
+
+        var malicious = new MockMultipartFile("file", "payload.exe", "application/octet-stream",
+                "not-an-image".getBytes());
+
+        mockMvc.perform(multipart("/api/receptions/" + receptionId + "/photos")
+                        .file(malicious)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /api/receptions/:id/photos - rechaza content-type que no coincide con la extensión")
+    void addPhoto_mismatchedContentType_returns400() throws Exception {
+        var body = Map.of(
+                "vehicle_id", vehicleId,
+                "entry_km", 15000,
+                "reported_problem", "Prueba content-type invalido",
+                "checklist", buildDetailedChecklist()
+        );
+        var createRes = mockMvc.perform(post("/api/receptions")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andReturn().getResponse().getContentAsString();
+        String receptionId = objectMapper.readTree(createRes).path("data").path("id").asText();
+
+        var spoofed = new MockMultipartFile("file", "frente.jpg", "application/octet-stream",
+                "not-really-an-image".getBytes());
+
+        mockMvc.perform(multipart("/api/receptions/" + receptionId + "/photos")
+                        .file(spoofed)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET /api/files/:path - requiere autenticación")
+    void serveFile_noToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/files/receptions/some-id/photo.jpg"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("GET /api/files/:path - deniega acceso a foto de otro tenant")
+    void serveFile_otherTenant_returns403() throws Exception {
+        var body = Map.of(
+                "vehicle_id", vehicleId,
+                "entry_km", 42000,
+                "reported_problem", "Prueba de aislamiento entre tenants",
+                "checklist", buildDetailedChecklist()
+        );
+        var createRes = mockMvc.perform(post("/api/receptions")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andReturn().getResponse().getContentAsString();
+        String receptionId = objectMapper.readTree(createRes).path("data").path("id").asText();
+
+        var photo = new MockMultipartFile("file", "frente.jpg", "image/jpeg",
+                "fake-image-bytes".getBytes());
+        var photoRes = mockMvc.perform(multipart("/api/receptions/" + receptionId + "/photos")
+                        .file(photo)
+                        .header("Authorization", "Bearer " + token))
+                .andReturn().getResponse().getContentAsString();
+        String photoUrl = objectMapper.readTree(photoRes).path("data").path("photos").get(0).asText();
+        String relativePath = photoUrl.substring(photoUrl.indexOf("receptions/"));
+
+        String otherTenantToken = registerTenantAndGetToken("otro-taller@test.rd", "pass1234");
+
+        mockMvc.perform(get("/api/files/" + relativePath)
+                        .header("Authorization", "Bearer " + otherTenantToken))
+                .andExpect(status().isForbidden());
+    }
 }
