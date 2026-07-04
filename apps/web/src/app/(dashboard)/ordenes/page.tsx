@@ -5,14 +5,8 @@ import { useRouter } from "next/navigation";
 import { useWorkOrders } from "@/hooks/useWorkOrders";
 import type { WorkOrderStatus } from "@/types/work-order";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 
 const STATUS_LABELS: Record<WorkOrderStatus, string> = {
   PENDIENTE: "Pendiente",
@@ -46,15 +40,51 @@ export default function OrdenesPage() {
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
+  const columns: ResponsiveColumn<(typeof orders)[number]>[] = [
+    {
+      header: "Vehículo",
+      primary: true,
+      cell: (o) => <span className="font-medium">{o.vehicle_label}</span>,
+    },
+    { header: "Cliente", cell: (o) => o.customer_name },
+    { header: "Técnico", cell: (o) => o.assigned_to ?? "—" },
+    {
+      header: "Estado",
+      cell: (o) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[o.status]}`}
+        >
+          {STATUS_LABELS[o.status]}
+        </span>
+      ),
+    },
+    {
+      header: "Costo est.",
+      className: "text-right",
+      cell: (o) =>
+        o.estimated_cost != null ? `RD$${o.estimated_cost.toLocaleString()}` : "—",
+    },
+    {
+      header: "Fecha",
+      cell: (o) => (
+        <span className="text-muted-foreground text-sm">
+          {new Date(o.created_at).toLocaleDateString("es-DO")}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Órdenes de trabajo</h1>
-          <p className="text-sm text-muted-foreground">{total} registros</p>
-        </div>
-        <Button onClick={() => router.push("/ordenes/nueva")}>+ Nueva orden</Button>
-      </div>
+      <PageHeader
+        title="Órdenes de trabajo"
+        description={`${total} registros`}
+        actions={
+          <Button onClick={() => router.push("/ordenes/nueva")} className="w-full sm:w-auto">
+            + Nueva orden
+          </Button>
+        }
+      />
 
       <div className="flex gap-2 flex-wrap">
         {STATUS_FILTERS.map((f) => (
@@ -75,59 +105,14 @@ export default function OrdenesPage() {
         ))}
       </div>
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vehículo</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Técnico</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Costo est.</TableHead>
-                <TableHead>Fecha</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Sin resultados
-                  </TableCell>
-                </TableRow>
-              )}
-              {orders.map((o) => (
-                <TableRow
-                  key={o.id}
-                  className="cursor-pointer hover:bg-muted/40"
-                  onClick={() => router.push(`/ordenes/${o.id}`)}
-                >
-                  <TableCell className="font-medium">{o.vehicle_label}</TableCell>
-                  <TableCell>{o.customer_name}</TableCell>
-                  <TableCell>{o.assigned_to ?? "—"}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[o.status]}`}
-                    >
-                      {STATUS_LABELS[o.status]}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {o.estimated_cost != null
-                      ? `RD$${o.estimated_cost.toLocaleString()}`
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {new Date(o.created_at).toLocaleDateString("es-DO")}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={orders}
+        columns={columns}
+        getKey={(o) => o.id}
+        onRowClick={(o) => router.push(`/ordenes/${o.id}`)}
+        isLoading={isLoading}
+        emptyMessage="Sin resultados"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">
