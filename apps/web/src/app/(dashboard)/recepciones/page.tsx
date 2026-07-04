@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useReceptions } from "@/hooks/useReceptions";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
+import type { Reception } from "@/types/reception";
 
 export default function RecepcionesPage() {
   const [page, setPage] = useState(0);
@@ -12,65 +15,62 @@ export default function RecepcionesPage() {
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
+  const columns: ResponsiveColumn<Reception>[] = [
+    { header: "Cliente", primary: true, cell: (r) => r.customer_name },
+    { header: "Vehículo", cell: (r) => r.vehicle_label },
+    {
+      header: "Problema",
+      cell: (r) => r.reported_problem,
+      className: "max-w-xs truncate",
+    },
+    { header: "Km entrada", cell: (r) => `${r.entry_km.toLocaleString()} km` },
+    {
+      header: "Fecha",
+      cell: (r) => new Date(r.created_at).toLocaleDateString("es-DO"),
+    },
+    {
+      header: "",
+      isAction: true,
+      cell: (r) => (
+        <Link
+          href={`/recepciones/${r.id}`}
+          className="text-xs font-medium text-foreground hover:text-white underline underline-offset-2"
+        >
+          Ver
+        </Link>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Recepciones</h1>
-          <p className="text-sm text-muted-foreground mt-1">{total} en total</p>
-        </div>
-        <Link
-          href="/recepciones/nueva"
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-[var(--gf-primary-hover)] transition-colors"
-        >
-          + Nueva recepción
-        </Link>
-      </div>
+      <PageHeader
+        title="Recepciones"
+        description={`${total} en total`}
+        actions={
+          <Link
+            href="/recepciones/nueva"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-[var(--gf-primary-hover)] transition-colors sm:w-auto"
+          >
+            + Nueva recepción
+          </Link>
+        }
+      />
 
-      {isLoading ? (
-        <div className="text-sm text-muted-foreground">Cargando...</div>
-      ) : receptions.length === 0 ? (
+      {!isLoading && receptions.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <p className="text-4xl mb-3">📋</p>
           <p className="font-medium">Sin recepciones</p>
           <p className="text-sm mt-1">Registra la primera entrada de un vehículo</p>
         </div>
       ) : (
-        <div className="bg-card rounded-lg border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Cliente</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vehículo</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Problema</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Km entrada</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fecha</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {receptions.map((r) => (
-                <tr key={r.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-4 py-3 font-medium">{r.customer_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{r.vehicle_label}</td>
-                  <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">{r.reported_problem}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{r.entry_km.toLocaleString()} km</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">
-                    {new Date(r.created_at).toLocaleDateString("es-DO")}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/recepciones/${r.id}`}
-                      className="text-xs font-medium text-foreground hover:text-white underline underline-offset-2"
-                    >
-                      Ver
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ResponsiveList
+          items={receptions}
+          columns={columns}
+          getKey={(r) => r.id}
+          isLoading={isLoading}
+          emptyMessage="Sin recepciones"
+        />
       )}
 
       {totalPages > 1 && (
