@@ -11,7 +11,8 @@ Página pública en `/` que vende TallerFacilRD a dueños de talleres automotric
 
 | Decisión | Valor |
 |----------|-------|
-| Ubicación | Dentro de `apps/web` (Next.js 15 existente), route group `(marketing)` |
+| Marca visible | **GarageFlow** (consistente con la app existente: logo, colores, nombre). "TallerFacilRD" queda como nombre del repo/proyecto |
+| Ubicación | Dentro de `apps/web` (Next.js **16.2.9** existente), route group `(marketing)` |
 | CTA primario | "Prueba gratis 15 días" → `/register` (sin tarjeta) |
 | CTA secundario | WhatsApp `wa.me/18296321220` con mensaje prellenado |
 | Precio | Único: **RD$2,500/mes** por taller, todo incluido |
@@ -44,10 +45,12 @@ Página pública en `/` que vende TallerFacilRD a dueños de talleres automotric
 
 ## Dirección visual
 
-- Estética taller/industrial: hero oscuro, acento ámbar (color de señalización de taller), tipografía grande y directa, jerarquía fuerte. Evitar look de template genérico.
+- Se reutiliza el design system GarageFlow existente en `globals.css` (dark-only, tokens `--gf-*`): fondo `--gf-bg`, primario azul `--gf-primary` para CTAs, ámbar `--gf-warning` como acento de dinero/urgencia (3 golpes, precio).
+- Fuentes ya configuradas en el root layout: Space Grotesk (display), Inter (texto), JetBrains Mono (cifras).
+- Logo existente: `src/components/brand/Logo.tsx`.
+- Estética taller/industrial, tipografía grande y directa, jerarquía fuerte. Evitar look de template genérico.
 - Mobile-first: el dueño de taller navega desde el celular.
 - Solo propiedades animables por compositor (transform/opacity) si hay motion; sin librerías de animación.
-- Tokens (colores, espaciado) como CSS custom properties o clases Tailwind consistentes con el proyecto.
 
 ## Manejo de errores / casos borde
 
