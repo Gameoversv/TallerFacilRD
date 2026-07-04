@@ -96,6 +96,13 @@
             <version>2.27.21</version>
         </dependency>
 
+        <!-- Rate limiting (in-memory token bucket, single-instance deploy) -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>8.14.0</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

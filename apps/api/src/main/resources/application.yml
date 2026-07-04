@@ -73,3 +73,19 @@ app:
       access-key: ${R2_ACCESS_KEY:}
       secret-key: ${R2_SECRET_KEY:}
       public-url: ${R2_PUBLIC_URL:http://localhost:9000/tallerfacil-media}
+  rate-limit:
+    # In-memory, per-instance token buckets. If the API is scaled to multiple instances,
+    # replace with a distributed backend (e.g. bucket4j-redis) so limits apply globally.
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    ip:
+      capacity: 20
+      refill-minutes: 1
+    login:
+      capacity: 5
+      refill-minutes: 1
+    register:
+      capacity: 5
+      refill-minutes: 1
+    portal-login:
+      capacity: 5
+      refill-minutes: 1
