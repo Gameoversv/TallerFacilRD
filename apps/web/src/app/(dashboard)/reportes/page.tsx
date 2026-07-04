@@ -35,12 +35,12 @@ export default function ReportesPage() {
         <p className="text-sm text-muted-foreground">Análisis de ventas, inventario y productividad</p>
       </div>
 
-      <div className="flex gap-1 rounded-lg border border-border bg-muted/30 p-1 w-fit">
+      <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-lg border border-border bg-muted/30 p-1">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               tab === t.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
