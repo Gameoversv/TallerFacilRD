@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 
+import { Faq } from "@/components/marketing/faq";
+import { FinalCta } from "@/components/marketing/final-cta";
 import { Hero } from "@/components/marketing/hero";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { Modules } from "@/components/marketing/modules";
 import { MoneyPunches } from "@/components/marketing/money-punches";
 import { Pains } from "@/components/marketing/pains";
+import { Pricing } from "@/components/marketing/pricing";
 
 export const metadata: Metadata = {
   title: "GarageFlow — Deje de perder plata en su taller",
@@ -20,6 +23,9 @@ export default function LandingPage() {
       <MoneyPunches />
       <Modules />
       <HowItWorks />
+      <Pricing />
+      <Faq />
+      <FinalCta />
     </main>
   );
 }
