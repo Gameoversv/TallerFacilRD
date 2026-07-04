@@ -18,7 +18,7 @@ const ORDERS = [
 
 const STATUS_STYLES: Record<(typeof ORDERS)[number]["status"], string> = {
   "En proceso": "bg-primary/15 text-primary",
-  Listo: "bg-emerald-500/15 text-emerald-400",
+  Listo: "bg-success/15 text-success",
   "Esperando pieza": "bg-warning/15 text-warning",
 };
 
@@ -84,7 +84,7 @@ export function Hero() {
             <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
               <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
               <span className="ml-3 text-xs font-medium text-muted-foreground">
                 Panel — GarageFlow
               </span>
