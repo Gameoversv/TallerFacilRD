@@ -43,7 +43,7 @@ export function Faq() {
               key={question}
               className="group rounded-2xl border border-border bg-card px-6 py-5 open:pb-6"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-lg font-semibold text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg font-display text-lg font-semibold text-foreground marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
                 {question}
                 <ChevronDown
                   className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"

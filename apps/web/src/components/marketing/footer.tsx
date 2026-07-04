@@ -30,7 +30,7 @@ export function MarketingFooter() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                className="rounded-sm text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 {link.label}
               </Link>
@@ -39,7 +39,7 @@ export function MarketingFooter() {
               href={MARKETING.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-sm text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {MARKETING.whatsappDisplay}
             </a>
