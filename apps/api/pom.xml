@@ -14,7 +14,7 @@
     <groupId>rd.tallerfacil</groupId>
     <artifactId>api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>TallerFacilRD API</name>
+    <name>WorkshopTrack API</name>
     <description>ERP ligero para talleres automotrices - Backend</description>
 
     <properties>

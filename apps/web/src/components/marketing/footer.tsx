@@ -47,7 +47,7 @@ export function MarketingFooter() {
         </div>
 
         <p className="mt-10 border-t border-border pt-6 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} GarageFlow
+          © {new Date().getFullYear()} WorkshopTrack
         </p>
       </div>
     </footer>

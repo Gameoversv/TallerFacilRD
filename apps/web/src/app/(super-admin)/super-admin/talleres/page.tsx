@@ -81,7 +81,7 @@ export default function TalleresPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">GarageFlow HQ</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">WorkshopTrack HQ</p>
           <h1 className="mt-1 font-display text-2xl font-bold tracking-tight">Talleres</h1>
           <p className="text-sm text-muted-foreground">{total} talleres registrados</p>
         </div>

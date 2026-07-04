@@ -33,7 +33,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="relative flex items-center gap-3">
           <LogoMark className="h-9 w-9" />
           <span className="font-display text-xl font-bold tracking-tight text-white">
-            Garage<span className="text-primary">Flow</span>
+            Workshop<span className="text-primary">Track</span>
           </span>
         </div>
 
@@ -61,7 +61,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <p className="relative text-xs text-muted-foreground">
-          © {new Date().getFullYear()} GarageFlow · Hecho para talleres de RD
+          © {new Date().getFullYear()} WorkshopTrack · Hecho para talleres de RD
         </p>
       </div>
 

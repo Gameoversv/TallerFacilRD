@@ -58,7 +58,7 @@ export function Topbar() {
       {/* Breadcrumb / page context */}
       <div className="hidden min-w-0 flex-col md:flex">
         <span className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          GarageFlow
+          WorkshopTrack
         </span>
         <span className="truncate font-display text-sm font-semibold text-white">
           {current?.label ?? "Panel"}

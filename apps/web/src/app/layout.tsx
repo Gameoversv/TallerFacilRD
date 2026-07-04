@@ -25,11 +25,11 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "GarageFlow — ERP para talleres mecánicos",
-    template: "%s · GarageFlow",
+    default: "WorkshopTrack — ERP para talleres mecánicos",
+    template: "%s · WorkshopTrack",
   },
   description:
-    "GarageFlow: ERP moderno para talleres mecánicos. Clientes, vehículos, órdenes de trabajo, inventario y facturación en una sola plataforma.",
+    "WorkshopTrack: ERP moderno para talleres mecánicos. Clientes, vehículos, órdenes de trabajo, inventario y facturación en una sola plataforma.",
 };
 
 export default function RootLayout({

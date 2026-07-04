@@ -17,7 +17,7 @@ export default function UsuariosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">GarageFlow HQ</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">WorkshopTrack HQ</p>
         <h1 className="mt-1 font-display text-2xl font-bold tracking-tight">Búsqueda de usuarios</h1>
         <p className="text-sm text-muted-foreground">Busca usuarios a través de todos los talleres</p>
       </div>

@@ -319,7 +319,7 @@ function LoginPageInner() {
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             {mode === "staff"
-              ? "Ingresa a tu taller en GarageFlow"
+              ? "Ingresa a tu taller en WorkshopTrack"
               : "Consulta tus vehículos y facturas"}
           </p>
         </div>
