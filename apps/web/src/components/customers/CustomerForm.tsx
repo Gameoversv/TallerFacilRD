@@ -38,7 +38,7 @@ export function CustomerForm({ defaultValues, onSubmit, submitLabel = "Guardar" 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Nombre *</Label>
           <Input {...register("firstName")} placeholder="Juan" />
@@ -50,7 +50,7 @@ export function CustomerForm({ defaultValues, onSubmit, submitLabel = "Guardar" 
           {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Teléfono</Label>
           <Input {...register("phone")} placeholder="809-000-0000" />
