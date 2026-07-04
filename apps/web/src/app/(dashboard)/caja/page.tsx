@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useCashTransactions, useCashBalance, useCreateCashTransaction } from "@/hooks/useCash";
 import { Button } from "@/components/ui/button";
-import type { TransactionType } from "@/types/cash";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
+import type { CashTransaction, TransactionType } from "@/types/cash";
 
 const today = new Date().toISOString().split("T")[0];
 const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -55,20 +57,51 @@ export default function CajaPage() {
 
   const fmt = (n: number) => `RD$ ${n.toLocaleString("es-DO", { minimumFractionDigits: 2 })}`;
 
+  const columns: ResponsiveColumn<CashTransaction>[] = [
+    {
+      header: "Fecha",
+      primary: true,
+      cell: (tx) => new Date(tx.transaction_date).toLocaleDateString("es-DO"),
+    },
+    {
+      header: "Tipo",
+      cell: (tx) => (
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+          tx.type === "INGRESO"
+            ? "bg-success/15 text-success"
+            : "bg-destructive/15 text-destructive"
+        }`}>
+          {tx.type === "INGRESO" ? "Ingreso" : "Egreso"}
+        </span>
+      ),
+    },
+    { header: "Categoría", cell: (tx) => tx.category ?? "—" },
+    { header: "Descripción", cell: (tx) => tx.description },
+    {
+      header: "Monto",
+      className: "text-right",
+      cell: (tx) => (
+        <span className={tx.type === "INGRESO" ? "font-semibold text-success" : "font-semibold text-destructive"}>
+          {tx.type === "EGRESO" ? "-" : ""}RD$ {tx.amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Caja</h1>
-          <p className="text-sm text-muted-foreground">Control de ingresos y egresos</p>
-        </div>
-        <Button onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Cancelar" : "+ Nueva transacción"}
-        </Button>
-      </div>
+      <PageHeader
+        title="Caja"
+        description="Control de ingresos y egresos"
+        actions={
+          <Button onClick={() => setShowForm((v) => !v)} className="w-full sm:w-auto">
+            {showForm ? "Cancelar" : "+ Nueva transacción"}
+          </Button>
+        }
+      />
 
       {/* Date range filter */}
-      <div className="flex gap-3 items-center text-sm">
+      <div className="flex flex-wrap gap-3 items-center text-sm">
         <label className="text-muted-foreground">Desde</label>
         <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
           className="rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
@@ -78,7 +111,7 @@ export default function CajaPage() {
       </div>
 
       {/* Balance cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-lg border bg-success/10 border-success/20 p-4">
           <p className="text-xs font-semibold text-success uppercase tracking-wide">Ingresos</p>
           <p className="text-2xl font-bold text-success mt-1">
@@ -103,7 +136,7 @@ export default function CajaPage() {
       {showForm && (
         <form onSubmit={handleSubmit} className="rounded-lg border bg-card p-5 space-y-4">
           <p className="font-medium text-foreground">Nueva transacción</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-muted-foreground">Tipo</label>
               <select value={type} onChange={(e) => { setType(e.target.value as TransactionType); setCategory(""); }}
@@ -148,50 +181,13 @@ export default function CajaPage() {
       )}
 
       {/* Transaction list */}
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : transactions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sin transacciones en el período seleccionado</p>
-      ) : (
-        <div className="rounded-md border bg-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 border-b">
-              <tr className="text-left text-xs text-muted-foreground">
-                <th className="px-4 py-2">Fecha</th>
-                <th className="px-4 py-2">Tipo</th>
-                <th className="px-4 py-2">Categoría</th>
-                <th className="px-4 py-2">Descripción</th>
-                <th className="px-4 py-2 text-right">Monto</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-muted/40">
-                  <td className="px-4 py-2 text-muted-foreground">
-                    {new Date(tx.transaction_date).toLocaleDateString("es-DO")}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      tx.type === "INGRESO"
-                        ? "bg-success/15 text-success"
-                        : "bg-destructive/15 text-destructive"
-                    }`}>
-                      {tx.type === "INGRESO" ? "Ingreso" : "Egreso"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2 text-muted-foreground">{tx.category ?? "—"}</td>
-                  <td className="px-4 py-2">{tx.description}</td>
-                  <td className={`px-4 py-2 text-right font-semibold ${
-                    tx.type === "INGRESO" ? "text-success" : "text-destructive"
-                  }`}>
-                    {tx.type === "EGRESO" ? "-" : ""}RD$ {tx.amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ResponsiveList
+        items={transactions}
+        columns={columns}
+        getKey={(tx) => tx.id}
+        isLoading={isLoading}
+        emptyMessage="Sin transacciones en el período seleccionado"
+      />
     </div>
   );
 }
