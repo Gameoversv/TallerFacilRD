@@ -9,11 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import rd.tallerfacil.api.auth.domain.RoleName;
 import rd.tallerfacil.api.auth.domain.User;
 import rd.tallerfacil.api.auth.dto.AuthResponse;
+import rd.tallerfacil.api.auth.dto.ChangePasswordRequest;
 import rd.tallerfacil.api.auth.dto.LoginRequest;
 import rd.tallerfacil.api.auth.dto.RegisterRequest;
 import rd.tallerfacil.api.auth.dto.UserResponse;
 import rd.tallerfacil.api.auth.repository.RoleRepository;
 import rd.tallerfacil.api.auth.repository.UserRepository;
+import rd.tallerfacil.api.shared.web.PasswordChangeNotAllowedException;
 import rd.tallerfacil.api.shared.web.TenantSuspendedException;
 import rd.tallerfacil.api.tenant.repository.TenantRepository;
 
@@ -66,5 +68,29 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
         return new AuthResponse(token, UserResponse.from(user));
+    }
+
+    /**
+     * Self-service password change for staff. Taller OWNERs are not allowed —
+     * they must contact a super-admin for a reset.
+     */
+    @Transactional
+    public void changeOwnPassword(String email, ChangePasswordRequest request) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        boolean isOwner = user.getRoles().stream()
+                .anyMatch(r -> r.getName() == RoleName.OWNER);
+        if (isOwner) {
+            throw new PasswordChangeNotAllowedException(
+                    "Los propietarios deben contactar a un super-admin para cambiar su contraseña.");
+        }
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
     }
 }
