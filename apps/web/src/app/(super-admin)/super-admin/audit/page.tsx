@@ -37,8 +37,8 @@ export default function AuditLogPage() {
         <p className="text-sm text-muted-foreground">{total} acciones registradas</p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border">
-        <table className="w-full text-sm">
+      <div className="w-full overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="border-b border-border bg-muted/40">
             <tr>
               {["Acción", "Detalle", "Actor", "Taller ID", "Fecha"].map((h) => (
