@@ -1,18 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useUserSearch, type UserSummary } from "@/hooks/useSuperAdmin";
+import { useUserSearch, useResetUserPassword, type UserSummary } from "@/hooks/useSuperAdmin";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
+import {
+  ResetPasswordDialog,
+  type ResetPasswordResult,
+} from "@/components/super-admin/ResetPasswordDialog";
 
 export default function UsuariosPage() {
   const [email, setEmail] = useState("");
   const { data, isLoading } = useUserSearch(email);
+  const resetPassword = useResetUserPassword();
+  const [resetResult, setResetResult] = useState<ResetPasswordResult | null>(null);
 
   const users = data?.data?.content ?? [];
   const total = data?.data?.total_elements ?? 0;
+
+  async function handleResetPassword(userId: string, userEmail: string) {
+    const result = await resetPassword.mutateAsync(userId);
+    setResetResult({ email: userEmail, temporaryPassword: result.temporary_password });
+  }
 
   const columns: ResponsiveColumn<UserSummary>[] = [
     { header: "Nombre", primary: true, cell: (u) => u.name },
@@ -38,6 +50,22 @@ export default function UsuariosPage() {
         <span className={`text-xs font-medium ${u.active ? "text-emerald-400" : "text-rose-400"}`}>
           {u.active ? "Activo" : "Inactivo"}
         </span>
+      ),
+    },
+    {
+      header: "",
+      isAction: true,
+      cell: (u) => (
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          disabled={resetPassword.isPending}
+          onClick={() => handleResetPassword(u.id, u.email)}
+        >
+          <KeyRound className="h-3.5 w-3.5" />
+          Resetear contraseña
+        </Button>
       ),
     },
   ];
@@ -74,6 +102,8 @@ export default function UsuariosPage() {
           />
         </>
       )}
+
+      <ResetPasswordDialog result={resetResult} onClose={() => setResetResult(null)} />
     </div>
   );
 }

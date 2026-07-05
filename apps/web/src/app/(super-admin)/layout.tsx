@@ -12,6 +12,7 @@ import {
   Users,
   ScrollText,
   Menu,
+  Megaphone,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/super-admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/super-admin/talleres", icon: Building2, label: "Talleres" },
   { href: "/super-admin/usuarios", icon: Users, label: "Usuarios" },
+  { href: "/super-admin/anuncio", icon: Megaphone, label: "Anuncio" },
   { href: "/super-admin/audit", icon: ScrollText, label: "Audit Log" },
 ] as const;
 
