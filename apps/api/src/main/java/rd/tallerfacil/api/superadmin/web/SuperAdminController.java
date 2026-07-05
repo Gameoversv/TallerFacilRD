@@ -7,6 +7,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import rd.tallerfacil.api.announcement.dto.AnnouncementResponse;
+import rd.tallerfacil.api.announcement.dto.UpdateAnnouncementRequest;
+import rd.tallerfacil.api.announcement.service.AnnouncementService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 import rd.tallerfacil.api.superadmin.dto.*;
 import rd.tallerfacil.api.superadmin.service.SuperAdminService;
@@ -22,6 +25,7 @@ import java.util.UUID;
 public class SuperAdminController {
 
     private final SuperAdminService service;
+    private final AnnouncementService announcementService;
 
     @GetMapping("/stats")
     public ApiResponse<GlobalStatsResponse> stats() {
@@ -102,6 +106,27 @@ public class SuperAdminController {
             @RequestParam(defaultValue = "20") int size
     ) {
         return ApiResponse.ok(service.searchUsers(email, page, size));
+    }
+
+    @PostMapping("/users/{userId}/reset-password")
+    public ApiResponse<ResetPasswordResponse> resetPassword(
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return ApiResponse.ok(service.resetUserPassword(userId, principal.getUsername()));
+    }
+
+    @GetMapping("/announcement")
+    public ApiResponse<AnnouncementResponse> getAnnouncement() {
+        return ApiResponse.ok(announcementService.getCurrent());
+    }
+
+    @PutMapping("/announcement")
+    public ApiResponse<AnnouncementResponse> setAnnouncement(
+            @Valid @RequestBody UpdateAnnouncementRequest req,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return ApiResponse.ok(announcementService.save(req, principal.getUsername()));
     }
 
     @GetMapping("/audit")
