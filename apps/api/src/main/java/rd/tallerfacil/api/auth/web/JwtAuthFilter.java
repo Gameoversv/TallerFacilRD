@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import rd.tallerfacil.api.auth.service.JwtService;
 import rd.tallerfacil.api.shared.domain.CustomerContext;
 import rd.tallerfacil.api.shared.domain.TenantContext;
+import rd.tallerfacil.api.tenant.repository.TenantRepository;
 
 import java.io.IOException;
 
@@ -24,6 +25,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TenantRepository tenantRepository;
 
     @Override
     protected void doFilterInternal(
@@ -50,13 +52,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var userDetails = userDetailsService.loadUserByUsername(email);
                 if (jwtService.isTokenValid(token, email)) {
+                    var tenantId = jwtService.extractTenantId(token);
+
+                    // Deny access when the token's tenant (taller) is suspended or
+                    // cancelled. SUPER_ADMIN (incl. impersonation, whose token stays
+                    // under the super-admin's email) is never blocked.
+                    boolean isSuperAdmin = userDetails.getAuthorities().stream()
+                            .anyMatch(a -> "ROLE_SUPER_ADMIN".equals(a.getAuthority()));
+                    if (tenantId != null && !isSuperAdmin
+                            && tenantRepository.findById(tenantId)
+                                    .map(t -> t.getStatus().blocksAccess())
+                                    .orElse(false)) {
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.setContentType("application/json");
+                        response.getWriter().write(
+                                "{\"success\":false,\"error\":\"Taller suspendido\"}");
+                        return;
+                    }
+
                     var auth = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
 
-                    var tenantId = jwtService.extractTenantId(token);
                     if (tenantId != null) {
                         TenantContext.set(tenantId);
                     }

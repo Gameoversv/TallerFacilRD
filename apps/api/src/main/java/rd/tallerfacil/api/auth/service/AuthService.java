@@ -14,6 +14,8 @@ import rd.tallerfacil.api.auth.dto.RegisterRequest;
 import rd.tallerfacil.api.auth.dto.UserResponse;
 import rd.tallerfacil.api.auth.repository.RoleRepository;
 import rd.tallerfacil.api.auth.repository.UserRepository;
+import rd.tallerfacil.api.shared.web.TenantSuspendedException;
+import rd.tallerfacil.api.tenant.repository.TenantRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TenantRepository tenantRepository;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -49,6 +52,18 @@ public class AuthService {
         );
         var user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Deny access to users whose tenant (taller) is suspended or cancelled.
+        // SUPER_ADMIN has no tenant and is never blocked.
+        if (user.getTenantId() != null) {
+            tenantRepository.findById(user.getTenantId())
+                    .filter(t -> t.getStatus().blocksAccess())
+                    .ifPresent(t -> {
+                        throw new TenantSuspendedException(
+                                "Tu taller está suspendido. Contacta a soporte.");
+                    });
+        }
+
         String token = jwtService.generateToken(user);
         return new AuthResponse(token, UserResponse.from(user));
     }
