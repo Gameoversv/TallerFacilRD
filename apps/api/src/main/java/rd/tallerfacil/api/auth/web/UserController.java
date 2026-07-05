@@ -1,14 +1,19 @@
 package rd.tallerfacil.api.auth.web;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rd.tallerfacil.api.auth.domain.User;
+import rd.tallerfacil.api.auth.dto.ChangePasswordRequest;
 import rd.tallerfacil.api.auth.dto.UserResponse;
 import rd.tallerfacil.api.auth.repository.UserRepository;
+import rd.tallerfacil.api.auth.service.AuthService;
 import rd.tallerfacil.api.shared.web.ApiResponse;
 
 import java.util.List;
@@ -19,10 +24,20 @@ import java.util.List;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     @GetMapping("/me")
     public ApiResponse<UserResponse> me(@AuthenticationPrincipal User user) {
         return ApiResponse.ok(UserResponse.from(user));
+    }
+
+    @PostMapping("/me/password")
+    public ApiResponse<Void> changePassword(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        authService.changeOwnPassword(user.getUsername(), request);
+        return ApiResponse.ok(null);
     }
 
     @GetMapping

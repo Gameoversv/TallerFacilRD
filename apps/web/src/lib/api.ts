@@ -32,10 +32,18 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
     const isAuthEndpoint = error.config?.url?.includes("/api/auth/");
-    if (error.response?.status === 401 && !isAuthEndpoint && typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+    if (!isAuthEndpoint && typeof window !== "undefined") {
+      const serverError =
+        (error.response?.data as { error?: string } | undefined)?.error ?? "";
+      // Tenant suspended/cancelled: the backend cuts the session mid-flight
+      // (JwtAuthFilter → 403 "Taller suspendido"). Log out and surface why.
+      const suspended = status === 403 && /suspendido/i.test(serverError);
+      if (status === 401 || suspended) {
+        localStorage.removeItem("token");
+        window.location.href = suspended ? "/login?suspended=1" : "/login";
+      }
     }
     return Promise.reject(error);
   }

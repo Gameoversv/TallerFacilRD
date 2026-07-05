@@ -37,6 +37,18 @@ public class GlobalExceptionHandler {
         return ApiResponse.error(ex.getMessage());
     }
 
+    @ExceptionHandler(TenantSuspendedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<Void> handleTenantSuspended(TenantSuspendedException ex) {
+        return ApiResponse.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(PasswordChangeNotAllowedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<Void> handlePasswordChangeNotAllowed(PasswordChangeNotAllowedException ex) {
+        return ApiResponse.error(ex.getMessage());
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponse<Void> handleAuthentication(AuthenticationException ex) {

@@ -100,60 +100,64 @@ export default function QuoteSection({ workOrderId, canEdit }: Props) {
 
           {/* Items */}
           <div className="space-y-2">
-            {items.map((item, idx) => (
-              <div key={idx} className="grid grid-cols-[120px_1fr_80px_120px_32px] gap-2 items-end">
-                <div>
-                  {idx === 0 && <Label className="text-xs">Tipo</Label>}
-                  <select
-                    value={item.itemType}
-                    onChange={(e) => updateItem(idx, "itemType", e.target.value as QuoteItemType)}
-                    className="w-full h-9 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm"
-                  >
-                    <option value="MANO_OBRA">Mano de obra</option>
-                    <option value="PIEZA">Pieza</option>
-                  </select>
-                </div>
-                <div>
-                  {idx === 0 && <Label className="text-xs">Descripción</Label>}
-                  <Input
-                    value={item.description}
-                    onChange={(e) => updateItem(idx, "description", e.target.value)}
-                    placeholder="Descripción..."
-                  />
-                </div>
-                <div>
-                  {idx === 0 && <Label className="text-xs">Cant.</Label>}
-                  <Input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)}
-                  />
-                </div>
-                <div>
-                  {idx === 0 && <Label className="text-xs">Precio unit. (RD$)</Label>}
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.unitPrice || ""}
-                    onChange={(e) => updateItem(idx, "unitPrice", parseFloat(e.target.value) || 0)}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className={idx === 0 ? "pt-5" : ""}>
-                  {items.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeItem(idx)}
-                      className="text-destructive hover:text-destructive text-xl leading-none"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
+            <div className="w-full overflow-x-auto">
+              <div className="min-w-[480px] space-y-2">
+                {items.map((item, idx) => (
+                  <div key={idx} className="grid grid-cols-[120px_1fr_80px_120px_32px] gap-2 items-end">
+                    <div>
+                      {idx === 0 && <Label className="text-xs">Tipo</Label>}
+                      <select
+                        value={item.itemType}
+                        onChange={(e) => updateItem(idx, "itemType", e.target.value as QuoteItemType)}
+                        className="w-full h-9 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm"
+                      >
+                        <option value="MANO_OBRA">Mano de obra</option>
+                        <option value="PIEZA">Pieza</option>
+                      </select>
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">Descripción</Label>}
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateItem(idx, "description", e.target.value)}
+                        placeholder="Descripción..."
+                      />
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">Cant.</Label>}
+                      <Input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)}
+                      />
+                    </div>
+                    <div>
+                      {idx === 0 && <Label className="text-xs">Precio unit. (RD$)</Label>}
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unitPrice || ""}
+                        onChange={(e) => updateItem(idx, "unitPrice", parseFloat(e.target.value) || 0)}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className={idx === 0 ? "pt-5" : ""}>
+                      {items.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeItem(idx)}
+                          className="text-destructive hover:text-destructive text-xl leading-none"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
             <Button type="button" variant="ghost" size="sm" onClick={addItem}>
               + Agregar ítem
             </Button>
@@ -301,22 +305,24 @@ function ItemTable({ title, items }: { title: string; items: Quote["items"] }) {
   return (
     <div>
       <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">{title}</p>
-      <table className="w-full text-sm">
-        <tbody className="divide-y">
-          {items.map((item) => (
-            <tr key={item.id}>
-              <td className="py-1 text-foreground">{item.description}</td>
-              <td className="py-1 text-center text-muted-foreground w-12">{item.quantity}</td>
-              <td className="py-1 text-right text-muted-foreground w-32">
-                RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-              </td>
-              <td className="py-1 text-right font-medium w-32">
-                RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="w-full overflow-x-auto">
+        <table className="w-full text-sm">
+          <tbody className="divide-y">
+            {items.map((item) => (
+              <tr key={item.id}>
+                <td className="py-1 text-foreground">{item.description}</td>
+                <td className="py-1 text-center text-muted-foreground w-12">{item.quantity}</td>
+                <td className="py-1 text-right text-muted-foreground w-32">
+                  RD$ {item.unit_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-1 text-right font-medium w-32">
+                  RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

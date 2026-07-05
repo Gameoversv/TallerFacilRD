@@ -4,9 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useInvoices } from "@/hooks/useInvoices";
 import { Button } from "@/components/ui/button";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 import type { InvoiceStatus } from "@/types/invoice";
 
 const STATUS_LABEL: Record<InvoiceStatus, string> = {
@@ -29,67 +28,66 @@ export default function FacturasPage() {
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
+  const columns: ResponsiveColumn<(typeof invoices)[number]>[] = [
+    {
+      header: "N° Factura",
+      primary: true,
+      cell: (inv) => <span className="font-mono font-medium">{inv.invoice_number}</span>,
+    },
+    { header: "Cliente", cell: (inv) => inv.customer_name },
+    {
+      header: "Vehículo",
+      cell: (inv) => <span className="text-sm text-muted-foreground">{inv.vehicle_label}</span>,
+    },
+    { header: "Fecha", cell: (inv) => new Date(inv.issue_date).toLocaleDateString("es-DO") },
+    {
+      header: "Estado",
+      cell: (inv) => (
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[inv.status]}`}>
+          {STATUS_LABEL[inv.status]}
+        </span>
+      ),
+    },
+    {
+      header: "Total",
+      className: "text-right",
+      cell: (inv) => (
+        <span className="font-medium">
+          RD$ {inv.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+    {
+      header: "",
+      isAction: true,
+      className: "w-20",
+      cell: (inv) => (
+        <Link href={`/facturas/${inv.id}`}>
+          <Button variant="ghost" size="sm">Ver</Button>
+        </Link>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Facturas</h1>
-          <p className="text-sm text-muted-foreground">{total} registros</p>
-        </div>
-        <Link href="/facturas/nueva">
-          <Button>+ Nueva factura</Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Facturas"
+        description={`${total} registros`}
+        actions={
+          <Link href="/facturas/nueva">
+            <Button className="w-full sm:w-auto">+ Nueva factura</Button>
+          </Link>
+        }
+      />
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>N° Factura</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Vehículo</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="w-20"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    Sin facturas registradas
-                  </TableCell>
-                </TableRow>
-              )}
-              {invoices.map((inv) => (
-                <TableRow key={inv.id} className="hover:bg-muted/40">
-                  <TableCell className="font-mono font-medium">{inv.invoice_number}</TableCell>
-                  <TableCell>{inv.customer_name}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{inv.vehicle_label}</TableCell>
-                  <TableCell>{new Date(inv.issue_date).toLocaleDateString("es-DO")}</TableCell>
-                  <TableCell>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[inv.status]}`}>
-                      {STATUS_LABEL[inv.status]}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    RD$ {inv.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/facturas/${inv.id}`}>
-                      <Button variant="ghost" size="sm">Ver</Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={invoices}
+        columns={columns}
+        getKey={(inv) => inv.id}
+        isLoading={isLoading}
+        emptyMessage="Sin facturas registradas"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">

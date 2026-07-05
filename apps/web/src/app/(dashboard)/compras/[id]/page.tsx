@@ -37,6 +37,7 @@ export default function CompraDetailPage({ params }: { params: Promise<{ id: str
       )}
 
       <div className="rounded-md border bg-card">
+        <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -69,6 +70,7 @@ export default function CompraDetailPage({ params }: { params: Promise<{ id: str
             </TableRow>
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

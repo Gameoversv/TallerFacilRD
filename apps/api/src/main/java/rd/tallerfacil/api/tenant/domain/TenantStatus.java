@@ -5,5 +5,10 @@ public enum TenantStatus {
     TRIAL,
     ACTIVE,
     SUSPENDED,
-    CANCELLED
+    CANCELLED;
+
+    /** Whether this status denies application access to the tenant's users. */
+    public boolean blocksAccess() {
+        return this == SUSPENDED || this == CANCELLED;
+    }
 }

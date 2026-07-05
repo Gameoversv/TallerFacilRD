@@ -79,34 +79,36 @@ export function MechanicsTab() {
       {/* Table */}
       {mechanics.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-muted/40">
-              <tr>
-                {["Mecánico", "OTs completadas", "OTs canceladas", "Ingresos generados", "Horas prom. por OT"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isLoading
-                ? Array.from({ length: 3 }).map((_, i) => (
-                  <tr key={i}>{Array.from({ length: 5 }).map((_, j) => (
-                    <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                  ))}</tr>
-                ))
-                : mechanics.map((m) => (
-                  <tr key={m.mechanic_name} className="hover:bg-muted/30">
-                    <td className="px-4 py-3 font-medium">{m.mechanic_name}</td>
-                    <td className="px-4 py-3 text-emerald-400 font-medium">{m.completed_ots}</td>
-                    <td className="px-4 py-3 text-rose-400">{m.cancelled_ots}</td>
-                    <td className="px-4 py-3">{fmt(m.total_revenue)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {m.avg_completion_hours != null ? `${m.avg_completion_hours.toFixed(1)}h` : "—"}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border bg-muted/40">
+                <tr>
+                  {["Mecánico", "OTs completadas", "OTs canceladas", "Ingresos generados", "Horas prom. por OT"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {isLoading
+                  ? Array.from({ length: 3 }).map((_, i) => (
+                    <tr key={i}>{Array.from({ length: 5 }).map((_, j) => (
+                      <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                    ))}</tr>
+                  ))
+                  : mechanics.map((m) => (
+                    <tr key={m.mechanic_name} className="hover:bg-muted/30">
+                      <td className="px-4 py-3 font-medium">{m.mechanic_name}</td>
+                      <td className="px-4 py-3 text-emerald-400 font-medium">{m.completed_ots}</td>
+                      <td className="px-4 py-3 text-rose-400">{m.cancelled_ots}</td>
+                      <td className="px-4 py-3">{fmt(m.total_revenue)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {m.avg_completion_hours != null ? `${m.avg_completion_hours.toFixed(1)}h` : "—"}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

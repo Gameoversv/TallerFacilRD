@@ -80,25 +80,27 @@ export function InventoryTab() {
             </Button>
           </div>
           <div className="overflow-hidden rounded-xl border border-orange-400/20">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border bg-orange-400/5">
-                <tr>
-                  {["Código", "Descripción", "Stock actual", "Stock mínimo"].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data?.low_stock_items.map((p) => (
-                  <tr key={p.internal_code} className="hover:bg-muted/30">
-                    <td className="px-4 py-3 font-mono text-xs">{p.internal_code}</td>
-                    <td className="px-4 py-3">{p.description}</td>
-                    <td className="px-4 py-3 font-bold text-orange-400">{p.current_stock}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{p.min_stock}</td>
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-border bg-orange-400/5">
+                  <tr>
+                    {["Código", "Descripción", "Stock actual", "Stock mínimo"].map((h) => (
+                      <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {data?.low_stock_items.map((p) => (
+                    <tr key={p.internal_code} className="hover:bg-muted/30">
+                      <td className="px-4 py-3 font-mono text-xs">{p.internal_code}</td>
+                      <td className="px-4 py-3">{p.description}</td>
+                      <td className="px-4 py-3 font-bold text-orange-400">{p.current_stock}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{p.min_stock}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

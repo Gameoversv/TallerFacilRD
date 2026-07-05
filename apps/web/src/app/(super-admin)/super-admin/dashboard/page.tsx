@@ -126,8 +126,8 @@ export default function SuperAdminDashboardPage() {
               Ver todos →
             </Link>
           </div>
-          <div className="overflow-hidden rounded-xl border border-border">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full min-w-[520px] text-sm">
               <thead className="border-b border-border bg-muted/40">
                 <tr>
                   {["Taller", "Plan", "Estado", "Usuarios", "Registrado"].map((h) => (

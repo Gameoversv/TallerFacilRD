@@ -8,16 +8,10 @@ import {
   useDeleteProduct,
 } from "@/hooks/useInventory";
 import { ProductForm, productToFormValues, type ProductFormValues } from "@/components/inventory/ProductForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import type { Product, ProductCategory } from "@/types/product";
 
 const CATEGORIES: ProductCategory[] = ["ACEITES", "FILTROS", "SENSORES", "BUJIAS", "SUSPENSION", "FRENOS"];
@@ -73,15 +67,92 @@ export default function InventarioPage() {
     }
   }
 
+  const columns: ResponsiveColumn<(typeof products)[number]>[] = [
+    {
+      header: "Código",
+      primary: true,
+      cell: (p) => <span className="font-mono text-sm">{p.internal_code}</span>,
+    },
+    { header: "Descripción", cell: (p) => p.description },
+    {
+      header: "Categoría",
+      cell: (p) => (
+        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+          {CATEGORY_LABELS[p.category]}
+        </span>
+      ),
+    },
+    {
+      header: "Stock",
+      className: "text-right",
+      cell: (p) => (
+        <>
+          <span className={`font-medium ${p.low_stock ? "text-destructive" : ""}`}>
+            {p.current_stock}
+          </span>
+          {p.low_stock && (
+            <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-medium">
+              Stock Bajo
+            </span>
+          )}
+          <span className="text-muted-foreground text-xs ml-1">/ mín {p.min_stock}</span>
+        </>
+      ),
+    },
+    {
+      header: "Precio venta",
+      className: "text-right",
+      cell: (p) => (
+        <span className="font-medium">
+          RD$ {p.sale_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+    {
+      header: "",
+      isAction: true,
+      className: "w-32",
+      cell: (p) => (
+        <div className="flex gap-1 justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditing(p);
+            }}
+          >
+            Editar
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm(`¿Eliminar "${p.description}"?`)) {
+                deleteMutation.mutate(p.id);
+              }
+            }}
+          >
+            Eliminar
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Inventario</h1>
-          <p className="text-sm text-muted-foreground">{total} productos</p>
-        </div>
-        <Button onClick={() => setShowCreate(true)}>+ Nuevo producto</Button>
-      </div>
+      <PageHeader
+        title="Inventario"
+        description={`${total} productos`}
+        actions={
+          <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
+            + Nuevo producto
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex gap-3 items-center flex-wrap">
@@ -110,81 +181,13 @@ export default function InventarioPage() {
         </label>
       </div>
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead className="text-right">Stock</TableHead>
-                <TableHead className="text-right">Precio venta</TableHead>
-                <TableHead className="w-32"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Sin productos
-                  </TableCell>
-                </TableRow>
-              )}
-              {products.map((p) => (
-                <TableRow key={p.id} className="hover:bg-muted/40">
-                  <TableCell className="font-mono text-sm">{p.internal_code}</TableCell>
-                  <TableCell>{p.description}</TableCell>
-                  <TableCell>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                      {CATEGORY_LABELS[p.category]}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className={`font-medium ${p.low_stock ? "text-destructive" : ""}`}>
-                      {p.current_stock}
-                    </span>
-                    {p.low_stock && (
-                      <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-medium">
-                        Stock Bajo
-                      </span>
-                    )}
-                    <span className="text-muted-foreground text-xs ml-1">/ mín {p.min_stock}</span>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    RD$ {p.sale_price.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditing(p)}
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => {
-                          if (confirm(`¿Eliminar "${p.description}"?`)) {
-                            deleteMutation.mutate(p.id);
-                          }
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={products}
+        columns={columns}
+        getKey={(p) => p.id}
+        isLoading={isLoading}
+        emptyMessage="Sin productos"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">

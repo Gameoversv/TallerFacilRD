@@ -4,9 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useInvoices } from "@/hooks/useInvoices";
 import { Button } from "@/components/ui/button";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 
 export default function CuentasCobrarPage() {
   const [page, setPage] = useState(0);
@@ -18,67 +17,69 @@ export default function CuentasCobrarPage() {
 
   const totalPendiente = invoices.reduce((sum, inv) => sum + inv.remaining_balance, 0);
 
+  const columns: ResponsiveColumn<(typeof invoices)[number]>[] = [
+    {
+      header: "N° Factura",
+      primary: true,
+      cell: (inv) => <span className="font-mono font-medium">{inv.invoice_number}</span>,
+    },
+    { header: "Cliente", cell: (inv) => inv.customer_name },
+    {
+      header: "Vehículo",
+      cell: (inv) => <span className="text-sm text-muted-foreground">{inv.vehicle_label}</span>,
+    },
+    { header: "Fecha", cell: (inv) => new Date(inv.issue_date).toLocaleDateString("es-DO") },
+    {
+      header: "Total",
+      className: "text-right",
+      cell: (inv) => (
+        <span>RD$ {inv.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}</span>
+      ),
+    },
+    {
+      header: "Pagado",
+      className: "text-right",
+      cell: (inv) => (
+        <span className="text-success">
+          RD$ {inv.paid_amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+    {
+      header: "Pendiente",
+      className: "text-right",
+      cell: (inv) => (
+        <span className="font-semibold text-warning">
+          RD$ {inv.remaining_balance.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+    {
+      header: "",
+      isAction: true,
+      className: "w-20",
+      cell: (inv) => (
+        <Link href={`/facturas/${inv.id}`}>
+          <Button variant="ghost" size="sm">Ver</Button>
+        </Link>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-white">Cuentas por Cobrar</h1>
-        <p className="text-sm text-muted-foreground">
-          {invoices.length} facturas pendientes · Total: RD${" "}
-          {totalPendiente.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-        </p>
-      </div>
+      <PageHeader
+        title="Cuentas por Cobrar"
+        description={`${invoices.length} facturas pendientes · Total: RD$ ${totalPendiente.toLocaleString("es-DO", { minimumFractionDigits: 2 })}`}
+      />
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>N° Factura</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Vehículo</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-right">Pagado</TableHead>
-                <TableHead className="text-right">Pendiente</TableHead>
-                <TableHead className="w-20"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    Sin facturas pendientes de cobro
-                  </TableCell>
-                </TableRow>
-              )}
-              {invoices.map((inv) => (
-                <TableRow key={inv.id} className="hover:bg-muted/40">
-                  <TableCell className="font-mono font-medium">{inv.invoice_number}</TableCell>
-                  <TableCell>{inv.customer_name}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{inv.vehicle_label}</TableCell>
-                  <TableCell>{new Date(inv.issue_date).toLocaleDateString("es-DO")}</TableCell>
-                  <TableCell className="text-right">
-                    RD$ {inv.total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell className="text-right text-success">
-                    RD$ {inv.paid_amount.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold text-warning">
-                    RD$ {inv.remaining_balance.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/facturas/${inv.id}`}>
-                      <Button variant="ghost" size="sm">Ver</Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={invoices}
+        columns={columns}
+        getKey={(inv) => inv.id}
+        isLoading={isLoading}
+        emptyMessage="Sin facturas pendientes de cobro"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">

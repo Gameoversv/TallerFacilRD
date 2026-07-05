@@ -5,12 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import rd.tallerfacil.api.auth.domain.RoleName;
 import rd.tallerfacil.api.auth.repository.UserRepository;
 import rd.tallerfacil.api.auth.service.JwtService;
+
+import java.security.SecureRandom;
 import rd.tallerfacil.api.customer.repository.CustomerRepository;
 import rd.tallerfacil.api.superadmin.domain.AdminAction;
 import rd.tallerfacil.api.superadmin.dto.*;
@@ -36,6 +39,13 @@ public class SuperAdminService {
     private final WorkOrderRepository workOrderRepository;
     private final AdminActionRepository auditRepository;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+    // Unambiguous alphabet (no 0/O/1/l/I) for readable temporary passwords.
+    private static final String TEMP_PASSWORD_ALPHABET =
+            "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    private static final int TEMP_PASSWORD_LENGTH = 12;
 
     // ── Global stats ──────────────────────────────────────────────────────────
 
@@ -94,9 +104,10 @@ public class SuperAdminService {
     public TenantDetailResponse getTenantDetail(UUID id) {
         var tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Taller no encontrado"));
+        // All staff login users of the taller (everyone except portal CLIENT users),
+        // so a super-admin can reach any of them (e.g. to reset a password).
         var owners = userRepository.findByTenantId(id).stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r ->
-                        r.getName() == RoleName.OWNER || r.getName() == RoleName.MANAGER))
+                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName() != RoleName.CLIENT))
                 .map(UserSummaryResponse::from)
                 .toList();
         return TenantDetailResponse.of(tenant,
@@ -191,6 +202,28 @@ public class SuperAdminService {
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
+
+    // ── Password reset ──────────────────────────────────────────────────────────
+
+    @Transactional
+    public ResetPasswordResponse resetUserPassword(UUID userId, String actorEmail) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        String temp = generateTempPassword();
+        user.setPassword(passwordEncoder.encode(temp));
+        userRepository.save(user);
+        audit(actorEmail, "PASSWORD_RESET", user.getTenantId(),
+                "Contraseña temporal generada para " + user.getEmail());
+        return new ResetPasswordResponse(temp);
+    }
+
+    private static String generateTempPassword() {
+        var sb = new StringBuilder(TEMP_PASSWORD_LENGTH);
+        for (int i = 0; i < TEMP_PASSWORD_LENGTH; i++) {
+            sb.append(TEMP_PASSWORD_ALPHABET.charAt(RANDOM.nextInt(TEMP_PASSWORD_ALPHABET.length())));
+        }
+        return sb.toString();
+    }
 
     private void audit(String actor, String action, UUID tenantId, String detail) {
         auditRepository.save(new AdminAction(actor, action, tenantId, detail));

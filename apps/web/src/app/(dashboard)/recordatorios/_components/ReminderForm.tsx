@@ -50,7 +50,7 @@ export function ReminderForm({ vehicles, onSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Vehículo</Label>
           <select
@@ -86,7 +86,7 @@ export function ReminderForm({ vehicles, onSuccess }: Props) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Fecha último servicio</Label>
           <Input type="date" value={lastServiceAt} onChange={(e) => setLastServiceAt(e.target.value)} />
@@ -97,7 +97,7 @@ export function ReminderForm({ vehicles, onSuccess }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Intervalo (días)</Label>
           <Input type="number" value={intervalDays} onChange={(e) => setIntervalDays(e.target.value)} placeholder="Ej: 90" />

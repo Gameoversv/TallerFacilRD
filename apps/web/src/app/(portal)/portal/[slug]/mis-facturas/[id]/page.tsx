@@ -89,7 +89,7 @@ export default function PortalInvoiceDetailPage({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Action bar — hidden on print */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <Link
           href={`/portal/${slug}/mis-facturas`}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -99,7 +99,7 @@ export default function PortalInvoiceDetailPage({
         </Link>
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors sm:w-auto"
         >
           <Printer className="h-4 w-4" />
           Imprimir / PDF
@@ -109,7 +109,7 @@ export default function PortalInvoiceDetailPage({
       {/* Invoice document */}
       <div className="rounded-2xl border border-border bg-white text-zinc-900 shadow-sm print:rounded-none print:border-0 print:shadow-none">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-zinc-100 px-8 py-6">
+        <div className="flex flex-col gap-3 border-b border-zinc-100 px-5 py-6 sm:flex-row sm:items-start sm:justify-between sm:px-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Factura
@@ -126,14 +126,14 @@ export default function PortalInvoiceDetailPage({
             </p>
           </div>
           <span
-            className={`rounded-full border px-3 py-1 text-xs font-semibold ${STATUS_PAPER[inv.status] ?? "bg-zinc-100 text-zinc-500 border-zinc-200"}`}
+            className={`self-start rounded-full border px-3 py-1 text-xs font-semibold ${STATUS_PAPER[inv.status] ?? "bg-zinc-100 text-zinc-500 border-zinc-200"}`}
           >
             {STATUS_LABEL[inv.status] ?? inv.status}
           </span>
         </div>
 
         {/* Customer + Vehicle */}
-        <div className="grid grid-cols-2 gap-6 border-b border-zinc-100 px-8 py-6">
+        <div className="grid grid-cols-1 gap-6 border-b border-zinc-100 px-5 py-6 sm:grid-cols-2 sm:px-8">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Cliente
@@ -149,7 +149,7 @@ export default function PortalInvoiceDetailPage({
         </div>
 
         {/* Items */}
-        <div className="px-8 py-6 space-y-6">
+        <div className="px-5 py-6 space-y-6 sm:px-8">
           {manoObra.length > 0 && (
             <div>
               <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400">
@@ -179,7 +179,7 @@ export default function PortalInvoiceDetailPage({
         </div>
 
         {/* Totals */}
-        <div className="border-t border-zinc-100 px-8 py-6">
+        <div className="border-t border-zinc-100 px-5 py-6 sm:px-8">
           <div className="ml-auto max-w-xs space-y-2">
             <Row label="Subtotal" value={money(inv.subtotal)} />
             {inv.apply_itbis && (
@@ -209,7 +209,8 @@ export default function PortalInvoiceDetailPage({
 
 function ItemTable({ items }: { items: InvoiceDetail["items"] }) {
   return (
-    <table className="w-full text-sm">
+    <div className="w-full overflow-x-auto">
+    <table className="w-full min-w-[480px] text-sm">
       <thead>
         <tr className="border-b border-zinc-100 text-left">
           <th className="pb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
@@ -241,6 +242,7 @@ function ItemTable({ items }: { items: InvoiceDetail["items"] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 

@@ -172,62 +172,64 @@ export default function NuevaCompraPage() {
           </div>
 
           {items.length > 0 && (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="pb-2">Producto</th>
-                  <th className="pb-2 w-24 text-center">Cantidad</th>
-                  <th className="pb-2 w-32 text-right">Costo unit.</th>
-                  <th className="pb-2 w-32 text-right">Subtotal</th>
-                  <th className="pb-2 w-10"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {items.map((item, idx) => (
-                  <tr key={item.productId}>
-                    <td className="py-2">
-                      <p className="font-medium">{item.productDescription}</p>
-                      <p className="text-xs text-muted-foreground font-mono">{item.productCode}</p>
-                    </td>
-                    <td className="py-2">
-                      <input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)}
-                        className="w-full text-center border rounded px-2 py-1"
-                      />
-                    </td>
-                    <td className="py-2">
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.unitCost || ""}
-                        onChange={(e) => updateItem(idx, "unitCost", parseFloat(e.target.value) || 0)}
-                        className="w-full text-right border rounded px-2 py-1"
-                        placeholder="0.00"
-                      />
-                    </td>
-                    <td className="py-2 text-right font-medium">
-                      RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-2 text-center">
-                      <button type="button" onClick={() => removeItem(idx)} className="text-destructive hover:text-destructive text-lg leading-none">×</button>
-                    </td>
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-2">Producto</th>
+                    <th className="pb-2 w-24 text-center">Cantidad</th>
+                    <th className="pb-2 w-32 text-right">Costo unit.</th>
+                    <th className="pb-2 w-32 text-right">Subtotal</th>
+                    <th className="pb-2 w-10"></th>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t font-bold">
-                  <td colSpan={3} className="pt-2 text-right">Total</td>
-                  <td className="pt-2 text-right">
-                    RD$ {total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
-                  </td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
+                </thead>
+                <tbody className="divide-y">
+                  {items.map((item, idx) => (
+                    <tr key={item.productId}>
+                      <td className="py-2">
+                        <p className="font-medium">{item.productDescription}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{item.productCode}</p>
+                      </td>
+                      <td className="py-2">
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)}
+                          className="w-full text-center border rounded px-2 py-1"
+                        />
+                      </td>
+                      <td className="py-2">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.unitCost || ""}
+                          onChange={(e) => updateItem(idx, "unitCost", parseFloat(e.target.value) || 0)}
+                          className="w-full text-right border rounded px-2 py-1"
+                          placeholder="0.00"
+                        />
+                      </td>
+                      <td className="py-2 text-right font-medium">
+                        RD$ {item.subtotal.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-2 text-center">
+                        <button type="button" onClick={() => removeItem(idx)} className="text-destructive hover:text-destructive text-lg leading-none">×</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t font-bold">
+                    <td colSpan={3} className="pt-2 text-right">Total</td>
+                    <td className="pt-2 text-right">
+                      RD$ {total.toLocaleString("es-DO", { minimumFractionDigits: 2 })}
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           )}
         </div>
 

@@ -326,6 +326,11 @@ function LoginPageInner() {
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {searchParams.get("suspended") === "1" && (
+          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+            Tu taller está suspendido. Contacta a soporte.
+          </p>
+        )}
         {mode === "client" && !activeSlug && (
           <div className="space-y-1">
             <Label>Tu taller</Label>

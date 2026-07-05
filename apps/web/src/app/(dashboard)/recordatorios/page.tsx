@@ -10,9 +10,10 @@ import {
 } from "@/hooks/useReminders";
 import { useVehicles } from "@/hooks/useVehicles";
 import { ReminderForm } from "./_components/ReminderForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -39,46 +40,33 @@ const STATUS_CONFIG: Record<ReminderStatus, { label: string; variant: "default" 
   COMPLETED: { label: "Completado", variant: "outline" },
 };
 
-function ReminderRow({ r }: { r: Reminder }) {
+function ReminderActions({ r }: { r: Reminder }) {
   const { mutate: complete, isPending: completing } = useCompleteReminder();
   const { mutate: remove, isPending: removing } = useDeleteReminder();
-  const cfg = STATUS_CONFIG[r.status];
 
   return (
-    <tr className="border-b transition-colors hover:bg-muted/30">
-      <td className="px-4 py-3 text-sm font-medium">{r.license_plate ?? "—"}</td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">{r.vehicle_label}</td>
-      <td className="px-4 py-3 text-sm">{r.custom_label || TYPE_LABELS[r.type] || r.type}</td>
-      <td className="px-4 py-3 text-sm">{r.next_date ?? "—"}</td>
-      <td className="px-4 py-3 text-sm">{r.next_km ? r.next_km.toLocaleString() + " km" : "—"}</td>
-      <td className="px-4 py-3">
-        <Badge variant={cfg.variant}>{cfg.label}</Badge>
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          {r.status !== "COMPLETED" && (
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={completing}
-              onClick={() => complete({ id: r.id })}
-              title="Marcar como completado"
-            >
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={removing}
-            onClick={() => remove(r.id)}
-            title="Eliminar"
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </div>
-      </td>
-    </tr>
+    <div className="flex items-center gap-2">
+      {r.status !== "COMPLETED" && (
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={completing}
+          onClick={() => complete({ id: r.id })}
+          title="Marcar como completado"
+        >
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+        </Button>
+      )}
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={removing}
+        onClick={() => remove(r.id)}
+        title="Eliminar"
+      >
+        <Trash2 className="h-4 w-4 text-destructive" />
+      </Button>
+    </div>
   );
 }
 
@@ -100,37 +88,55 @@ export default function RecordatoriosPage() {
   const overdue = (reminders ?? []).filter((r) => r.status === "OVERDUE").length;
   const dueSoon = (reminders ?? []).filter((r) => r.status === "DUE_SOON").length;
 
+  const columns: ResponsiveColumn<Reminder>[] = [
+    { header: "Placa", primary: true, cell: (r) => r.license_plate ?? "—" },
+    {
+      header: "Vehículo",
+      cell: (r) => <span className="text-muted-foreground">{r.vehicle_label}</span>,
+    },
+    { header: "Tipo", cell: (r) => r.custom_label || TYPE_LABELS[r.type] || r.type },
+    { header: "Próxima fecha", cell: (r) => r.next_date ?? "—" },
+    { header: "Próximo km", cell: (r) => (r.next_km ? r.next_km.toLocaleString() + " km" : "—") },
+    {
+      header: "Estado",
+      cell: (r) => <Badge variant={STATUS_CONFIG[r.status].variant}>{STATUS_CONFIG[r.status].label}</Badge>,
+    },
+    {
+      header: "",
+      isAction: true,
+      className: "w-24",
+      cell: (r) => <ReminderActions r={r} />,
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Recordatorios</h1>
-          <p className="text-sm text-muted-foreground">
-            Mantenimientos programados por tiempo y kilometraje
-          </p>
-        </div>
-
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo recordatorio
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Crear recordatorio</DialogTitle>
-            </DialogHeader>
-            <ReminderForm
-              vehicles={vehicles}
-              onSuccess={() => setOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+      <PageHeader
+        title="Recordatorios"
+        description="Mantenimientos programados por tiempo y kilometraje"
+        actions={
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo recordatorio
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Crear recordatorio</DialogTitle>
+              </DialogHeader>
+              <ReminderForm
+                vehicles={vehicles}
+                onSuccess={() => setOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
       {(overdue > 0 || dueSoon > 0) && (
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           {overdue > 0 && (
             <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
               <Bell className="h-4 w-4" />
@@ -146,7 +152,7 @@ export default function RecordatoriosPage() {
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {(["ALL", "OVERDUE", "DUE_SOON", "UPCOMING", "COMPLETED"] as const).map((s) => (
           <button
             key={s}
@@ -162,43 +168,13 @@ export default function RecordatoriosPage() {
         ))}
       </div>
 
-      <div className="rounded-lg border bg-card">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b bg-muted/40 text-xs uppercase text-muted-foreground">
-              <th className="px-4 py-3">Placa</th>
-              <th className="px-4 py-3">Vehículo</th>
-              <th className="px-4 py-3">Tipo</th>
-              <th className="px-4 py-3">Próxima fecha</th>
-              <th className="px-4 py-3">Próximo km</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i} className="border-b">
-                    {Array.from({ length: 7 }).map((__, j) => (
-                      <td key={j} className="px-4 py-3">
-                        <Skeleton className="h-4 w-full" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              : filtered.length === 0
-              ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                      No hay recordatorios
-                    </td>
-                  </tr>
-                )
-              : filtered.map((r) => <ReminderRow key={r.id} r={r} />)
-            }
-          </tbody>
-        </table>
-      </div>
+      <ResponsiveList
+        items={filtered}
+        columns={columns}
+        getKey={(r) => r.id}
+        isLoading={isLoading}
+        emptyMessage="No hay recordatorios"
+      />
     </div>
   );
 }

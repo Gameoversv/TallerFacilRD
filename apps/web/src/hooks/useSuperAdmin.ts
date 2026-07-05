@@ -165,6 +165,17 @@ export function useUserSearch(email: string, page = 0) {
   });
 }
 
+export function useResetUserPassword() {
+  return useMutation({
+    mutationFn: (userId: string) =>
+      api
+        .post<{ data: { temporary_password: string } }>(
+          `/api/super-admin/users/${userId}/reset-password`,
+        )
+        .then((r) => r.data.data),
+  });
+}
+
 // ── Audit log ──────────────────────────────────────────────────────────────
 
 export function useAuditLog(tenantId?: string, page = 0) {
@@ -174,5 +185,34 @@ export function useAuditLog(tenantId?: string, page = 0) {
       api
         .get("/api/super-admin/audit", { params: { tenantId: tenantId || undefined, page } })
         .then((r) => r.data),
+  });
+}
+
+// ── Announcement ───────────────────────────────────────────────────────────
+
+export interface Announcement {
+  id: string;
+  message: string;
+  level: "INFO" | "WARNING";
+  active: boolean;
+  updated_at: string;
+}
+
+export function useAdminAnnouncement() {
+  return useQuery<{ data: Announcement | null }>({
+    queryKey: ["super-admin", "announcement"],
+    queryFn: () => api.get("/api/super-admin/announcement").then((r) => r.data),
+  });
+}
+
+export function useSaveAnnouncement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { message: string; level: string; active: boolean }) =>
+      api.put("/api/super-admin/announcement", body).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-admin", "announcement"] });
+      qc.invalidateQueries({ queryKey: ["announcement"] });
+    },
   });
 }

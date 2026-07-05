@@ -289,6 +289,7 @@ export default function OrdenDetailPage({
           </span>
         </div>
 
+        <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -342,6 +343,7 @@ export default function OrdenDetailPage({
             ))}
           </TableBody>
         </Table>
+        </div>
 
         {canEdit && (
           <form

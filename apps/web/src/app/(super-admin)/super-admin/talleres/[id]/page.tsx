@@ -1,13 +1,24 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Building2, Users, Car, ClipboardList, LogIn, Clock } from "lucide-react";
-import { useTenantDetail, useImpersonate, useExtendTrial, useUpdateTenantStatus, useAuditLog } from "@/hooks/useSuperAdmin";
+import { ArrowLeft, Building2, Users, Car, ClipboardList, LogIn, Clock, KeyRound } from "lucide-react";
+import {
+  useTenantDetail,
+  useImpersonate,
+  useExtendTrial,
+  useUpdateTenantStatus,
+  useAuditLog,
+  useResetUserPassword,
+} from "@/hooks/useSuperAdmin";
 import { startImpersonation } from "@/components/ImpersonationBanner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import {
+  ResetPasswordDialog,
+  type ResetPasswordResult,
+} from "@/components/super-admin/ResetPasswordDialog";
 
 const STATUS_COLORS = {
   PENDING: "bg-violet-400/15 text-violet-400",
@@ -35,6 +46,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   const impersonate = useImpersonate();
   const extendTrial = useExtendTrial();
   const updateStatus = useUpdateTenantStatus();
+  const resetPassword = useResetUserPassword();
+  const [resetResult, setResetResult] = useState<ResetPasswordResult | null>(null);
 
   const t = data?.data;
   const audit = auditData?.data?.content ?? [];
@@ -43,6 +56,11 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     impersonate.mutate(id, {
       onSuccess: (res) => { startImpersonation(res.token); router.push("/dashboard"); },
     });
+  }
+
+  async function handleResetPassword(userId: string, email: string) {
+    const result = await resetPassword.mutateAsync(userId);
+    setResetResult({ email, temporaryPassword: result.temporary_password });
   }
 
   if (isLoading) return (
@@ -61,30 +79,30 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         <Link href="/super-admin/talleres" className="mb-4 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3 w-3" /> Volver a talleres
         </Link>
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="font-display text-2xl font-bold tracking-tight">{t.name}</h1>
             <p className="text-sm text-muted-foreground">{t.slug} · {t.country}</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleImpersonate} className="gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleImpersonate} className="w-full gap-2 sm:w-auto">
               <LogIn className="h-4 w-4" /> Acceder como taller
             </Button>
             {(t.status === "TRIAL" || t.status === "PENDING") && (
-              <Button variant="outline" size="sm" onClick={() => extendTrial.mutate({ id, days: 30 })} className="gap-2">
+              <Button variant="outline" size="sm" onClick={() => extendTrial.mutate({ id, days: 30 })} className="w-full gap-2 sm:w-auto">
                 <Clock className="h-4 w-4" /> +30 días trial
               </Button>
             )}
             {t.status === "ACTIVE" && (
               <Button variant="outline" size="sm"
-                className="border-orange-400/40 text-orange-400 hover:bg-orange-400/10"
+                className="w-full border-orange-400/40 text-orange-400 hover:bg-orange-400/10 sm:w-auto"
                 onClick={() => updateStatus.mutate({ id, status: "SUSPENDED" })}>
                 Suspender
               </Button>
             )}
             {t.status === "SUSPENDED" && (
               <Button variant="outline" size="sm"
-                className="border-emerald-400/40 text-emerald-400 hover:bg-emerald-400/10"
+                className="w-full border-emerald-400/40 text-emerald-400 hover:bg-emerald-400/10 sm:w-auto"
                 onClick={() => updateStatus.mutate({ id, status: "ACTIVE" })}>
                 Reactivar
               </Button>
@@ -126,12 +144,12 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       {t.owners.length > 0 && (
         <section>
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Usuarios del taller</h2>
-          <div className="overflow-hidden rounded-xl border border-border">
-            <table className="w-full text-sm">
+          <div className="w-full overflow-x-auto rounded-xl border border-border">
+            <table className="w-full min-w-[560px] text-sm">
               <thead className="border-b border-border bg-muted/40">
                 <tr>
-                  {["Nombre", "Email", "Rol", "Estado"].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
+                  {["Nombre", "Email", "Rol", "Estado", ""].map((h, i) => (
+                    <th key={i} className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -147,6 +165,18 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                       <span className={`text-xs font-medium ${u.active ? "text-emerald-400" : "text-rose-400"}`}>
                         {u.active ? "Activo" : "Inactivo"}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={resetPassword.isPending}
+                        onClick={() => handleResetPassword(u.id, u.email)}
+                      >
+                        <KeyRound className="h-3.5 w-3.5" />
+                        Resetear contraseña
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -176,6 +206,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </section>
       )}
+
+      <ResetPasswordDialog result={resetResult} onClose={() => setResetResult(null)} />
     </div>
   );
 }

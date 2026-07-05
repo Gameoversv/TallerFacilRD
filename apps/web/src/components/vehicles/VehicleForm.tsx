@@ -94,7 +94,7 @@ export function VehicleForm({
 
       {tab === "basico" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Marca *</Label>
               <Input {...register("brand")} placeholder="Toyota" />
@@ -107,7 +107,7 @@ export function VehicleForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Año *</Label>
               <Input {...register("year", { valueAsNumber: true })} type="number" placeholder="2020" />
@@ -119,7 +119,7 @@ export function VehicleForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Placa</Label>
               <Input {...register("licensePlate")} placeholder="ABC-1234" />
@@ -130,7 +130,7 @@ export function VehicleForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Color</Label>
               <Input {...register("color")} placeholder="Blanco" />

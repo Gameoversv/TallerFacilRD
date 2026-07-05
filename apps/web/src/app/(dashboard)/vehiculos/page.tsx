@@ -4,17 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useVehicles, useCreateVehicle, useDeleteVehicle } from "@/hooks/useVehicles";
 import { VehicleForm, type VehicleFormValues } from "@/components/vehicles/VehicleForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ResponsiveList, type ResponsiveColumn } from "@/components/layout/ResponsiveList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 export default function VehiculosPage() {
   const router = useRouter();
@@ -56,15 +50,53 @@ export default function VehiculosPage() {
     setShowCreate(false);
   }
 
+  const columns: ResponsiveColumn<(typeof vehicles)[number]>[] = [
+    {
+      header: "Vehículo",
+      primary: true,
+      cell: (v) => (
+        <span className="font-medium">
+          {v.brand} {v.model}
+        </span>
+      ),
+    },
+    { header: "Año", cell: (v) => v.year },
+    { header: "Placa", cell: (v) => v.license_plate ?? "—" },
+    { header: "Propietario", cell: (v) => v.customer_name },
+    { header: "Transmisión", cell: (v) => v.transmission ?? "—" },
+    {
+      header: "",
+      isAction: true,
+      className: "w-24",
+      cell: (v) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm(`¿Eliminar ${v.brand} ${v.model}?`)) {
+              deleteMutation.mutate(v.id);
+            }
+          }}
+        >
+          Eliminar
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">Vehículos</h1>
-          <p className="text-sm text-muted-foreground">{total} registros</p>
-        </div>
-        <Button onClick={() => setShowCreate(true)}>+ Nuevo vehículo</Button>
-      </div>
+      <PageHeader
+        title="Vehículos"
+        description={`${total} registros`}
+        actions={
+          <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
+            + Nuevo vehículo
+          </Button>
+        }
+      />
 
       <Input
         placeholder="Buscar por placa, VIN o propietario..."
@@ -76,63 +108,14 @@ export default function VehiculosPage() {
         className="max-w-sm"
       />
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Cargando...</p>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vehículo</TableHead>
-                <TableHead>Año</TableHead>
-                <TableHead>Placa</TableHead>
-                <TableHead>Propietario</TableHead>
-                <TableHead>Transmisión</TableHead>
-                <TableHead className="w-24"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {vehicles.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    Sin resultados
-                  </TableCell>
-                </TableRow>
-              )}
-              {vehicles.map((v) => (
-                <TableRow
-                  key={v.id}
-                  className="cursor-pointer hover:bg-muted/40"
-                  onClick={() => router.push(`/vehiculos/${v.id}`)}
-                >
-                  <TableCell className="font-medium">
-                    {v.brand} {v.model}
-                  </TableCell>
-                  <TableCell>{v.year}</TableCell>
-                  <TableCell>{v.license_plate ?? "—"}</TableCell>
-                  <TableCell>{v.customer_name}</TableCell>
-                  <TableCell>{v.transmission ?? "—"}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`¿Eliminar ${v.brand} ${v.model}?`)) {
-                          deleteMutation.mutate(v.id);
-                        }
-                      }}
-                    >
-                      Eliminar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <ResponsiveList
+        items={vehicles}
+        columns={columns}
+        getKey={(v) => v.id}
+        onRowClick={(v) => router.push(`/vehiculos/${v.id}`)}
+        isLoading={isLoading}
+        emptyMessage="Sin resultados"
+      />
 
       {totalPages > 1 && (
         <div className="flex gap-2 items-center justify-end text-sm">
