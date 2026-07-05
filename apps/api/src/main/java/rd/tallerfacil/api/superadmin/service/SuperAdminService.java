@@ -104,9 +104,10 @@ public class SuperAdminService {
     public TenantDetailResponse getTenantDetail(UUID id) {
         var tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Taller no encontrado"));
+        // All staff login users of the taller (everyone except portal CLIENT users),
+        // so a super-admin can reach any of them (e.g. to reset a password).
         var owners = userRepository.findByTenantId(id).stream()
-                .filter(u -> u.getRoles().stream().anyMatch(r ->
-                        r.getName() == RoleName.OWNER || r.getName() == RoleName.MANAGER))
+                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName() != RoleName.CLIENT))
                 .map(UserSummaryResponse::from)
                 .toList();
         return TenantDetailResponse.of(tenant,
