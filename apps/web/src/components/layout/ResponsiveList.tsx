@@ -159,7 +159,7 @@ export function ResponsiveList<T>({
             )}
           >
             {primary && (
-              <div className="mb-2 font-medium text-white">
+              <div className="mb-2 min-w-0 break-words font-medium text-white">
                 {primary.cell(item)}
               </div>
             )}
@@ -176,7 +176,7 @@ export function ResponsiveList<T>({
                   )}
                   <dd
                     className={cn(
-                      "min-w-0 text-right text-foreground",
+                      "min-w-0 break-words text-right text-foreground",
                       col.hideLabelOnCard && "w-full",
                     )}
                   >
