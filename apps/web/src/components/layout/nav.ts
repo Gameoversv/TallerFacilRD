@@ -10,6 +10,7 @@ import {
   Package,
   ReceiptText,
   ShoppingCart,
+  UserCog,
   Users,
   Wrench,
   type LucideIcon,
@@ -65,6 +66,10 @@ export const navGroups: NavGroup[] = [
       { href: "/reportes", label: "Reportes", icon: BarChart3 },
       { href: "/recordatorios", label: "Recordatorios", icon: BellRing },
     ],
+  },
+  {
+    label: "Cuenta",
+    items: [{ href: "/mi-cuenta", label: "Mi cuenta", icon: UserCog }],
   },
 ];
 
