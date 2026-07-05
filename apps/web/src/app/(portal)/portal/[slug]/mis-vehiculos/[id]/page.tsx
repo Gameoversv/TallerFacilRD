@@ -115,9 +115,9 @@ function ReceptionCard({ visit, slug }: { visit: VisitSummary; slug: string }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium text-foreground">
               {visit.reception_date
                 ? new Date(visit.reception_date).toLocaleDateString("es-DO", {
@@ -128,7 +128,7 @@ function ReceptionCard({ visit, slug }: { visit: VisitSummary; slug: string }) {
                 : "—"}
             </p>
             {visit.complaint && (
-              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
                 {visit.complaint}
               </p>
             )}
